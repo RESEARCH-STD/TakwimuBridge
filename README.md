@@ -1,5 +1,7 @@
 # TakwimuBridge — Qualitative Data Analysis Tool
 
+**Live:** https://takwimubridge-qda.vercel.app — auto-deployed from this repo's `main` branch via Vercel (see "Deploying" below for how the build installs Quarto in Vercel's cloud build).
+
 A **Quarto + Bootstrap 5** website implementing SST's ("Sustainable Solutions
 Tanzania") qualitative data analysis (QDA) tool: import KIIs, FGDs,
 interviews and open-ended responses, highlight and code passages, assign
@@ -53,6 +55,14 @@ See [about.qmd](about.qmd) for the full scope table.
 quarto preview      # live-reloading local preview
 quarto render        # builds the static site into ./_site
 ```
+
+## Deploying
+
+This repo auto-deploys to Vercel on every push to `main` (project `takwimubridge-qda`, team `geomap-onboarding-portal`), via Vercel's GitHub integration — no CI file in this repo controls it.
+
+Vercel's build image doesn't include Quarto, so `vercel.json`'s `buildCommand` downloads the pinned Quarto CLI release tarball (currently v1.10.18, matching local dev — bump both together) into `.quarto-bin/` and runs `quarto render` before Vercel serves `outputDirectory: "_site"`. No R/Python/Jupyter engine is needed since none of the `.qmd` files use code chunks — just Quarto + its bundled Pandoc.
+
+To deploy manually instead (e.g. to test before pushing): `quarto render` locally, then `npx vercel deploy ./_site --prod --yes --project takwimubridge-qda`.
 
 ## Project Structure
 
