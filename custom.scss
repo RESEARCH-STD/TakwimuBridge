@@ -99,7 +99,18 @@ body {
   margin-bottom: .4rem;
 }
 
-/* ---------------- Hero (home page) ---------------- */
+/* ---------------- Full-bleed home page ---------------- */
+// index.qmd's banded sections use .column-screen so their backgrounds reach
+// the viewport edge instead of stopping at Quarto's grid.body-width column.
+// That makes Quarto classify <main> as .page-full, which — only in that
+// variant — carries its own top margin/padding meant for a title block we
+// don't render (title-block-banner: false). Zero it so the hero sits flush
+// under the navbar like it did before.
+main#quarto-document-content.page-full {
+  margin-top: 0;
+  padding-top: 0;
+}
+
 .hero-section {
   background: linear-gradient(135deg, $primary 0%, $secondary 100%);
   color: #fff;

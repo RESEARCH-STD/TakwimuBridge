@@ -5,7 +5,7 @@ title-block-banner: false
 ---
 
 <!-- ============================= HERO ============================= -->
-<section class="hero-section">
+<section class="hero-section column-screen">
 <div class="container">
 <div class="grid align-items-center">
 <div class="g-col-12 g-col-lg-7">
@@ -53,7 +53,7 @@ Everything — projects, transcripts, codes, weights — is saved in your own br
 </section>
 
 <!-- ======================= THE PROBLEM ======================= -->
-<section class="section">
+<section class="section column-screen">
 <div class="container">
 <div class="grid align-items-center gap-5">
 <div class="g-col-12 g-col-lg-6">
@@ -116,7 +116,7 @@ times is not the same as ten different participants each raising it once.
 </section>
 
 <!-- ======================= HOW IT WORKS ======================= -->
-<section class="section section-alt">
+<section class="section section-alt column-screen">
 <div class="container">
 <div class="text-center mb-5">
 <span class="eyebrow">How It Works</span>
@@ -171,7 +171,7 @@ This is a genuinely working client-side tool, not a mockup — see <a href="abou
 </section>
 
 <!-- ======================= FEATURE GRID ======================= -->
-<section class="section">
+<section class="section column-screen">
 <div class="container">
 <div class="text-center mb-5">
 <span class="eyebrow">What's Inside</span>
@@ -213,7 +213,7 @@ This is a genuinely working client-side tool, not a mockup — see <a href="abou
 </section>
 
 <!-- ======================= CTA ======================= -->
-<section class="section-tight section-alt">
+<section class="section-tight section-alt column-screen">
 <div class="container text-center">
 <span class="eyebrow">Try It Now</span>
 <h4 class="mb-3 fw-normal">A demo project — five KIIs and one FGD on environmental &amp; governance challenges — is bundled in, so you can explore before adding your own data.</h4>
