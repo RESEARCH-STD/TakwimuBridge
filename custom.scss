@@ -166,7 +166,10 @@ body {
 @media (max-width: 992px) {
   .tb-workspace-row { grid-template-columns: 1fr; }
 }
-.tb-workspace-row .card { min-height: 60vh; max-height: 78vh; }
+// No max-height here on purpose: panels extend to fit their content (a long
+// transcript, a long codebook) instead of being capped to a viewport-height
+// box with its own internal scrollbar — the page scrolls naturally instead.
+.tb-workspace-row .card { min-height: 60vh; }
 
 .tb-source-item {
   padding: .5rem .6rem;
