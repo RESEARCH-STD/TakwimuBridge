@@ -1,0 +1,39 @@
+---
+title: "About & Scope"
+subtitle: "What TakwimuBridge is, who built it, and exactly what \"runs in your browser\" means for your data."
+---
+
+## What this is
+
+TakwimuBridge is a qualitative data analysis (QDA) tool designed by **Sustainable Solutions Tanzania (SST)** for researchers, students, consultants, institutions and organizations working with Key Informant Interviews (KIIs), Focus Group Discussions (FGDs), individual interviews, open-ended survey responses, and other textual qualitative data.
+
+This build implements SST's own **Version 1.0 (MVP) workflow**: upload a transcript → identify the respondent/source → read → highlight → code → assign a colour → optionally score importance 1–10 → automatically count → compare respondents/themes → retrieve quotations → generate charts/word cloud → export results.
+
+## What "runs in your browser" means
+
+This is a **static site with no backend, no database, and no server-side account system**. Every project, source, code and coded reference you create is stored in your web browser's local storage, on your own device.
+
+| Capability | Status |
+|---|---|
+| Highlighting, coding, theming, weighting | ✅ Real — genuinely computed, not mocked |
+| Frequency, coverage, weighted-score, average-weight analysis | ✅ Real — recalculated live from your actual coded data |
+| Charts, heat map, word frequency, word cloud | ✅ Real — rendered client-side from your data |
+| CSV / Excel / Word-report / image / JSON export | ✅ Real — generated client-side, downloads directly |
+| DOCX / TXT / CSV import | ✅ Real — parsed client-side (mammoth.js / SheetJS); nothing is uploaded anywhere |
+| Multi-user projects / team coding | ❌ Not implemented — one browser, one person, one copy of the data |
+| Inter-coder reliability, advanced compound queries, codebooks-as-templates | ❌ Not implemented in v1 — the data model anticipates them (see below) but no UI yet |
+| Cloud sync / cross-device access | ❌ Not implemented — use **Export → Full Project Backup (JSON)** to move a project between browsers or computers |
+
+Because everything lives in local storage: clearing your browser's site data, using a different browser, or switching devices means your projects won't be there. **Export a JSON backup of any project you care about.**
+
+## What a server-backed Version 2 would add
+
+Per SST's own functional description, later versions could add: codebooks as reusable templates, inter-coder reliability checks, team/multi-user projects with shared codebooks, more advanced compound queries ("Pollution AND Weak Enforcement", or "Pollution among District A respondents"), relationship/network maps between codes, and more sophisticated FGD speaker-level analysis. The data model here (themes with a parent/child hierarchy, and codings that can carry multiple theme IDs) is deliberately structured so those features can be added without a redesign.
+
+## A naming note
+
+This product's real name, **"TakwimuBridge"**, comes directly from SST's own functional description document. A separate, unrelated project in this workspace — a socio-economic **data catalog** site for university students — currently uses **"Takwimu Bridge"** (with a space) as an explicitly-labelled *placeholder* name, chosen before this product existed. If both are meant to be part of one product family, or if the data-catalog site's placeholder should be renamed to avoid confusion, that's a decision for the project owner — it hasn't been resolved here.
+
+## Credits
+
+Functional description and user guide: **Sustainable Solutions Tanzania (SST)**. Built with [Quarto](https://quarto.org) and Bootstrap 5. Charts by [Chart.js](https://www.chartjs.org/), word clouds by [wordcloud2.js](https://wordcloud2-js.timdream.org/), spreadsheet export by [SheetJS](https://sheetjs.com/), DOCX import by [mammoth.js](https://github.com/mwilliamson/mammoth.js).

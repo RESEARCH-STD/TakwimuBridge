@@ -1,0 +1,289 @@
+---
+title: "Analysis Dashboard"
+subtitle: "Frequency, respondent coverage, weighted importance, and group comparisons — every number links back to its quotations."
+---
+
+```{=html}
+<div id="tb-no-project-alert" class="alert alert-warning d-none">
+<i class="bi bi-exclamation-triangle"></i> No active project selected. <a href="projects.html">Go to Projects</a> to create or open one.
+</div>
+
+<div id="tb-analysis-content" class="d-none">
+
+<div class="grid gap-3 mb-4">
+<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-sources">0</div><div class="tb-stat-label">Sources</div></div></div>
+<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-respondents">0</div><div class="tb-stat-label">Respondents</div></div></div>
+<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-codedrefs">0</div><div class="tb-stat-label">Coded References</div></div></div>
+<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-themes">0</div><div class="tb-stat-label">Themes / Codes</div></div></div>
+</div>
+
+<div class="grid gap-3 mb-4">
+<div class="g-col-12 g-col-lg-6">
+<div class="tb-panel" style="height:340px;">
+<div class="tb-panel-header">Theme Frequency <button class="btn btn-sm btn-link p-0" data-png="tb-chart-frequency" data-name="theme-frequency" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="tb-panel-body"><canvas id="tb-chart-frequency"></canvas></div>
+</div>
+</div>
+<div class="g-col-12 g-col-lg-6">
+<div class="tb-panel" style="height:340px;">
+<div class="tb-panel-header">Weighted Theme Score (Total) <button class="btn btn-sm btn-link p-0" data-png="tb-chart-weighted" data-name="weighted-theme-score" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="tb-panel-body"><canvas id="tb-chart-weighted"></canvas></div>
+</div>
+</div>
+</div>
+
+<div class="grid gap-3 mb-4">
+<div class="g-col-12 g-col-lg-6">
+<div class="tb-panel" style="height:320px;">
+<div class="tb-panel-header">Respondent Coverage (%) <button class="btn btn-sm btn-link p-0" data-png="tb-chart-coverage" data-name="respondent-coverage" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="tb-panel-body"><canvas id="tb-chart-coverage"></canvas></div>
+</div>
+</div>
+<div class="g-col-12 g-col-lg-6">
+<div class="tb-panel" style="height:320px;">
+<div class="tb-panel-header">Most Frequent Words (all text)</div>
+<div class="tb-panel-body" id="tb-top-words">
+<p class="text-muted small">No text yet.</p>
+</div>
+</div>
+</div>
+</div>
+
+<div class="tb-panel mb-4">
+<div class="tb-panel-header">
+Respondent × Theme Matrix
+<select class="form-select form-select-sm" style="width:auto;" id="tb-matrix-metric-select">
+<option value="frequency">Frequency</option>
+<option value="totalWeight">Total Weighted Score</option>
+<option value="avgWeight">Average Weight</option>
+</select>
+</div>
+<div class="tb-panel-body" style="overflow-x:auto;">
+<table class="table table-sm tb-matrix-table" id="tb-matrix-table"></table>
+<p class="text-muted small mb-0">Click any cell to see the underlying quotations.</p>
+</div>
+</div>
+
+<div class="tb-panel mb-4">
+<div class="tb-panel-header">
+Group Comparison
+</div>
+<div class="tb-panel-body">
+<div class="grid gap-2 mb-3">
+<div class="g-col-6">
+<label class="form-label small">Compare respondents by</label>
+<select class="form-select form-select-sm" id="tb-compare-attribute-select"></select>
+</div>
+<div class="g-col-6">
+<label class="form-label small">Theme / Code</label>
+<select class="form-select form-select-sm" id="tb-compare-theme-select"></select>
+</div>
+</div>
+<div style="height:280px;"><canvas id="tb-chart-compare"></canvas></div>
+<p class="text-muted small mb-0" id="tb-compare-empty"></p>
+</div>
+</div>
+
+<div class="tb-panel mb-4">
+<div class="tb-panel-header">Theme Hierarchy</div>
+<div class="tb-panel-body" id="tb-theme-hierarchy"></div>
+</div>
+
+</div>
+
+<!-- Evidence modal -->
+<div class="modal fade" id="tb-modal-evidence" tabindex="-1">
+<div class="modal-dialog modal-lg modal-dialog-scrollable">
+<div class="modal-content">
+<div class="modal-header"><h5 class="modal-title" id="tb-evidence-title">Evidence</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body" id="tb-evidence-list"></div>
+</div>
+</div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.TB && window.TB.seedDemoIfNeeded) window.TB.seedDemoIfNeeded();
+  var TB = window.TB;
+  var project = TB.getActiveProject();
+  if (!project) { document.getElementById("tb-no-project-alert").classList.remove("d-none"); return; }
+  document.getElementById("tb-analysis-content").classList.remove("d-none");
+
+  function esc(s) { return TB.escapeHtml(s); }
+  function leafThemes() {
+    return project.themes.filter(function (t) { return TB.childThemes(project, t.id).length === 0; });
+  }
+
+  function showEvidence(title, list) {
+    document.getElementById("tb-evidence-title").textContent = title;
+    var body = document.getElementById("tb-evidence-list");
+    body.innerHTML = list.length ? list.map(function (e) {
+      return '<div class="tb-evidence-quote">' +
+        "&ldquo;" + esc(e.quote) + "&rdquo;" +
+        '<div class="text-muted small mt-1">' + esc(e.sourceName) + (e.respondentLabel ? " — " + esc(e.respondentLabel) : "") +
+        (e.weight !== null && e.weight !== undefined ? ' &nbsp;<span class="badge bg-secondary">weight ' + e.weight + "/10</span>" : "") +
+        (e.memo ? " — <em>" + esc(e.memo) + "</em>" : "") + "</div></div>";
+    }).join("") : '<p class="text-muted">No coded references yet.</p>';
+    new bootstrap.Modal(document.getElementById("tb-modal-evidence")).show();
+  }
+  function showThemeEvidence(themeId) {
+    var theme = TB.themeById(project, themeId);
+    showEvidence(theme ? theme.name : "Evidence", TB.evidenceForTheme(project, themeId));
+  }
+
+  function renderSummary() {
+    document.getElementById("tb-stat-sources").textContent = project.sources.length;
+    document.getElementById("tb-stat-respondents").textContent = TB.respondentsOf(project).length;
+    document.getElementById("tb-stat-codedrefs").textContent = project.codings.length;
+    document.getElementById("tb-stat-themes").textContent = project.themes.length;
+  }
+
+  function renderMainCharts() {
+    var leaves = leafThemes();
+    var stats = leaves.map(function (t) { var s = TB.themeStats(project, t.id); s.theme = t; return s; })
+      .sort(function (a, b) { return b.frequency - a.frequency; });
+    var labels = stats.map(function (s) { return s.theme.name; });
+    var colors = stats.map(function (s) { return s.theme.color; });
+
+    TB.charts.barChart("tb-chart-frequency", labels, stats.map(function (s) { return s.frequency; }), {
+      label: "Frequency", colors: colors,
+      onClick: function (i) { showThemeEvidence(stats[i].theme.id); }
+    });
+    var byWeight = stats.slice().sort(function (a, b) { return b.totalWeight - a.totalWeight; });
+    TB.charts.barChart("tb-chart-weighted", byWeight.map(function (s) { return s.theme.name; }), byWeight.map(function (s) { return s.totalWeight; }), {
+      label: "Total Weighted Score", colors: byWeight.map(function (s) { return s.theme.color; }),
+      onClick: function (i) { showThemeEvidence(byWeight[i].theme.id); }
+    });
+    TB.charts.barChart("tb-chart-coverage", labels, stats.map(function (s) { return s.coveragePct; }), {
+      label: "Respondent Coverage %", colors: colors, horizontal: true,
+      onClick: function (i) { showThemeEvidence(stats[i].theme.id); }
+    });
+  }
+
+  function renderTopWords() {
+    var words = TB.wordFrequency(project, { scope: "all" }).slice(0, 14);
+    var el = document.getElementById("tb-top-words");
+    if (!words.length) { el.innerHTML = '<p class="text-muted small">No text yet.</p>'; return; }
+    var max = words[0].count;
+    el.innerHTML = words.map(function (w) {
+      var size = 0.8 + (w.count / max) * 0.9;
+      return '<span class="badge rounded-pill bg-light text-dark border me-2 mb-2" style="font-size:' + size.toFixed(2) + 'rem;">' + esc(w.word) + " · " + w.count + "</span>";
+    }).join("") + '<p class="text-muted small mt-2 mb-0">See the <a href="wordfrequency.html">Word Frequency &amp; Word Cloud</a> page for the full picture.</p>';
+  }
+
+  function renderMatrix() {
+    var metric = document.getElementById("tb-matrix-metric-select").value;
+    var m = TB.matrixData(project, leafThemes().map(function (t) { return t.id; }));
+    var cellValue = function (r, t) {
+      var c = m.cells[r.id][t.id];
+      if (metric === "avgWeight") return c.weightedCount ? Math.round((c.totalWeight / c.weightedCount) * 100) / 100 : null;
+      if (metric === "totalWeight") return c.totalWeight;
+      return c.frequency;
+    };
+    var max = 0;
+    m.respondents.forEach(function (r) { m.themes.forEach(function (t) { max = Math.max(max, cellValue(r, t) || 0); }); });
+
+    var html = "<thead><tr><th>Respondent</th>" + m.themes.map(function (t) { return "<th>" + esc(t.name) + "</th>"; }).join("") + "</tr></thead><tbody>";
+    html += m.respondents.map(function (r) {
+      return "<tr><th class=\"text-nowrap\">" + esc(r.label) + "</th>" + m.themes.map(function (t) {
+        var v = cellValue(r, t);
+        var display = v === null ? "—" : v;
+        var bg = TB.charts.heatColor(v || 0, max);
+        var fg = TB.charts.heatTextColor(v || 0, max);
+        return '<td class="tb-cell-heat" style="background:' + bg + ";color:" + fg + ';" data-respondent="' + r.id + '" data-theme="' + t.id + '">' + display + "</td>";
+      }).join("") + "</tr>";
+    }).join("");
+    html += "</tbody>";
+    var table = document.getElementById("tb-matrix-table");
+    table.innerHTML = html;
+    Array.prototype.forEach.call(table.querySelectorAll(".tb-cell-heat"), function (td) {
+      td.addEventListener("click", function () {
+        var rid = td.getAttribute("data-respondent"), tid = td.getAttribute("data-theme");
+        var r = m.respondents.find(function (r) { return r.id === rid; });
+        var theme = TB.themeById(project, tid);
+        var evidence = TB.evidenceForTheme(project, tid).filter(function (e) { return TB.respondentIdForCoding(e.coding) === rid; });
+        showEvidence((theme ? theme.name : "") + " — " + (r ? r.label : ""), evidence);
+      });
+    });
+  }
+
+  var ATTRIBUTE_LABELS = { sex: "Sex", location: "Location", stakeholder: "Stakeholder", institution: "Institution" };
+  function comparableAttributes() {
+    var respondents = TB.respondentsOf(project);
+    return Object.keys(ATTRIBUTE_LABELS).filter(function (key) {
+      var values = {};
+      respondents.forEach(function (r) { var v = (r.attributes || {})[key]; if (v) values[v] = true; });
+      return Object.keys(values).length > 1;
+    });
+  }
+
+  function renderCompareControls() {
+    var attrs = comparableAttributes();
+    var attrSelect = document.getElementById("tb-compare-attribute-select");
+    var emptyMsg = document.getElementById("tb-compare-empty");
+    if (!attrs.length) {
+      attrSelect.innerHTML = "";
+      emptyMsg.textContent = "Add at least two respondents with different Sex/Location/Stakeholder/Institution values to compare groups.";
+      TB.charts.destroy("tb-chart-compare");
+      return;
+    }
+    emptyMsg.textContent = "";
+    attrSelect.innerHTML = attrs.map(function (a) { return '<option value="' + a + '">' + ATTRIBUTE_LABELS[a] + "</option>"; }).join("");
+    var themeSelect = document.getElementById("tb-compare-theme-select");
+    themeSelect.innerHTML = leafThemes().map(function (t) { return '<option value="' + t.id + '">' + esc(t.name) + "</option>"; }).join("");
+    renderCompareChart();
+  }
+
+  function renderCompareChart() {
+    var attrs = comparableAttributes();
+    if (!attrs.length) return;
+    var attrKey = document.getElementById("tb-compare-attribute-select").value;
+    var themeId = document.getElementById("tb-compare-theme-select").value;
+    if (!attrKey || !themeId) return;
+    var groups = TB.groupComparison(project, attrKey, themeId);
+    TB.charts.groupedBarChart("tb-chart-compare", groups.map(function (g) { return g.value; }), [
+      { name: "Frequency", values: groups.map(function (g) { return g.frequency; }), color: "#4B2E83" },
+      { name: "Coverage %", values: groups.map(function (g) { return g.coveragePct; }), color: "#17B8A6" }
+    ]);
+  }
+
+  function renderHierarchy() {
+    var tree = TB.themeTree(project);
+    function renderNode(node, depth) {
+      var s = TB.themeStats(project, node.id);
+      return '<div class="tb-theme-row" style="margin-left:' + (depth * 1.1) + 'rem;" data-theme-id="' + node.id + '">' +
+        '<span class="tb-theme-swatch" style="background:' + node.color + ';"></span>' +
+        '<span class="flex-grow-1">' + esc(node.name) + "</span>" +
+        '<span class="text-muted small me-2">cov. ' + s.coverageCount + "/" + s.coverageTotal + "</span>" +
+        '<span class="badge bg-light text-dark border">' + s.frequency + "×</span>" +
+        (s.avgWeight !== null ? ' <span class="badge bg-accent ms-1">avg ' + s.avgWeight + "</span>" : "") +
+        "</div>" +
+        node.children.map(function (c) { return renderNode(c, depth + 1); }).join("");
+    }
+    var el = document.getElementById("tb-theme-hierarchy");
+    el.innerHTML = tree.length ? tree.map(function (n) { return renderNode(n, 0); }).join("") : '<p class="text-muted small mb-0">No themes yet — add some from the Coding Workspace.</p>';
+    Array.prototype.forEach.call(el.querySelectorAll(".tb-theme-row"), function (row) {
+      row.addEventListener("click", function () { showThemeEvidence(row.getAttribute("data-theme-id")); });
+    });
+  }
+
+  document.getElementById("tb-matrix-metric-select").addEventListener("change", renderMatrix);
+  document.getElementById("tb-compare-attribute-select").addEventListener("change", renderCompareChart);
+  document.getElementById("tb-compare-theme-select").addEventListener("change", renderCompareChart);
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-png]"), function (btn) {
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      TB.exportUtil.canvasToPNG(btn.getAttribute("data-png"), TB.exportUtil.slug(project.title) + "-" + btn.getAttribute("data-name") + ".png");
+    });
+  });
+
+  renderSummary();
+  renderMainCharts();
+  renderTopWords();
+  renderMatrix();
+  renderCompareControls();
+  renderHierarchy();
+});
+</script>
+```

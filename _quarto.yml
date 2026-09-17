@@ -1,0 +1,81 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+
+# ---------------------------------------------------------------------------
+# NOTE ON NAMING: "TakwimuBridge" is the product name given in SST's own
+# functional description document for this qualitative data analysis tool.
+# The sibling project ../SITE-1 separately uses "Takwimu Bridge" (with a
+# space) as an explicitly-labeled PLACEHOLDER name for an unrelated data
+# CATALOG site. That is a naming collision the user should resolve (rename
+# one of the two, or confirm both are intentionally part of one product
+# family) — see README.md.
+# ---------------------------------------------------------------------------
+
+website:
+  title: "TakwimuBridge"
+  description: "A qualitative data analysis tool for researchers, students, consultants and institutions — code, weigh, compare and visualize KIIs, FGDs, interviews and open-ended responses, entirely in your browser."
+  site-url: "https://sustainable-solutions-tz.github.io/takwimubridge-qda/"
+  favicon: images/logo.svg
+  page-navigation: true
+  bread-crumbs: false
+  open-graph: true
+  twitter-card: true
+
+  navbar:
+    background: primary
+    pinned: true
+    logo: images/logo.svg
+    logo-alt: "TakwimuBridge logo"
+    title: "TakwimuBridge"
+    left:
+      - text: "Home"
+        href: index.qmd
+      - text: "Projects"
+        href: projects.qmd
+      - text: "Coding Workspace"
+        href: workspace.qmd
+      - text: "Analysis"
+        href: analysis.qmd
+      - text: "Word Frequency"
+        href: wordfrequency.qmd
+      - text: "Export"
+        href: export.qmd
+      - text: "User Guide"
+        href: guide.qmd
+    right:
+      - text: "About"
+        href: about.qmd
+
+  page-footer:
+    background: dark
+    left: |
+      **TakwimuBridge**<br>
+      A qualitative data analysis tool by Sustainable Solutions Tanzania (SST).<br>
+      © 2026 Sustainable Solutions Tanzania. All analysis runs locally in your browser.
+    center:
+      - text: "User Guide"
+        href: guide.qmd
+      - text: "Coding Workspace"
+        href: workspace.qmd
+      - text: "About"
+        href: about.qmd
+    right: |
+      Built with [Quarto](https://quarto.org) & Bootstrap 5.<br>
+      Client-side proof of concept — no server, no account needed.
+
+format:
+  html:
+    theme:
+      light: [flatly, custom.scss]
+    include-in-header: _includes/head-extra.html
+    toc: false
+    link-external-icon: false
+    link-external-newwindow: true
+    grid:
+      body-width: 1150px
+      sidebar-width: 250px
+      margin-width: 250px
+    highlight-style: github

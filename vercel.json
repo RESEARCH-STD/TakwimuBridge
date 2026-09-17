@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "installCommand": "true",
+  "buildCommand": "curl -fsSL https://github.com/quarto-dev/quarto-cli/releases/download/v1.10.18/quarto-1.10.18-linux-amd64.tar.gz -o quarto.tar.gz && mkdir -p .quarto-bin && tar -xzf quarto.tar.gz -C .quarto-bin --strip-components=1 && export PATH=\"$PWD/.quarto-bin/bin:$PATH\" && quarto --version && quarto render",
+  "outputDirectory": "_site"
+}

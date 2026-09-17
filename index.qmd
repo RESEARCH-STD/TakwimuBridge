@@ -1,0 +1,206 @@
+---
+pagetitle: "TakwimuBridge — Qualitative Data Analysis Tool"
+page-layout: full
+title-block-banner: false
+---
+
+<!-- ============================= HERO ============================= -->
+<section class="hero-section">
+<div class="container">
+<div class="grid align-items-center">
+<div class="g-col-12 g-col-lg-7">
+<span class="badge rounded-pill mb-3" style="background:rgba(255,255,255,.15)!important;color:#fff!important;">
+<i class="bi bi-journal-text me-1"></i> By Sustainable Solutions Tanzania (SST) — runs entirely in your browser
+</span>
+<h1>Code, count, compare and visualize your qualitative data — without switching software.</h1>
+<p class="lead">
+TakwimuBridge helps researchers, students, consultants and institutions turn
+Key Informant Interviews, Focus Group Discussions, in-depth interviews and
+open-ended survey responses into organized themes, defensible frequencies,
+and evidence-backed charts.
+</p>
+<div class="d-flex flex-wrap gap-3 mt-4">
+<a href="projects.html" class="btn btn-accent btn-lg px-4">
+<i class="bi bi-play-fill me-1"></i> Open the Demo Project
+</a>
+<a href="guide.html" class="btn btn-outline-light btn-lg px-4">
+Read the User Guide
+</a>
+</div>
+<div class="grid hero-stats mt-5">
+<div class="g-col-4">
+<div class="stat-value">0</div>
+<div class="stat-label">Servers Involved</div>
+</div>
+<div class="g-col-4">
+<div class="stat-value">4</div>
+<div class="stat-label">Core Indicators</div>
+</div>
+<div class="g-col-4">
+<div class="stat-value">1–10</div>
+<div class="stat-label">Importance Weighting</div>
+</div>
+</div>
+<p class="small mt-2" style="color:rgba(255,255,255,.6);">
+Everything — projects, transcripts, codes, weights — is saved in your own browser's storage. Nothing is uploaded anywhere. See <a href="about.html" class="link-light">About &amp; Scope</a> for what that means.
+</p>
+</div>
+<div class="g-col-12 g-col-lg-5 d-none d-lg-block text-center">
+<i class="bi bi-diagram-3-fill" style="font-size:14rem;color:rgba(255,255,255,.12);"></i>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ======================= THE PROBLEM ======================= -->
+<section class="section">
+<div class="container">
+<div class="grid align-items-center gap-5">
+<div class="g-col-12 g-col-lg-6">
+<span class="eyebrow">The Problem</span>
+<h2>Qualitative evidence is rich — and hard to summarize honestly.</h2>
+<p class="text-muted fs-5">
+A researcher interviews five, ten, or fifty people. Each transcript is full
+of insight, but turning pages of quotes into a defensible, comparable
+finding usually means either an expensive specialist tool, or a manual
+process in spreadsheets that loses the connection between a number and the
+words behind it.
+</p>
+<p class="text-muted fs-5">
+Frequency alone can also mislead: one participant repeating an issue ten
+times is not the same as ten different participants each raising it once.
+</p>
+</div>
+<div class="g-col-12 g-col-lg-6">
+<div class="grid gap-3">
+<div class="g-col-6">
+<div class="step-card text-center">
+<i class="bi bi-chat-square-quote step-icon"></i>
+<div class="fw-semibold">Evidence gets lost</div>
+<div class="text-muted small">once findings are summarized</div>
+</div>
+</div>
+<div class="g-col-6">
+<div class="step-card text-center">
+<i class="bi bi-graph-up step-icon"></i>
+<div class="fw-semibold">Frequency ≠ importance</div>
+<div class="text-muted small">one voice can dominate the count</div>
+</div>
+</div>
+<div class="g-col-6">
+<div class="step-card text-center">
+<i class="bi bi-cash-coin step-icon"></i>
+<div class="fw-semibold">Specialist tools cost</div>
+<div class="text-muted small">and require training to learn</div>
+</div>
+</div>
+<div class="g-col-6">
+<div class="step-card text-center">
+<i class="bi bi-people step-icon"></i>
+<div class="fw-semibold">Group differences</div>
+<div class="text-muted small">are hard to compare by hand</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ======================= HOW IT WORKS ======================= -->
+<section class="section section-alt">
+<div class="container">
+<div class="text-center mb-5">
+<span class="eyebrow">How It Works</span>
+<h2>From transcript to defensible finding, in your browser</h2>
+<p class="text-muted fs-5 mx-auto" style="max-width:44rem;">
+The workflow TakwimuBridge is built around: Upload → Read → Highlight → Code → Score → Count → Compare → Visualize → Export.
+</p>
+</div>
+<div class="grid gap-4">
+<div class="g-col-12 g-col-md-6 g-col-lg-3">
+<div class="step-card">
+<div class="step-number">1</div>
+<h5><i class="bi bi-upload me-1 text-accent"></i> Import &amp; Code</h5>
+<p class="text-muted mb-0">Upload KIIs, FGDs, interviews or survey responses. Select text, assign a theme and colour, and optionally score its importance from 1–10.</p>
+</div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-3">
+<div class="step-card">
+<div class="step-number">2</div>
+<h5><i class="bi bi-diagram-3 me-1 text-accent"></i> Organize Themes</h5>
+<p class="text-muted mb-0">Build a Theme → Sub-theme → Code hierarchy. One statement can carry more than one code.</p>
+</div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-3">
+<div class="step-card">
+<div class="step-number">3</div>
+<h5><i class="bi bi-bar-chart me-1 text-accent"></i> Analyze &amp; Compare</h5>
+<p class="text-muted mb-0">Frequency, respondent coverage, total weighted score and average weight — computed automatically, and comparable across groups.</p>
+</div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-3">
+<div class="step-card">
+<div class="step-number">4</div>
+<h5><i class="bi bi-download me-1 text-accent"></i> Export Results</h5>
+<p class="text-muted mb-0">Every number links back to its quotations. Export tables to CSV/Excel, a coding report to Word, and charts as images.</p>
+</div>
+</div>
+</div>
+<p class="text-center text-muted small mt-4">
+<i class="bi bi-info-circle me-1"></i>
+This is a genuinely working client-side tool, not a mockup — see <a href="about.html">About &amp; Scope</a> for exactly what "client-side" means for your data.
+</p>
+</div>
+</section>
+
+<!-- ======================= FEATURE GRID ======================= -->
+<section class="section">
+<div class="container">
+<div class="text-center mb-5">
+<span class="eyebrow">What's Inside</span>
+<h2 class="mb-0">Built around the full analytical workflow</h2>
+</div>
+<div class="grid gap-4">
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="step-card"><i class="bi bi-layout-three-columns step-icon"></i>
+<h5>Three-Panel Coding Workspace</h5>
+<p class="text-muted mb-0">Sources on the left, transcript in the centre, theme/code/weight/memo on the right — highlight text and code it in place.</p></div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="step-card"><i class="bi bi-people-fill step-icon"></i>
+<h5>Respondent Attributes &amp; FGD Speakers</h5>
+<p class="text-muted mb-0">Tag Sex, Location, Stakeholder and Institution per respondent, and code individual FGD speakers separately.</p></div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="step-card"><i class="bi bi-grid-3x3 step-icon"></i>
+<h5>Respondent × Theme Matrix</h5>
+<p class="text-muted mb-0">Switch any cell between Frequency, Total Weight or Average Weight, with a heat-map view of where issues concentrate.</p></div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="step-card"><i class="bi bi-clouds step-icon"></i>
+<h5>Word Frequency &amp; Word Cloud</h5>
+<p class="text-muted mb-0">Stop-word-filtered word frequency, scoped to all text or only to coded passages under a theme.</p></div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="step-card"><i class="bi bi-quote step-icon"></i>
+<h5>Evidence Retrieval</h5>
+<p class="text-muted mb-0">Click any number on the dashboard to see every quotation behind it, with source and respondent attribution.</p></div>
+</div>
+<div class="g-col-12 g-col-md-6 g-col-lg-4">
+<div class="step-card"><i class="bi bi-file-earmark-arrow-down step-icon"></i>
+<h5>Real Exports</h5>
+<p class="text-muted mb-0">CSV, Excel workbook, a Word-compatible coding report, chart PNGs, and a full JSON project backup/restore.</p></div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ======================= CTA ======================= -->
+<section class="section-tight section-alt">
+<div class="container text-center">
+<span class="eyebrow">Try It Now</span>
+<h4 class="mb-3 fw-normal">A demo project — five KIIs and one FGD on environmental &amp; governance challenges — is bundled in, so you can explore before adding your own data.</h4>
+<a href="projects.html" class="btn btn-primary btn-lg px-4"><i class="bi bi-play-fill me-1"></i> Open Projects</a>
+</div>
+</section>

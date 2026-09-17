@@ -1,0 +1,120 @@
+---
+title: "Word Frequency & Word Cloud"
+subtitle: "Words are not codes, and codes are not themes — use this to spot vocabulary patterns, not to replace coding."
+---
+
+```{=html}
+<div id="tb-no-project-alert" class="alert alert-warning d-none">
+<i class="bi bi-exclamation-triangle"></i> No active project selected. <a href="projects.html">Go to Projects</a> to create or open one.
+</div>
+
+<div id="tb-wf-content" class="d-none">
+
+<div class="alert alert-secondary small">
+<i class="bi bi-lightbulb"></i> <strong>Important:</strong> "factory waste", "dirty river" and "smoke" might all be coded as <em>Environmental Pollution</em> — so the coded reference count for a theme can be much higher than the count of any single word. Word frequency is a vocabulary check, not a substitute for coding.
+</div>
+
+<div class="tb-panel mb-4">
+<div class="tb-panel-header">Scope</div>
+<div class="tb-panel-body">
+<div class="grid gap-3">
+<div class="g-col-12 g-col-md-4">
+<div class="btn-group-vertical w-100" role="group">
+<input type="radio" class="btn-check" name="wfScope" id="tb-wf-scope-all" value="all" checked>
+<label class="btn btn-outline-secondary text-start" for="tb-wf-scope-all">All transcript text</label>
+<input type="radio" class="btn-check" name="wfScope" id="tb-wf-scope-coded" value="coded">
+<label class="btn btn-outline-secondary text-start" for="tb-wf-scope-coded">Coded passages only</label>
+</div>
+</div>
+<div class="g-col-12 g-col-md-4" id="tb-wf-theme-wrap" style="display:none;">
+<label class="form-label small">Limit to theme(s)</label>
+<div id="tb-wf-theme-checks" style="max-height:120px;overflow-y:auto;"></div>
+</div>
+<div class="g-col-12 g-col-md-4">
+<label class="form-label small">Extra stopwords (comma-separated)</label>
+<input class="form-control form-control-sm" id="tb-wf-stopwords" placeholder="e.g. village, district">
+</div>
+</div>
+<button class="btn btn-accent btn-sm mt-3" id="tb-wf-apply-btn"><i class="bi bi-arrow-repeat"></i> Update</button>
+</div>
+</div>
+
+<div class="grid gap-3 mb-4">
+<div class="g-col-12 g-col-lg-7">
+<div class="tb-panel" style="height:420px;">
+<div class="tb-panel-header">Word Cloud <button class="btn btn-sm btn-link p-0" id="tb-wf-cloud-png" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="tb-panel-body">
+<canvas id="tb-wf-cloud" width="700" height="360" style="width:100%;height:100%;"></canvas>
+</div>
+</div>
+</div>
+<div class="g-col-12 g-col-lg-5">
+<div class="tb-panel" style="height:420px;">
+<div class="tb-panel-header">
+Word Frequency Table
+<button class="btn btn-sm btn-outline-secondary" id="tb-wf-export-btn"><i class="bi bi-download"></i> CSV</button>
+</div>
+<div class="tb-panel-body">
+<table class="table table-sm table-striped">
+<thead><tr><th>Word</th><th class="text-end">Count</th></tr></thead>
+<tbody id="tb-wf-table-body"></tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.TB && window.TB.seedDemoIfNeeded) window.TB.seedDemoIfNeeded();
+  var TB = window.TB;
+  var project = TB.getActiveProject();
+  if (!project) { document.getElementById("tb-no-project-alert").classList.remove("d-none"); return; }
+  document.getElementById("tb-wf-content").classList.remove("d-none");
+
+  function esc(s) { return TB.escapeHtml(s); }
+  var lastResult = [];
+
+  function renderThemeChecks() {
+    document.getElementById("tb-wf-theme-checks").innerHTML = project.themes.map(function (t) {
+      return '<div class="form-check"><input class="form-check-input tb-wf-theme-check" type="checkbox" value="' + t.id + '" id="wfchk-' + t.id + '">' +
+        '<label class="form-check-label" for="wfchk-' + t.id + '">' + esc(t.name) + "</label></div>";
+    }).join("") || '<p class="text-muted small">No themes yet.</p>';
+  }
+
+  function toggleThemeWrap() {
+    var coded = document.getElementById("tb-wf-scope-coded").checked;
+    document.getElementById("tb-wf-theme-wrap").style.display = coded ? "" : "none";
+  }
+
+  function update() {
+    var scope = document.querySelector('input[name="wfScope"]:checked').value;
+    var themeIds = Array.prototype.map.call(document.querySelectorAll(".tb-wf-theme-check:checked"), function (c) { return c.value; });
+    var extra = document.getElementById("tb-wf-stopwords").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    lastResult = TB.wordFrequency(project, { scope: scope, themeIds: themeIds.length ? themeIds : null, extraStopwords: extra });
+
+    TB.charts.renderWordCloud("tb-wf-cloud", lastResult);
+
+    var body = document.getElementById("tb-wf-table-body");
+    body.innerHTML = lastResult.length
+      ? lastResult.slice(0, 200).map(function (w) { return "<tr><td>" + esc(w.word) + "</td><td class=\"text-end\">" + w.count + "</td></tr>"; }).join("")
+      : '<tr><td colspan="2" class="text-muted">No words found for this scope.</td></tr>';
+  }
+
+  document.getElementById("tb-wf-apply-btn").addEventListener("click", update);
+  document.querySelectorAll('input[name="wfScope"]').forEach(function (r) { r.addEventListener("change", function () { toggleThemeWrap(); update(); }); });
+  document.getElementById("tb-wf-export-btn").addEventListener("click", function () {
+    TB.exportUtil.exportWordFrequencyCSV(lastResult, TB.exportUtil.slug(project.title) + "-word-frequency");
+  });
+  document.getElementById("tb-wf-cloud-png").addEventListener("click", function () {
+    TB.exportUtil.canvasToPNG("tb-wf-cloud", TB.exportUtil.slug(project.title) + "-word-cloud.png");
+  });
+
+  renderThemeChecks();
+  toggleThemeWrap();
+  update();
+});
+</script>
+```

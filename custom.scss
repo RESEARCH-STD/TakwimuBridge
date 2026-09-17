@@ -1,0 +1,263 @@
+/*
+  custom.scss — TakwimuBridge (Qualitative Data Analysis Tool)
+  Base theme: flatly (see _quarto.yml). This file overrides Bootstrap 5
+  variables (scss:defaults) and adds component-level styling (scss:rules).
+
+  Brand palette — deliberately distinct from the sibling ../SITE-1 project
+  (which uses a teal-blue/amber palette) so the two products are visually
+  distinguishable at a glance:
+    Primary   #4B2E83  deep violet     (analysis, research, focus)
+    Secondary #2A1B54  darker violet
+    Accent    #17B8A6  teal            (CTAs, highlights)
+    Success   #1E8A5F  green
+    Info      #2F6FED  blue
+    Warning   #E08E45  amber-orange
+    Danger    #C0392B  red
+*/
+
+/*-- scss:defaults --*/
+
+// NOTE: Quarto's bundled Bootstrap omits the classic .row/.col-* responsive
+// grid (it expects its own .grid/.g-col-* CSS-grid system instead). This
+// site's layouts use Quarto's .grid/.g-col-* classes rather than
+// Bootstrap's row/col-*, for the same reason SITE-1 does.
+
+// Brand colors
+$primary:   #4B2E83;
+$secondary: #2A1B54;
+$success:   #1E8A5F;
+$info:      #2F6FED;
+$warning:   #E08E45;
+$danger:    #C0392B;
+$light:     #F6F5FA;
+$dark:      #1C1030;
+
+$accent:    #17B8A6; // not a native Bootstrap theme color; used via custom utility classes below
+
+// Typography
+$font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+$headings-font-family: "Poppins", $font-family-sans-serif;
+$headings-font-weight: 600;
+$body-color: #241A33;
+$link-color: $primary;
+
+// Shape language: soft, rounded, modern
+$border-radius: 0.6rem;
+$border-radius-sm: 0.45rem;
+$border-radius-lg: 0.9rem;
+$card-border-radius: 0.9rem;
+$card-border-width: 0;
+$card-box-shadow: 0 0.35rem 1.5rem rgba(75, 46, 131, 0.08);
+$btn-border-radius: 0.5rem;
+$btn-font-weight: 600;
+
+// Navbar
+$navbar-dark-color: rgba(255, 255, 255, 0.88);
+$navbar-dark-hover-color: #ffffff;
+$navbar-dark-active-color: #ffffff;
+
+/*-- scss:rules --*/
+
+:root {
+  --brand-accent: #{$accent};
+  --brand-primary: #{$primary};
+  --brand-secondary: #{$secondary};
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+.grid > * {
+  min-width: 0;
+}
+
+.badge {
+  white-space: normal;
+}
+
+.text-accent { color: var(--brand-accent) !important; }
+.bg-accent { background-color: var(--brand-accent) !important; }
+.btn-accent {
+  background-color: var(--brand-accent);
+  border-color: var(--brand-accent);
+  color: #ffffff;
+}
+.btn-accent:hover, .btn-accent:focus {
+  background-color: #139f8f;
+  border-color: #139f8f;
+  color: #ffffff;
+}
+.eyebrow {
+  display: inline-block;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  font-size: .78rem;
+  color: var(--brand-accent);
+  margin-bottom: .4rem;
+}
+
+/* ---------------- Hero (home page) ---------------- */
+.hero-section {
+  background: linear-gradient(135deg, $primary 0%, $secondary 100%);
+  color: #fff;
+  padding: 5rem 0 4rem;
+}
+.hero-section h1 { color: #fff; }
+.hero-section .lead { color: rgba(255,255,255,.88); }
+.hero-stats .stat-value { font-family: $headings-font-family; font-size: 2rem; font-weight: 700; color: #fff; }
+.hero-stats .stat-label { font-size: .85rem; color: rgba(255,255,255,.7); }
+
+.section { padding: 4rem 0; }
+.section-tight { padding: 2rem 0; }
+.section-alt { background: $light; }
+
+.step-card {
+  background: #fff;
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: $card-box-shadow;
+  padding: 1.5rem;
+  height: 100%;
+}
+.step-number {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 2.2rem; height: 2.2rem; border-radius: 50%;
+  background: var(--brand-accent); color: #fff; font-weight: 700; margin-bottom: .75rem;
+}
+.step-icon { font-size: 1.8rem; color: var(--brand-primary); margin-bottom: .5rem; display: block; }
+
+/* ---------------- App shell (workspace / analysis / etc.) ---------------- */
+.tb-app-shell {
+  background: $light;
+  border-radius: var(--bs-border-radius-lg);
+  padding: 1rem;
+}
+.tb-panel {
+  background: #fff;
+  border-radius: var(--bs-border-radius);
+  box-shadow: 0 0.15rem 0.6rem rgba(75,46,131,.08);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.tb-panel-header {
+  padding: .65rem .9rem;
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+  font-size: .85rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: $secondary;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+}
+.tb-panel-body {
+  padding: .75rem .9rem;
+  overflow-y: auto;
+}
+.tb-workspace-row {
+  display: grid;
+  grid-template-columns: 240px 1fr 300px;
+  gap: 1rem;
+  align-items: stretch;
+}
+@media (max-width: 992px) {
+  .tb-workspace-row { grid-template-columns: 1fr; }
+}
+.tb-workspace-row .tb-panel { min-height: 60vh; max-height: 78vh; }
+
+.tb-source-item {
+  padding: .5rem .6rem;
+  border-radius: var(--bs-border-radius-sm);
+  cursor: pointer;
+  font-size: .9rem;
+  margin-bottom: .3rem;
+  border: 1px solid transparent;
+}
+.tb-source-item:hover { background: $light; }
+.tb-source-item.active { background: rgba(75,46,131,.08); border-color: rgba(75,46,131,.25); font-weight: 600; }
+.tb-source-item .tb-source-type-badge { font-size: .65rem; }
+
+.tb-transcript {
+  font-size: .96rem;
+  line-height: 1.85;
+  white-space: pre-wrap;
+}
+.tb-transcript mark.tb-coded {
+  padding: .05rem 0;
+  border-radius: .2rem;
+  cursor: pointer;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,.15);
+}
+.tb-transcript mark.tb-coded.tb-selected-ref {
+  outline: 2px solid $dark;
+}
+
+.tb-code-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .2rem .55rem;
+  border-radius: 999px;
+  font-size: .78rem;
+  font-weight: 600;
+  color: #fff;
+  margin: .15rem .25rem .15rem 0;
+}
+.tb-code-chip .swatch {
+  width: .55rem; height: .55rem; border-radius: 50%; background: #fff; opacity: .85;
+}
+
+.tb-theme-row {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .35rem .4rem;
+  border-radius: var(--bs-border-radius-sm);
+  cursor: pointer;
+}
+.tb-theme-row:hover { background: $light; }
+.tb-theme-row.selected { background: rgba(23,184,166,.12); }
+.tb-theme-swatch { width: .8rem; height: .8rem; border-radius: 3px; flex: none; }
+.tb-theme-indent-1 { margin-left: 1.1rem; }
+
+.tb-weight-slider { width: 100%; }
+
+.tb-matrix-table td.tb-cell-heat {
+  text-align: center;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+.tb-matrix-table th { position: sticky; top: 0; background: #fff; }
+
+.tb-evidence-quote {
+  border-left: 3px solid var(--brand-accent);
+  padding: .5rem .8rem;
+  background: $light;
+  border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+  margin-bottom: .6rem;
+}
+
+.tb-stat-card {
+  background: #fff;
+  border-radius: var(--bs-border-radius-lg);
+  box-shadow: $card-box-shadow;
+  padding: 1.1rem 1.2rem;
+}
+.tb-stat-card .tb-stat-value { font-family: $headings-font-family; font-size: 1.9rem; font-weight: 700; color: $primary; }
+.tb-stat-card .tb-stat-label { font-size: .8rem; color: #6b6478; text-transform: uppercase; letter-spacing: .03em; }
+
+.tb-demo-banner {
+  background: rgba(23,184,166,.1);
+  border: 1px solid rgba(23,184,166,.3);
+  border-radius: var(--bs-border-radius);
+  padding: .6rem 1rem;
+  font-size: .88rem;
+}
+
+.partner-logo-strip img { height: 40px; opacity: .8; }

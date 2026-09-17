@@ -1,0 +1,226 @@
+---
+title: "Coding Workspace"
+subtitle: "Read, highlight, and code — sources on the left, transcript in the centre, theme and weight on the right."
+---
+
+```{=html}
+<div id="tb-no-project-alert" class="alert alert-warning d-none">
+<i class="bi bi-exclamation-triangle"></i> No active project selected. <a href="projects.html">Go to Projects</a> to create or open one.
+</div>
+
+<div id="tb-workspace-content" class="tb-app-shell d-none">
+<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+<div>
+<h4 class="mb-0" id="tb-project-title">—</h4>
+<div class="text-muted small" id="tb-project-meta">—</div>
+</div>
+<div class="d-flex gap-2">
+<button class="btn btn-outline-secondary btn-sm" id="tb-manage-themes-btn"><i class="bi bi-diagram-3"></i> Codebook</button>
+<button class="btn btn-accent btn-sm" id="tb-add-source-btn"><i class="bi bi-plus-lg"></i> Add Source</button>
+</div>
+</div>
+
+<div class="tb-workspace-row">
+<!-- LEFT: Sources -->
+<div class="tb-panel">
+<div class="tb-panel-header">Sources</div>
+<div class="tb-panel-body" id="tb-sources-list"></div>
+</div>
+
+<!-- CENTRE: Transcript -->
+<div class="tb-panel">
+<div class="tb-panel-header">
+<span id="tb-active-source-name">—</span>
+<span class="text-muted" style="font-size:.72rem;font-weight:400;text-transform:none;">select text to code it</span>
+</div>
+<div class="tb-panel-body">
+<div id="tb-source-attributes" class="mb-2"></div>
+<div class="tb-transcript" id="tb-transcript-text"></div>
+</div>
+</div>
+
+<!-- RIGHT: Codebook reference -->
+<div class="tb-panel">
+<div class="tb-panel-header">Codebook</div>
+<div class="tb-panel-body" id="tb-codebook-tree"></div>
+</div>
+</div>
+</div>
+
+<button id="tb-code-selection-btn" class="btn btn-sm btn-accent d-none" style="position:absolute;z-index:1050;">
+<i class="bi bi-highlighter"></i> Code Selection
+</button>
+
+<!-- ============================ MODAL: Add/Edit Source ============================ -->
+<div class="modal fade" id="tb-modal-add-source" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header"><h5 class="modal-title">Add Source</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body" id="tb-source-form">
+<input type="hidden" id="tbf-source-id">
+<div class="grid gap-2 mb-3">
+<div class="g-col-6">
+<label class="form-label">Source Type</label>
+<select class="form-select" id="tbf-source-type">
+<option value="KII">Key Informant Interview (KII)</option>
+<option value="FGD">Focus Group Discussion (FGD)</option>
+<option value="Interview">Individual / In-depth Interview</option>
+<option value="Survey">Open-ended Survey Response</option>
+<option value="Document">Document</option>
+</select>
+</div>
+<div class="g-col-6">
+<label class="form-label">Source Name</label>
+<input class="form-control" id="tbf-source-name" placeholder="e.g. KII-06">
+</div>
+</div>
+
+<fieldset class="border rounded p-2 mb-3">
+<legend class="float-none w-auto px-1 small text-muted">Respondent / Source Attributes</legend>
+<div class="grid gap-2">
+<div class="g-col-6"><label class="form-label small">Respondent ID</label><input class="form-control form-control-sm" id="tbf-source-respondentid"></div>
+<div class="g-col-6"><label class="form-label small">Sex</label>
+<select class="form-select form-select-sm" id="tbf-source-sex"><option value=""></option><option>Female</option><option>Male</option><option>Other</option></select>
+</div>
+<div class="g-col-6"><label class="form-label small">Location</label><input class="form-control form-control-sm" id="tbf-source-location"></div>
+<div class="g-col-6"><label class="form-label small">Stakeholder</label><input class="form-control form-control-sm" id="tbf-source-stakeholder" placeholder="e.g. Government Official"></div>
+<div class="g-col-12"><label class="form-label small">Institution</label><input class="form-control form-control-sm" id="tbf-source-institution"></div>
+</div>
+</fieldset>
+
+<div id="tbf-speakers-wrap" class="mb-3 d-none">
+<label class="form-label">Speakers (comma-separated, e.g. Moderator, P1, P2, P3)</label>
+<input class="form-control" id="tbf-source-speakers" placeholder="Moderator, P1, P2, P3">
+</div>
+
+<label class="form-label">Text</label>
+<div class="btn-group btn-group-sm mb-2" role="group">
+<input type="radio" class="btn-check" name="srcImportMode" id="tbf-mode-paste" value="paste" checked>
+<label class="btn btn-outline-secondary" for="tbf-mode-paste">Paste Text</label>
+<input type="radio" class="btn-check" name="srcImportMode" id="tbf-mode-txt" value="txt">
+<label class="btn btn-outline-secondary" for="tbf-mode-txt">Upload .txt</label>
+<input type="radio" class="btn-check" name="srcImportMode" id="tbf-mode-docx" value="docx">
+<label class="btn btn-outline-secondary" for="tbf-mode-docx">Upload .docx</label>
+<input type="radio" class="btn-check" name="srcImportMode" id="tbf-mode-csv" value="csv">
+<label class="btn btn-outline-secondary" for="tbf-mode-csv">Upload .csv / .xlsx</label>
+</div>
+<div id="tbf-text-wrap" class="mb-3">
+<textarea class="form-control" id="tbf-source-text" rows="6" placeholder="Paste the transcript or open-ended responses here…"></textarea>
+</div>
+<div id="tbf-file-wrap" class="mb-3 d-none">
+<input type="file" class="form-control" id="tbf-source-file">
+<div class="form-text">DOCX and CSV/XLSX are parsed entirely in your browser (via mammoth.js / SheetJS) — nothing is uploaded to a server.</div>
+</div>
+
+<label class="form-label">Memo</label>
+<textarea class="form-control" id="tbf-source-memo" rows="2"></textarea>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+<button class="btn btn-accent" id="tb-save-source-btn">Add Source</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============================ MODAL: Codebook ============================ -->
+<div class="modal fade" id="tb-modal-codebook" tabindex="-1">
+<div class="modal-dialog modal-lg">
+<div class="modal-content">
+<div class="modal-header"><h5 class="modal-title">Codebook — Themes, Sub-themes &amp; Codes</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div id="tb-theme-tree-editor" class="mb-3"></div>
+<hr>
+<div class="grid gap-2 align-items-end">
+<div class="g-col-4"><label class="form-label small">New theme / code name</label><input class="form-control" id="tbf-theme-name"></div>
+<div class="g-col-4"><label class="form-label small">Parent (leave blank for top-level)</label><select class="form-select" id="tbf-theme-parent"></select></div>
+<div class="g-col-2"><label class="form-label small">Colour</label><input type="color" class="form-control form-control-color w-100" id="tbf-theme-color" value="#4B2E83"></div>
+<div class="g-col-2"><button class="btn btn-accent w-100" id="tb-add-theme-btn">Add</button></div>
+</div>
+<p class="text-muted small mt-3 mb-0">Colours are a visual aid only — the theme/code <em>name</em> carries the analytical meaning (per TakwimuBridge's design principle).</p>
+</div>
+<div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
+</div>
+</div>
+</div>
+
+<!-- ============================ MODAL: Apply Code (new) ============================ -->
+<div class="modal fade" id="tb-modal-apply-code" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header"><h5 class="modal-title">Code Selection</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div class="tb-evidence-quote" id="tb-apply-quote-preview" style="font-style:italic;"></div>
+
+<label class="form-label">Theme(s) / Code(s) — you may choose more than one</label>
+<div id="tb-apply-theme-checks" class="mb-3" style="max-height:180px;overflow-y:auto;"></div>
+
+<div data-speaker-wrap class="mb-3">
+<label class="form-label small">Speaker (FGD)</label>
+<select class="form-select form-select-sm" id="tb-apply-speaker-select"></select>
+</div>
+
+<div class="form-check form-switch mb-2">
+<input class="form-check-input" type="checkbox" id="tb-apply-weight-toggle">
+<label class="form-check-label">Assign importance / salience score</label>
+</div>
+<div class="d-flex align-items-center gap-2 mb-3">
+<input type="range" min="1" max="10" class="form-range tb-weight-slider" id="tb-apply-weight-slider">
+<span class="badge bg-secondary" id="tb-apply-weight-value">5</span>
+</div>
+
+<label class="form-label">Memo (optional)</label>
+<textarea class="form-control" id="tb-apply-memo" rows="2"></textarea>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+<button class="btn btn-accent" id="tb-save-coding-btn">Apply Code</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ============================ MODAL: Edit Coding ============================ -->
+<div class="modal fade" id="tb-modal-edit-coding" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header"><h5 class="modal-title">Coded Reference</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body">
+<div class="tb-evidence-quote" id="tb-edit-quote-preview" style="font-style:italic;"></div>
+
+<label class="form-label">Theme(s) / Code(s)</label>
+<div id="tb-edit-theme-checks" class="mb-3" style="max-height:180px;overflow-y:auto;"></div>
+
+<div data-speaker-wrap class="mb-3">
+<label class="form-label small">Speaker (FGD)</label>
+<select class="form-select form-select-sm" id="tb-edit-speaker-select"></select>
+</div>
+
+<div class="form-check form-switch mb-2">
+<input class="form-check-input" type="checkbox" id="tb-edit-weight-toggle">
+<label class="form-check-label">Assign importance / salience score</label>
+</div>
+<div class="d-flex align-items-center gap-2 mb-3">
+<input type="range" min="1" max="10" class="form-range tb-weight-slider" id="tb-edit-weight-slider">
+<span class="badge bg-secondary" id="tb-edit-weight-value">5</span>
+</div>
+
+<label class="form-label">Memo (optional)</label>
+<textarea class="form-control" id="tb-edit-memo" rows="2"></textarea>
+</div>
+<div class="modal-footer">
+<button class="btn btn-outline-danger me-auto" id="tb-delete-coding-btn"><i class="bi bi-trash"></i> Delete</button>
+<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+<button class="btn btn-accent" id="tb-update-coding-btn">Save Changes</button>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.TB && window.TB.seedDemoIfNeeded) window.TB.seedDemoIfNeeded();
+  if (window.TB && window.TB.workspace) window.TB.workspace.init();
+});
+</script>
+```

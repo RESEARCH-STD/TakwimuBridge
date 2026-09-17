@@ -1,0 +1,7 @@
+/_site/
+/.quarto/
+/.quarto-bin/
+/quarto.tar.gz
+/.vercel
+
+**/*.quarto_ipynb

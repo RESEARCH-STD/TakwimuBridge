@@ -1,0 +1,86 @@
+---
+title: "Simple User Guide"
+subtitle: "How the qualitative data analysis tool works — no statistics background required."
+---
+
+## What is TakwimuBridge?
+
+TakwimuBridge is designed to help a researcher analyse information collected through interviews, Key Informant Interviews (KIIs), Focus Group Discussions (FGDs), open-ended questions and other written qualitative information.
+
+You do not need to be an advanced data analyst to use it. You mainly need to read the information, identify important ideas, highlight them, and classify them into themes. TakwimuBridge then helps organize, count, compare and present those findings.
+
+## A Simple Example
+
+Suppose you interviewed five people about challenges facing their community. Each interview produced about three pages of written information.
+
+You create a new project and upload the five interviews. You tell the system whether each document is a KII, FGD, interview, open-ended response, or another document.
+
+You open the first interview and start reading. A respondent might say: *"One of our biggest problems is pollution because industries are discharging waste into the river."*
+
+You decide that this statement is talking about **Environmental Pollution**. You highlight the statement and select or create the theme *Environmental Pollution*. You may choose yellow as its colour. TakwimuBridge automatically records that Environmental Pollution has been mentioned once.
+
+If another respondent discusses pollution, you highlight that statement using the same theme. The frequency becomes two. You continue doing this across all interviews.
+
+::: {.callout-note}
+This exact example — five KIIs discussing environmental pollution, water scarcity, poor planning and unemployment — is bundled into TakwimuBridge as the **demo project** on the [Projects](projects.html) page, already fully coded, so you can see the finished result before coding your own data.
+:::
+
+## Giving Importance to a Statement
+
+Sometimes two people may discuss the same issue, but the statements may not carry the same weight in your analysis. TakwimuBridge lets you give each highlighted statement an optional score from **1 to 10**.
+
+For example, one Environmental Pollution statement may receive a weight of 8/10, another 6/10, another 9/10. TakwimuBridge can then tell you both how frequently the issue appeared *and* the importance you assigned to the coded statements.
+
+The score represents **your assessment**, as the researcher, of the importance or salience of the statement — it is not automatically the respondent's own numerical rating.
+
+## Creating Different Themes
+
+As you continue reading, different issues will emerge — Environmental Pollution, Water Shortage, Poor Planning, Unemployment, Weak Law Enforcement, and so on.
+
+Every time you find a statement relating to one of these issues, you highlight it and assign the appropriate theme.
+
+You can also organize related issues under broader themes. For example, *Environmental Challenges* may contain *Environmental Pollution*, *Water Shortage* and *Deforestation*. *Governance Challenges* may contain *Poor Planning*, *Weak Enforcement* and *Limited Community Participation*.
+
+## What TakwimuBridge Does Automatically
+
+While you concentrate on reading and coding, the software does the counting and organization. For every theme, it calculates:
+
+1. **Frequency** — the number of times it was coded.
+2. **Respondent Coverage** — the number and percentage of respondents who mentioned it.
+3. **Total Weighted Score** — the sum of the importance scores you assigned.
+4. **Average Weight** — the average importance across all references coded under it.
+
+This avoids a common mistake: one person mentioning an issue ten times is different from ten different people each mentioning it once. TakwimuBridge shows both.
+
+## Seeing What People Actually Said
+
+TakwimuBridge does not only give you numbers. Click a theme, such as *Environmental Pollution*, on the [Analysis Dashboard](analysis.html) and it shows every statement you highlighted under that theme, and where it came from — so when writing a report, you can move from a number straight back to the evidence behind it.
+
+## Comparing Different Groups
+
+If you entered basic respondent attributes, TakwimuBridge can compare groups such as Men vs. Women, Youth vs. Adults, Community Members vs. Government Officials, District A vs. District B, or KIIs vs. FGDs — helping you see whether different groups view the same problem differently.
+
+## Creating Graphs and Word Clouds
+
+Bar charts show the most frequently discussed themes. Weighted bar charts show themes with the highest combined importance scores. Word clouds show commonly occurring words, sized by frequency. Heat maps show which themes are more common among different respondents. Comparison charts compare themes between groups.
+
+## The Process in Ten Simple Steps
+
+1. Upload what people said.
+2. Read the interviews or discussions.
+3. Highlight important statements.
+4. Give each statement a theme.
+5. Give the theme or code a colour.
+6. Optionally give the coded statement an importance score from 1–10.
+7. TakwimuBridge counts and organizes the coded information.
+8. Compare themes and respondents.
+9. Create graphs, tables, heat maps and word clouds.
+10. Export the findings for your report.
+
+## In Simple Terms
+
+A beginner does not need to understand complicated programming or statistical commands. **You** do the interpretation; TakwimuBridge helps organize, quantify, compare and visualize the qualitative evidence.
+
+<div class="text-center my-5">
+<a href="workspace.html" class="btn btn-accent btn-lg"><i class="bi bi-highlighter me-1"></i> Try the Coding Workspace</a>
+</div>

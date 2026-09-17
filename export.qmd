@@ -1,0 +1,92 @@
+---
+title: "Export"
+subtitle: "Everything generates in your browser — nothing is uploaded anywhere to produce these files."
+---
+
+```{=html}
+<div id="tb-no-project-alert" class="alert alert-warning d-none">
+<i class="bi bi-exclamation-triangle"></i> No active project selected. <a href="projects.html">Go to Projects</a> to create or open one.
+</div>
+
+<div id="tb-export-content" class="d-none">
+
+<div class="grid gap-3 mb-4">
+
+<div class="g-col-12 g-col-lg-6">
+<div class="step-card h-100">
+<h5><i class="bi bi-table text-accent me-1"></i> Tables — CSV / Excel</h5>
+<p class="text-muted small">Coded references, theme frequency/coverage/weight table, and the respondent × theme matrix.</p>
+<div class="d-flex flex-wrap gap-2">
+<button class="btn btn-sm btn-outline-primary" id="tb-exp-coded-csv">Coded References (CSV)</button>
+<button class="btn btn-sm btn-outline-primary" id="tb-exp-freq-csv">Theme Frequency (CSV)</button>
+</div>
+<div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+<select class="form-select form-select-sm" style="width:auto;" id="tb-exp-matrix-metric">
+<option value="frequency">Matrix — Frequency</option>
+<option value="totalWeight">Matrix — Total Weight</option>
+<option value="avgWeight">Matrix — Average Weight</option>
+</select>
+<button class="btn btn-sm btn-outline-primary" id="tb-exp-matrix-csv">Export Matrix (CSV)</button>
+</div>
+<hr>
+<button class="btn btn-sm btn-accent" id="tb-exp-workbook"><i class="bi bi-file-earmark-spreadsheet"></i> Full Analysis Workbook (.xlsx)</button>
+</div>
+</div>
+
+<div class="g-col-12 g-col-lg-6">
+<div class="step-card h-100">
+<h5><i class="bi bi-file-earmark-word text-accent me-1"></i> Coding Report</h5>
+<p class="text-muted small">A theme-by-theme summary with coverage, weights and sample supporting quotations — opens in Microsoft Word.</p>
+<button class="btn btn-sm btn-accent" id="tb-exp-word"><i class="bi bi-download"></i> Download Coding Report (.doc)</button>
+<p class="text-muted small mt-2 mb-0"><i class="bi bi-info-circle"></i> This is an HTML file saved with a Word-compatible extension, not a native binary .docx — Word opens it correctly, but very old Word versions may show a format warning (safe to open anyway).</p>
+</div>
+</div>
+
+<div class="g-col-12">
+<div class="step-card h-100">
+<h5><i class="bi bi-box-seam text-accent me-1"></i> Full Project Backup (JSON)</h5>
+<p class="text-muted small">Save your entire project — sources, codebook and coded references — to a file, or restore one on another browser/computer. This is the only reliable way to move a project, since everything otherwise lives only in this browser's storage.</p>
+<div class="d-flex flex-wrap gap-2">
+<button class="btn btn-sm btn-outline-secondary" id="tb-exp-json"><i class="bi bi-download"></i> Export This Project (.json)</button>
+<button class="btn btn-sm btn-outline-secondary" id="tb-exp-import-btn"><i class="bi bi-upload"></i> Restore From Backup</button>
+<input type="file" id="tb-exp-import-file" accept=".json" class="d-none">
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (window.TB && window.TB.seedDemoIfNeeded) window.TB.seedDemoIfNeeded();
+  var TB = window.TB;
+  var project = TB.getActiveProject();
+  if (!project) { document.getElementById("tb-no-project-alert").classList.remove("d-none"); return; }
+  document.getElementById("tb-export-content").classList.remove("d-none");
+
+  document.getElementById("tb-exp-coded-csv").addEventListener("click", function () { TB.exportUtil.exportCodedReferencesCSV(project); });
+  document.getElementById("tb-exp-freq-csv").addEventListener("click", function () { TB.exportUtil.exportFrequencyTableCSV(project); });
+  document.getElementById("tb-exp-matrix-csv").addEventListener("click", function () {
+    TB.exportUtil.exportMatrixCSV(project, document.getElementById("tb-exp-matrix-metric").value);
+  });
+  document.getElementById("tb-exp-workbook").addEventListener("click", function () { TB.exportUtil.exportWorkbook(project); });
+  document.getElementById("tb-exp-word").addEventListener("click", function () { TB.exportUtil.exportThemeReportWord(project); });
+  document.getElementById("tb-exp-json").addEventListener("click", function () { TB.exportUtil.exportProjectJSON(project); });
+
+  document.getElementById("tb-exp-import-btn").addEventListener("click", function () {
+    document.getElementById("tb-exp-import-file").click();
+  });
+  document.getElementById("tb-exp-import-file").addEventListener("change", function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    TB.exportUtil.importProjectJSON(file, function (err, imported) {
+      if (err) { alert("Could not import that file: " + err.message); return; }
+      TB.setActiveProjectId(imported.id);
+      alert('Imported as a new project — "' + imported.title + '". Redirecting to Projects.');
+      window.location.href = "projects.html";
+    });
+  });
+});
+</script>
+```

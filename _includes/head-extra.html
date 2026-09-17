@@ -1,0 +1,24 @@
+<!-- Google Fonts (same family pairing as ../SITE-1 for brand-family consistency) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+
+<!--
+  Third-party libraries loaded only because they provide capability Quarto's
+  bundled Bootstrap does not (charts, word clouds, spreadsheet export, DOCX
+  parsing) — kept to the minimum needed for the coding/analysis workflow.
+  All loaded with `defer` so they execute, in this order, before
+  DOMContentLoaded — every page script below waits for DOMContentLoaded
+  before touching `TB`, so load order here is all that matters.
+-->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/wordcloud@1.2.2/src/wordcloud2.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js" defer></script>
+
+<!-- TakwimuBridge app scripts (shared across every page) -->
+<script src="assets/app.js" defer></script>
+<script src="assets/demo-data.js" defer></script>
+<script src="assets/coding-ui.js" defer></script>
+<script src="assets/charts.js" defer></script>
+<script src="assets/export.js" defer></script>
