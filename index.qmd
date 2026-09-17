@@ -74,31 +74,39 @@ times is not the same as ten different participants each raising it once.
 <div class="g-col-12 g-col-lg-6">
 <div class="grid gap-3">
 <div class="g-col-6">
-<div class="step-card text-center">
+<div class="card step-card text-center">
+<div class="card-body">
 <i class="bi bi-chat-square-quote step-icon"></i>
 <div class="fw-semibold">Evidence gets lost</div>
 <div class="text-muted small">once findings are summarized</div>
 </div>
 </div>
+</div>
 <div class="g-col-6">
-<div class="step-card text-center">
+<div class="card step-card text-center">
+<div class="card-body">
 <i class="bi bi-graph-up step-icon"></i>
 <div class="fw-semibold">Frequency ≠ importance</div>
 <div class="text-muted small">one voice can dominate the count</div>
 </div>
 </div>
+</div>
 <div class="g-col-6">
-<div class="step-card text-center">
+<div class="card step-card text-center">
+<div class="card-body">
 <i class="bi bi-cash-coin step-icon"></i>
 <div class="fw-semibold">Specialist tools cost</div>
 <div class="text-muted small">and require training to learn</div>
 </div>
 </div>
+</div>
 <div class="g-col-6">
-<div class="step-card text-center">
+<div class="card step-card text-center">
+<div class="card-body">
 <i class="bi bi-people step-icon"></i>
 <div class="fw-semibold">Group differences</div>
 <div class="text-muted small">are hard to compare by hand</div>
+</div>
 </div>
 </div>
 </div>
@@ -119,31 +127,39 @@ The workflow TakwimuBridge is built around: Upload → Read → Highlight → Co
 </div>
 <div class="grid gap-4">
 <div class="g-col-12 g-col-md-6 g-col-lg-3">
-<div class="step-card">
+<div class="card step-card">
+<div class="card-body">
 <div class="step-number">1</div>
 <h5><i class="bi bi-upload me-1 text-accent"></i> Import &amp; Code</h5>
 <p class="text-muted mb-0">Upload KIIs, FGDs, interviews or survey responses. Select text, assign a theme and colour, and optionally score its importance from 1–10.</p>
 </div>
 </div>
+</div>
 <div class="g-col-12 g-col-md-6 g-col-lg-3">
-<div class="step-card">
+<div class="card step-card">
+<div class="card-body">
 <div class="step-number">2</div>
 <h5><i class="bi bi-diagram-3 me-1 text-accent"></i> Organize Themes</h5>
 <p class="text-muted mb-0">Build a Theme → Sub-theme → Code hierarchy. One statement can carry more than one code.</p>
 </div>
 </div>
+</div>
 <div class="g-col-12 g-col-md-6 g-col-lg-3">
-<div class="step-card">
+<div class="card step-card">
+<div class="card-body">
 <div class="step-number">3</div>
 <h5><i class="bi bi-bar-chart me-1 text-accent"></i> Analyze &amp; Compare</h5>
 <p class="text-muted mb-0">Frequency, respondent coverage, total weighted score and average weight — computed automatically, and comparable across groups.</p>
 </div>
 </div>
+</div>
 <div class="g-col-12 g-col-md-6 g-col-lg-3">
-<div class="step-card">
+<div class="card step-card">
+<div class="card-body">
 <div class="step-number">4</div>
 <h5><i class="bi bi-download me-1 text-accent"></i> Export Results</h5>
 <p class="text-muted mb-0">Every number links back to its quotations. Export tables to CSV/Excel, a coding report to Word, and charts as images.</p>
+</div>
 </div>
 </div>
 </div>
@@ -163,34 +179,34 @@ This is a genuinely working client-side tool, not a mockup — see <a href="abou
 </div>
 <div class="grid gap-4">
 <div class="g-col-12 g-col-md-6 g-col-lg-4">
-<div class="step-card"><i class="bi bi-layout-three-columns step-icon"></i>
+<div class="card step-card"><div class="card-body"><i class="bi bi-layout-three-columns step-icon"></i>
 <h5>Three-Panel Coding Workspace</h5>
-<p class="text-muted mb-0">Sources on the left, transcript in the centre, theme/code/weight/memo on the right — highlight text and code it in place.</p></div>
+<p class="text-muted mb-0">Sources on the left, transcript in the centre, theme/code/weight/memo on the right — highlight text and code it in place.</p></div></div>
 </div>
 <div class="g-col-12 g-col-md-6 g-col-lg-4">
-<div class="step-card"><i class="bi bi-people-fill step-icon"></i>
+<div class="card step-card"><div class="card-body"><i class="bi bi-people-fill step-icon"></i>
 <h5>Respondent Attributes &amp; FGD Speakers</h5>
-<p class="text-muted mb-0">Tag Sex, Location, Stakeholder and Institution per respondent, and code individual FGD speakers separately.</p></div>
+<p class="text-muted mb-0">Tag Sex, Location, Stakeholder and Institution per respondent, and code individual FGD speakers separately.</p></div></div>
 </div>
 <div class="g-col-12 g-col-md-6 g-col-lg-4">
-<div class="step-card"><i class="bi bi-grid-3x3 step-icon"></i>
+<div class="card step-card"><div class="card-body"><i class="bi bi-grid-3x3 step-icon"></i>
 <h5>Respondent × Theme Matrix</h5>
-<p class="text-muted mb-0">Switch any cell between Frequency, Total Weight or Average Weight, with a heat-map view of where issues concentrate.</p></div>
+<p class="text-muted mb-0">Switch any cell between Frequency, Total Weight or Average Weight, with a heat-map view of where issues concentrate.</p></div></div>
 </div>
 <div class="g-col-12 g-col-md-6 g-col-lg-4">
-<div class="step-card"><i class="bi bi-clouds step-icon"></i>
+<div class="card step-card"><div class="card-body"><i class="bi bi-clouds step-icon"></i>
 <h5>Word Frequency &amp; Word Cloud</h5>
-<p class="text-muted mb-0">Stop-word-filtered word frequency, scoped to all text or only to coded passages under a theme.</p></div>
+<p class="text-muted mb-0">Stop-word-filtered word frequency, scoped to all text or only to coded passages under a theme.</p></div></div>
 </div>
 <div class="g-col-12 g-col-md-6 g-col-lg-4">
-<div class="step-card"><i class="bi bi-quote step-icon"></i>
+<div class="card step-card"><div class="card-body"><i class="bi bi-quote step-icon"></i>
 <h5>Evidence Retrieval</h5>
-<p class="text-muted mb-0">Click any number on the dashboard to see every quotation behind it, with source and respondent attribution.</p></div>
+<p class="text-muted mb-0">Click any number on the dashboard to see every quotation behind it, with source and respondent attribution.</p></div></div>
 </div>
 <div class="g-col-12 g-col-md-6 g-col-lg-4">
-<div class="step-card"><i class="bi bi-file-earmark-arrow-down step-icon"></i>
+<div class="card step-card"><div class="card-body"><i class="bi bi-file-earmark-arrow-down step-icon"></i>
 <h5>Real Exports</h5>
-<p class="text-muted mb-0">CSV, Excel workbook, a Word-compatible coding report, chart PNGs, and a full JSON project backup/restore.</p></div>
+<p class="text-muted mb-0">CSV, Excel workbook, a Word-compatible coding report, chart PNGs, and a full JSON project backup/restore.</p></div></div>
 </div>
 </div>
 </div>

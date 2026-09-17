@@ -114,12 +114,19 @@ body {
 .section-tight { padding: 2rem 0; }
 .section-alt { background: $light; }
 
+// .step-card/.tb-stat-card/.tb-panel* are companion modifier classes used
+// alongside Bootstrap's own .card/.card-header/.card-body (not replacements
+// for them — same pattern ../SITE-1 uses, e.g. `card border-0 shadow-soft`).
+// $card-border-radius/$card-box-shadow/$card-border-width above already
+// theme every plain .card; these modifiers add the bits Bootstrap doesn't
+// have an opinion on (hover-lift, header typography, stat typography).
 .step-card {
-  background: #fff;
-  border-radius: var(--bs-border-radius-lg);
-  box-shadow: $card-box-shadow;
   padding: 1.5rem;
-  height: 100%;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.step-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 1rem 2.5rem rgba(75, 46, 131, 0.14);
 }
 .step-number {
   display: inline-flex; align-items: center; justify-content: center;
@@ -134,29 +141,20 @@ body {
   border-radius: var(--bs-border-radius-lg);
   padding: 1rem;
 }
-.tb-panel {
-  background: #fff;
-  border-radius: var(--bs-border-radius);
-  box-shadow: 0 0.15rem 0.6rem rgba(75,46,131,.08);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
 .tb-panel-header {
-  padding: .65rem .9rem;
-  border-bottom: 1px solid #eee;
   font-weight: 600;
   font-size: .85rem;
   text-transform: uppercase;
   letter-spacing: .04em;
   color: $secondary;
+  background: #fff;
+  border-bottom: 1px solid #eee; // $card-border-width is 0 site-wide, so restore just this edge
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: .5rem;
 }
 .tb-panel-body {
-  padding: .75rem .9rem;
   overflow-y: auto;
 }
 .tb-workspace-row {
@@ -168,7 +166,7 @@ body {
 @media (max-width: 992px) {
   .tb-workspace-row { grid-template-columns: 1fr; }
 }
-.tb-workspace-row .tb-panel { min-height: 60vh; max-height: 78vh; }
+.tb-workspace-row .card { min-height: 60vh; max-height: 78vh; }
 
 .tb-source-item {
   padding: .5rem .6rem;
@@ -243,14 +241,8 @@ body {
   margin-bottom: .6rem;
 }
 
-.tb-stat-card {
-  background: #fff;
-  border-radius: var(--bs-border-radius-lg);
-  box-shadow: $card-box-shadow;
-  padding: 1.1rem 1.2rem;
-}
-.tb-stat-card .tb-stat-value { font-family: $headings-font-family; font-size: 1.9rem; font-weight: 700; color: $primary; }
-.tb-stat-card .tb-stat-label { font-size: .8rem; color: #6b6478; text-transform: uppercase; letter-spacing: .03em; }
+.tb-stat-value { font-family: $headings-font-family; font-size: 1.9rem; font-weight: 700; color: $primary; }
+.tb-stat-label { font-size: .8rem; color: #6b6478; text-transform: uppercase; letter-spacing: .03em; }
 
 .tb-demo-banner {
   background: rgba(23,184,166,.1);

@@ -14,9 +14,9 @@ subtitle: "Words are not codes, and codes are not themes — use this to spot vo
 <i class="bi bi-lightbulb"></i> <strong>Important:</strong> "factory waste", "dirty river" and "smoke" might all be coded as <em>Environmental Pollution</em> — so the coded reference count for a theme can be much higher than the count of any single word. Word frequency is a vocabulary check, not a substitute for coding.
 </div>
 
-<div class="tb-panel mb-4">
-<div class="tb-panel-header">Scope</div>
-<div class="tb-panel-body">
+<div class="card tb-panel mb-4">
+<div class="card-header tb-panel-header">Scope</div>
+<div class="card-body tb-panel-body">
 <div class="grid gap-3">
 <div class="g-col-12 g-col-md-4">
 <div class="btn-group-vertical w-100" role="group">
@@ -41,20 +41,20 @@ subtitle: "Words are not codes, and codes are not themes — use this to spot vo
 
 <div class="grid gap-3 mb-4">
 <div class="g-col-12 g-col-lg-7">
-<div class="tb-panel" style="height:420px;">
-<div class="tb-panel-header">Word Cloud <button class="btn btn-sm btn-link p-0" id="tb-wf-cloud-png" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
-<div class="tb-panel-body">
+<div class="card tb-panel" style="height:420px;">
+<div class="card-header tb-panel-header">Word Cloud <button class="btn btn-sm btn-link p-0" id="tb-wf-cloud-png" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="card-body tb-panel-body">
 <canvas id="tb-wf-cloud" width="700" height="360" style="width:100%;height:100%;"></canvas>
 </div>
 </div>
 </div>
 <div class="g-col-12 g-col-lg-5">
-<div class="tb-panel" style="height:420px;">
-<div class="tb-panel-header">
+<div class="card tb-panel" style="height:420px;">
+<div class="card-header tb-panel-header">
 Word Frequency Table
 <button class="btn btn-sm btn-outline-secondary" id="tb-wf-export-btn"><i class="bi bi-download"></i> CSV</button>
 </div>
-<div class="tb-panel-body">
+<div class="card-body tb-panel-body">
 <table class="table table-sm table-striped">
 <thead><tr><th>Word</th><th class="text-end">Count</th></tr></thead>
 <tbody id="tb-wf-table-body"></tbody>

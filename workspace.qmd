@@ -22,27 +22,27 @@ subtitle: "Read, highlight, and code — sources on the left, transcript in the 
 
 <div class="tb-workspace-row">
 <!-- LEFT: Sources -->
-<div class="tb-panel">
-<div class="tb-panel-header">Sources</div>
-<div class="tb-panel-body" id="tb-sources-list"></div>
+<div class="card tb-panel">
+<div class="card-header tb-panel-header">Sources</div>
+<div class="card-body tb-panel-body" id="tb-sources-list"></div>
 </div>
 
 <!-- CENTRE: Transcript -->
-<div class="tb-panel">
-<div class="tb-panel-header">
+<div class="card tb-panel">
+<div class="card-header tb-panel-header">
 <span id="tb-active-source-name">—</span>
 <span class="text-muted" style="font-size:.72rem;font-weight:400;text-transform:none;">select text to code it</span>
 </div>
-<div class="tb-panel-body">
+<div class="card-body tb-panel-body">
 <div id="tb-source-attributes" class="mb-2"></div>
 <div class="tb-transcript" id="tb-transcript-text"></div>
 </div>
 </div>
 
 <!-- RIGHT: Codebook reference -->
-<div class="tb-panel">
-<div class="tb-panel-header">Codebook</div>
-<div class="tb-panel-body" id="tb-codebook-tree"></div>
+<div class="card tb-panel">
+<div class="card-header tb-panel-header">Codebook</div>
+<div class="card-body tb-panel-body" id="tb-codebook-tree"></div>
 </div>
 </div>
 </div>

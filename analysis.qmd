@@ -11,46 +11,46 @@ subtitle: "Frequency, respondent coverage, weighted importance, and group compar
 <div id="tb-analysis-content" class="d-none">
 
 <div class="grid gap-3 mb-4">
-<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-sources">0</div><div class="tb-stat-label">Sources</div></div></div>
-<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-respondents">0</div><div class="tb-stat-label">Respondents</div></div></div>
-<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-codedrefs">0</div><div class="tb-stat-label">Coded References</div></div></div>
-<div class="g-col-6 g-col-md-3"><div class="tb-stat-card"><div class="tb-stat-value" id="tb-stat-themes">0</div><div class="tb-stat-label">Themes / Codes</div></div></div>
+<div class="g-col-6 g-col-md-3"><div class="card h-100 tb-stat-card"><div class="card-body text-center"><div class="tb-stat-value" id="tb-stat-sources">0</div><div class="tb-stat-label">Sources</div></div></div></div>
+<div class="g-col-6 g-col-md-3"><div class="card h-100 tb-stat-card"><div class="card-body text-center"><div class="tb-stat-value" id="tb-stat-respondents">0</div><div class="tb-stat-label">Respondents</div></div></div></div>
+<div class="g-col-6 g-col-md-3"><div class="card h-100 tb-stat-card"><div class="card-body text-center"><div class="tb-stat-value" id="tb-stat-codedrefs">0</div><div class="tb-stat-label">Coded References</div></div></div></div>
+<div class="g-col-6 g-col-md-3"><div class="card h-100 tb-stat-card"><div class="card-body text-center"><div class="tb-stat-value" id="tb-stat-themes">0</div><div class="tb-stat-label">Themes / Codes</div></div></div></div>
 </div>
 
 <div class="grid gap-3 mb-4">
 <div class="g-col-12 g-col-lg-6">
-<div class="tb-panel" style="height:340px;">
-<div class="tb-panel-header">Theme Frequency <button class="btn btn-sm btn-link p-0" data-png="tb-chart-frequency" data-name="theme-frequency" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
-<div class="tb-panel-body"><canvas id="tb-chart-frequency"></canvas></div>
+<div class="card tb-panel" style="height:340px;">
+<div class="card-header tb-panel-header">Theme Frequency <button class="btn btn-sm btn-link p-0" data-png="tb-chart-frequency" data-name="theme-frequency" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="card-body tb-panel-body"><canvas id="tb-chart-frequency"></canvas></div>
 </div>
 </div>
 <div class="g-col-12 g-col-lg-6">
-<div class="tb-panel" style="height:340px;">
-<div class="tb-panel-header">Weighted Theme Score (Total) <button class="btn btn-sm btn-link p-0" data-png="tb-chart-weighted" data-name="weighted-theme-score" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
-<div class="tb-panel-body"><canvas id="tb-chart-weighted"></canvas></div>
+<div class="card tb-panel" style="height:340px;">
+<div class="card-header tb-panel-header">Weighted Theme Score (Total) <button class="btn btn-sm btn-link p-0" data-png="tb-chart-weighted" data-name="weighted-theme-score" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="card-body tb-panel-body"><canvas id="tb-chart-weighted"></canvas></div>
 </div>
 </div>
 </div>
 
 <div class="grid gap-3 mb-4">
 <div class="g-col-12 g-col-lg-6">
-<div class="tb-panel" style="height:320px;">
-<div class="tb-panel-header">Respondent Coverage (%) <button class="btn btn-sm btn-link p-0" data-png="tb-chart-coverage" data-name="respondent-coverage" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
-<div class="tb-panel-body"><canvas id="tb-chart-coverage"></canvas></div>
+<div class="card tb-panel" style="height:320px;">
+<div class="card-header tb-panel-header">Respondent Coverage (%) <button class="btn btn-sm btn-link p-0" data-png="tb-chart-coverage" data-name="respondent-coverage" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="card-body tb-panel-body"><canvas id="tb-chart-coverage"></canvas></div>
 </div>
 </div>
 <div class="g-col-12 g-col-lg-6">
-<div class="tb-panel" style="height:320px;">
-<div class="tb-panel-header">Most Frequent Words (all text)</div>
-<div class="tb-panel-body" id="tb-top-words">
+<div class="card tb-panel" style="height:320px;">
+<div class="card-header tb-panel-header">Most Frequent Words (all text)</div>
+<div class="card-body tb-panel-body" id="tb-top-words">
 <p class="text-muted small">No text yet.</p>
 </div>
 </div>
 </div>
 </div>
 
-<div class="tb-panel mb-4">
-<div class="tb-panel-header">
+<div class="card tb-panel mb-4">
+<div class="card-header tb-panel-header">
 Respondent × Theme Matrix
 <select class="form-select form-select-sm" style="width:auto;" id="tb-matrix-metric-select">
 <option value="frequency">Frequency</option>
@@ -58,17 +58,17 @@ Respondent × Theme Matrix
 <option value="avgWeight">Average Weight</option>
 </select>
 </div>
-<div class="tb-panel-body" style="overflow-x:auto;">
+<div class="card-body tb-panel-body" style="overflow-x:auto;">
 <table class="table table-sm tb-matrix-table" id="tb-matrix-table"></table>
 <p class="text-muted small mb-0">Click any cell to see the underlying quotations.</p>
 </div>
 </div>
 
-<div class="tb-panel mb-4">
-<div class="tb-panel-header">
+<div class="card tb-panel mb-4">
+<div class="card-header tb-panel-header">
 Group Comparison
 </div>
-<div class="tb-panel-body">
+<div class="card-body tb-panel-body">
 <div class="grid gap-2 mb-3">
 <div class="g-col-6">
 <label class="form-label small">Compare respondents by</label>
@@ -84,9 +84,9 @@ Group Comparison
 </div>
 </div>
 
-<div class="tb-panel mb-4">
-<div class="tb-panel-header">Theme Hierarchy</div>
-<div class="tb-panel-body" id="tb-theme-hierarchy"></div>
+<div class="card tb-panel mb-4">
+<div class="card-header tb-panel-header">Theme Hierarchy</div>
+<div class="card-body tb-panel-body" id="tb-theme-hierarchy"></div>
 </div>
 
 </div>
