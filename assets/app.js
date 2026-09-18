@@ -24,7 +24,7 @@
     return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
-  var PALETTE = ["#4B2E83", "#17B8A6", "#E08E45", "#C0392B", "#2F6FED", "#1E8A5F",
+  var PALETTE = ["#1B4F9C", "#17B8A6", "#E08E45", "#C0392B", "#2F6FED", "#1E8A5F",
     "#8E44AD", "#D35400", "#16A085", "#B3261E", "#2C3E50", "#7D3C98"];
   var paletteCursor = 0;
   function nextColor() {

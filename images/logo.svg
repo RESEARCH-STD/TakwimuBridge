@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="TakwimuBridge logo">
-  <rect width="64" height="64" rx="14" fill="#4B2E83"/>
+  <rect width="64" height="64" rx="14" fill="#1B4F9C"/>
   <path d="M14 40 L14 24 L22 24 L22 40" stroke="#17B8A6" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M28 40 L28 18 L36 18 L36 40" stroke="#FFFFFF" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M42 40 L42 28 L50 28 L50 40" stroke="#17B8A6" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>

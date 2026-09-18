@@ -92,7 +92,7 @@
 
   function buildDemoProject() {
     var themes = [
-      { id: "thm-env", name: "Environmental Challenges", parentId: null, color: "#4B2E83",
+      { id: "thm-env", name: "Environmental Challenges", parentId: null, color: "#1B4F9C",
         memo: "Broad environmental issues raised across interviews." },
       { id: "thm-pollution", name: "Environmental Pollution", parentId: "thm-env", color: "#8E44AD", memo: "" },
       { id: "thm-water", name: "Water Scarcity", parentId: "thm-env", color: "#2F6FED", memo: "" },

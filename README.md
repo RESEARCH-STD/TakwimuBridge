@@ -68,7 +68,7 @@ To deploy manually instead (e.g. to test before pushing): `quarto render` locall
 
 ```
 _quarto.yml                Site config: navbar, footer, search, theme
-custom.scss                 Bootstrap variable overrides + component styles (violet/teal palette)
+custom.scss                 Bootstrap variable overrides + component styles (blue/teal palette)
 _includes/head-extra.html   Fonts + CDN libraries (Chart.js, wordcloud2.js, SheetJS, mammoth.js) + app scripts
 assets/app.js                Core data model, localStorage persistence, all analysis computations
 assets/demo-data.js          Seeded demo project (5 KIIs + 1 FGD) matching the functional doc's illustrative matrix

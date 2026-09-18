@@ -9,7 +9,7 @@
 
   var registry = {};
 
-  var BRAND_COLORS = ["#4B2E83", "#17B8A6", "#E08E45", "#2F6FED", "#C0392B", "#1E8A5F", "#8E44AD", "#D35400"];
+  var BRAND_COLORS = ["#1B4F9C", "#17B8A6", "#E08E45", "#2F6FED", "#C0392B", "#1E8A5F", "#8E44AD", "#D35400"];
 
   function destroy(canvasId) {
     if (registry[canvasId]) { registry[canvasId].destroy(); delete registry[canvasId]; }
@@ -92,10 +92,10 @@
   }
 
   function heatColor(value, max) {
-    if (!max || value <= 0) return "#F6F5FA";
+    if (!max || value <= 0) return "#F5F7FA";
     var t = Math.min(1, value / max);
-    // interpolate light lavender (#F6F5FA) -> brand primary (#4B2E83)
-    var from = [246, 245, 250], to = [75, 46, 131];
+    // interpolate light gray (#F5F7FA) -> brand primary (#1B4F9C)
+    var from = [245, 247, 250], to = [27, 79, 156];
     var rgb = from.map(function (c, i) { return Math.round(c + (to[i] - c) * t); });
     return "rgb(" + rgb.join(",") + ")";
   }

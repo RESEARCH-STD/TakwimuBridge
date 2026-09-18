@@ -111,7 +111,7 @@
       "<h2>Theme Summary</h2>" +
       stats.map(function (s) {
         var evidence = window.TB.evidenceForTheme(project, s.themeId).slice(0, 3);
-        return "<h3 style=\"color:#4B2E83;\">" + esc(s.theme.name) + "</h3>" +
+        return "<h3 style=\"color:#1B4F9C;\">" + esc(s.theme.name) + "</h3>" +
           "<p><b>Frequency:</b> " + s.frequency + " &nbsp; <b>Respondent Coverage:</b> " + s.coverageCount + "/" + s.coverageTotal + " (" + s.coveragePct + "%) &nbsp; " +
           "<b>Total Weighted Score:</b> " + s.totalWeight + " &nbsp; <b>Average Weight:</b> " + (s.avgWeight === null ? "—" : s.avgWeight) + "</p>" +
           (s.theme.memo ? "<p><i>Memo: " + esc(s.theme.memo) + "</i></p>" : "") +

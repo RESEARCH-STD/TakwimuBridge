@@ -242,7 +242,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (!attrKey || !themeId) return;
     var groups = TB.groupComparison(project, attrKey, themeId);
     TB.charts.groupedBarChart("tb-chart-compare", groups.map(function (g) { return g.value; }), [
-      { name: "Frequency", values: groups.map(function (g) { return g.frequency; }), color: "#4B2E83" },
+      { name: "Frequency", values: groups.map(function (g) { return g.frequency; }), color: "#1B4F9C" },
       { name: "Coverage %", values: groups.map(function (g) { return g.coveragePct; }), color: "#17B8A6" }
     ]);
   }

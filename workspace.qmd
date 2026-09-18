@@ -134,7 +134,7 @@ subtitle: "Read, highlight, and code — sources on the left, transcript in the 
 <div class="grid gap-2 align-items-end">
 <div class="g-col-4"><label class="form-label small">New theme / code name</label><input class="form-control" id="tbf-theme-name"></div>
 <div class="g-col-4"><label class="form-label small">Parent (leave blank for top-level)</label><select class="form-select" id="tbf-theme-parent"></select></div>
-<div class="g-col-2"><label class="form-label small">Colour</label><input type="color" class="form-control form-control-color w-100" id="tbf-theme-color" value="#4B2E83"></div>
+<div class="g-col-2"><label class="form-label small">Colour</label><input type="color" class="form-control form-control-color w-100" id="tbf-theme-color" value="#1B4F9C"></div>
 <div class="g-col-2"><button class="btn btn-accent w-100" id="tb-add-theme-btn">Add</button></div>
 </div>
 <p class="text-muted small mt-3 mb-0">Colours are a visual aid only — the theme/code <em>name</em> carries the analytical meaning (per TakwimuBridge's design principle).</p>
