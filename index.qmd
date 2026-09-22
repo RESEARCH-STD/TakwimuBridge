@@ -7,8 +7,7 @@ title-block-banner: false
 <!-- ============================= HERO ============================= -->
 <section class="hero-section column-screen">
 <div class="container">
-<div class="grid align-items-center">
-<div class="g-col-12 g-col-lg-7">
+<div class="text-center mx-auto" style="max-width:46rem;">
 <span class="badge rounded-pill mb-3" style="background:rgba(255,255,255,.15)!important;color:#fff!important;">
 <i class="bi bi-journal-text me-1"></i> By Sustainable Solutions Tanzania (SST) — runs entirely in your browser
 </span>
@@ -19,7 +18,7 @@ Key Informant Interviews, Focus Group Discussions, in-depth interviews and
 open-ended survey responses into organized themes, defensible frequencies,
 and evidence-backed charts.
 </p>
-<div class="d-flex flex-wrap gap-3 mt-4">
+<div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
 <a href="projects.html" class="btn btn-accent btn-lg px-4">
 <i class="bi bi-play-fill me-1"></i> Open the Demo Project
 </a>
@@ -44,10 +43,6 @@ Read the User Guide
 <p class="small mt-2" style="color:rgba(255,255,255,.6);">
 Everything — projects, transcripts, codes, weights — is saved in your own browser's storage. Nothing is uploaded anywhere. See <a href="about.html" class="link-light">About &amp; Scope</a> for what that means.
 </p>
-</div>
-<div class="g-col-12 g-col-lg-5 d-none d-lg-block text-center">
-<i class="bi bi-diagram-3-fill" style="font-size:14rem;color:rgba(255,255,255,.12);"></i>
-</div>
 </div>
 </div>
 </section>
