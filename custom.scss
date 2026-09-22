@@ -3,9 +3,9 @@
   Base theme: flatly (see _quarto.yml). This file overrides Bootstrap 5
   variables (scss:defaults) and adds component-level styling (scss:rules).
 
-  Brand palette — the company's brand color is blue (not the earlier
-  purple draft), kept distinct from the sibling ../SITE-1 project's
-  teal-blue/amber palette via a deeper, more saturated blue:
+  Brand palette — the company's brand color is blue (kept from the earlier
+  correction), distinct from the sibling ../SITE-1 project's teal-blue/amber
+  palette via a deeper, more saturated blue:
     Primary   #1B4F9C  deep blue       (analysis, research, focus)
     Secondary #123166  darker navy
     Accent    #17B8A6  teal            (CTAs, highlights)
@@ -13,6 +13,12 @@
     Info      #2F6FED  blue
     Warning   #E08E45  amber-orange
     Danger    #C0392B  red
+
+  Typography, shape language (radius/shadow/border), card hover treatment,
+  and the transparent-to-frosted navbar are adopted from geoai-africa.com's
+  design system (its actual compiled CSS, not a guess) — colors kept blue
+  per an explicit decision to keep that correction rather than adopt its
+  orange palette too.
 */
 
 /*-- scss:defaults --*/
@@ -29,26 +35,30 @@ $success:   #1E8A5F;
 $info:      #2F6FED;
 $warning:   #E08E45;
 $danger:    #C0392B;
-$light:     #F5F7FA;
+$light:     #F6F7FA;
 $dark:      #0F1E36;
 
 $accent:    #17B8A6; // not a native Bootstrap theme color; used via custom utility classes below
 
-// Typography
+// Typography — Space Grotesk (display/headings) + Inter (body), the same
+// pairing geoai-africa.com uses.
 $font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-$headings-font-family: "Poppins", $font-family-sans-serif;
+$headings-font-family: "Space Grotesk", $font-family-sans-serif;
 $headings-font-weight: 600;
-$body-color: #241A33;
+$body-color: #1E2A3A;
 $link-color: $primary;
 
-// Shape language: soft, rounded, modern
-$border-radius: 0.6rem;
-$border-radius-sm: 0.45rem;
-$border-radius-lg: 0.9rem;
-$card-border-radius: 0.9rem;
-$card-border-width: 0;
-$card-box-shadow: 0 0.35rem 1.5rem rgba(27, 79, 156, 0.08);
-$btn-border-radius: 0.5rem;
+// Shape language — adopted from geoai-africa.com: rounder radii, a subtle
+// primary-tinted card border, and a soft tinted shadow instead of a flat
+// borderless card.
+$border-radius: 0.75rem;      // 12px
+$border-radius-sm: 0.6rem;
+$border-radius-lg: 1.25rem;   // 20px
+$card-border-radius: 0.75rem;
+$card-border-width: 1px;
+$card-border-color: rgba(27, 79, 156, 0.12);
+$card-box-shadow: 0 4px 24px rgba(27, 79, 156, 0.08);
+$btn-border-radius: 0.75rem;
 $btn-font-weight: 600;
 
 // Navbar
@@ -62,6 +72,12 @@ $navbar-dark-active-color: #ffffff;
   --brand-accent: #{$accent};
   --brand-primary: #{$primary};
   --brand-secondary: #{$secondary};
+  --border: #{$card-border-color};
+  --border-hover: rgba(27, 79, 156, 0.35);
+  --shadow: #{$card-box-shadow};
+  --shadow-hover: 0 8px 32px rgba(27, 79, 156, 0.14);
+  --bg-off: #EEF2F7;      // a step darker than $light, for alternating section backgrounds
+  --radius-xl: 1.75rem;   // 28px, for large showcase elements
 }
 
 body {
@@ -80,14 +96,26 @@ body {
 .text-accent { color: var(--brand-accent) !important; }
 .bg-accent { background-color: var(--brand-accent) !important; }
 .btn-accent {
-  background-color: var(--brand-accent);
-  border-color: var(--brand-accent);
+  background: linear-gradient(135deg, var(--brand-accent), #12988a);
+  border-color: transparent;
   color: #ffffff;
+  box-shadow: 0 4px 20px rgba(23, 184, 166, 0.25);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-accent:hover, .btn-accent:focus {
-  background-color: #139f8f;
-  border-color: #139f8f;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(23, 184, 166, 0.35);
   color: #ffffff;
+}
+.btn-primary {
+  background: linear-gradient(135deg, $primary, $secondary);
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(27, 79, 156, 0.25);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover, .btn-primary:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(27, 79, 156, 0.35);
 }
 .eyebrow {
   display: inline-block;
@@ -104,40 +132,93 @@ body {
 // the viewport edge instead of stopping at Quarto's grid.body-width column.
 // That makes Quarto classify <main> as .page-full, which — only in that
 // variant — carries its own top margin/padding meant for a title block we
-// don't render (title-block-banner: false). Zero it so the hero sits flush
-// under the navbar like it did before.
+// don't render. Zero it so the hero sits flush under the navbar.
 main#quarto-document-content.page-full {
   margin-top: 0;
   padding-top: 0;
+}
+// The (empty, since title-block-banner: false) title block still carries
+// Bootstrap's own margin-block-end below it, pushing the hero down and
+// leaving a gap where body-white shows through the transparent navbar.
+#title-block-header:empty,
+main#quarto-document-content.page-full #title-block-header {
+  margin-block-end: 0;
 }
 
 .hero-section {
   background: linear-gradient(135deg, $primary 0%, $secondary 100%);
   color: #fff;
-  padding: 5rem 0 4rem;
+  // Bootstrap's `.nav-fixed` reserves body padding-top equal to the fixed
+  // navbar's height so normal-flow content starts below it. For a
+  // transparent-over-hero navbar the hero needs to bleed up behind that
+  // reserved strip instead, so it's zeroed on body (below) and added back
+  // here as extra top padding, keeping the hero's actual content clear of
+  // the (fixed, out-of-flow) navbar without shifting anything after it.
+  padding: calc(5rem + 78px) 0 4rem;
 }
 .hero-section h1 { color: #fff; }
 .hero-section .lead { color: rgba(255,255,255,.88); }
 .hero-stats .stat-value { font-family: $headings-font-family; font-size: 2rem; font-weight: 700; color: #fff; }
 .hero-stats .stat-label { font-size: .85rem; color: rgba(255,255,255,.7); }
 
+/* Navbar: transparent over the hero, frosted/blurred once scrolled —
+   adopted from geoai-africa.com. Scoped with :has() to whichever page
+   actually has a hero (index.qmd) — other pages have no hero to float
+   over, and a transparent navbar there would be unreadable against a
+   plain white body. The scroll listener that adds .navbar-scrolled and
+   flips data-bs-theme lives in _includes/head-extra.html. */
+// !important because Quarto's own JS measures the fixed navbar's actual
+// rendered height and sets it as an inline style on <body> at runtime
+// (data-bs-offset) — inline styles beat any stylesheet selector, however
+// specific, short of !important.
+body:has(.hero-section) {
+  padding-top: 0 !important;
+}
+body:has(.hero-section) #quarto-header .navbar {
+  background: transparent;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+body:has(.hero-section) #quarto-header.navbar-scrolled .navbar {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 2px 16px rgba(27, 79, 156, 0.10);
+}
+
 .section { padding: 4rem 0; }
 .section-tight { padding: 2rem 0; }
-.section-alt { background: $light; }
+.section-alt { background: var(--bg-off); }
 
 // .step-card/.tb-stat-card/.tb-panel* are companion modifier classes used
 // alongside Bootstrap's own .card/.card-header/.card-body (not replacements
 // for them — same pattern ../SITE-1 uses, e.g. `card border-0 shadow-soft`).
-// $card-border-radius/$card-box-shadow/$card-border-width above already
-// theme every plain .card; these modifiers add the bits Bootstrap doesn't
-// have an opinion on (hover-lift, header typography, stat typography).
+// $card-border-radius/$card-box-shadow/$card-border-width/$card-border-color
+// above already theme every plain .card; these modifiers add the bits
+// Bootstrap doesn't have an opinion on (hover-lift, accent bar, header
+// typography, stat typography).
 .step-card {
   padding: 1.5rem;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+}
+.step-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
 }
 .step-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 1rem 2.5rem rgba(27, 79, 156, 0.14);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-hover);
+}
+.step-card:hover::before {
+  transform: scaleX(1);
 }
 .step-number {
   display: inline-flex; align-items: center; justify-content: center;
@@ -145,6 +226,24 @@ main#quarto-document-content.page-full {
   background: var(--brand-accent); color: #fff; font-weight: 700; margin-bottom: .75rem;
 }
 .step-icon { font-size: 1.8rem; color: var(--brand-primary); margin-bottom: .5rem; display: block; }
+
+// Boxed icon treatment for the feature-grid cards (a 48x48 tinted-gradient
+// swatch behind the icon), adopted from geoai-africa.com's .pillar-icon.
+.step-icon-box {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, rgba(27, 79, 156, .14), rgba(23, 184, 166, .10));
+  border-radius: var(--bs-border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-icon-box .step-icon {
+  font-size: 1.2rem;
+  margin-bottom: 0;
+  display: block;
+}
 
 /* ---------------- App shell (workspace / analysis / etc.) ---------------- */
 .tb-app-shell {
@@ -159,7 +258,6 @@ main#quarto-document-content.page-full {
   letter-spacing: .04em;
   color: $secondary;
   background: #fff;
-  border-bottom: 1px solid #eee; // $card-border-width is 0 site-wide, so restore just this edge
   display: flex;
   align-items: center;
   justify-content: space-between;

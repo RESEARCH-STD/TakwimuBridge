@@ -1,7 +1,8 @@
-<!-- Google Fonts (same family pairing as ../SITE-1 for brand-family consistency) -->
+<!-- Google Fonts: Inter (body) + Space Grotesk (headings), adopted from
+     geoai-africa.com's type system -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
 <!--
   Third-party libraries loaded only because they provide capability Quarto's
@@ -22,3 +23,25 @@
 <script src="assets/coding-ui.js" defer></script>
 <script src="assets/charts.js" defer></script>
 <script src="assets/export.js" defer></script>
+
+<!--
+  Navbar: transparent over the hero, frosted/blurred once scrolled past
+  50px — adopted from geoai-africa.com. Only takes effect on the page that
+  actually has a .hero-section (index.qmd); the corresponding CSS in
+  custom.scss is scoped with :has() the same way, so this is a no-op
+  elsewhere.
+-->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var header = document.getElementById("quarto-header");
+  var navEl = header && header.querySelector(".navbar");
+  if (!header || !navEl || !document.querySelector(".hero-section")) return;
+  function onScroll() {
+    var scrolled = window.pageYOffset > 50;
+    header.classList.toggle("navbar-scrolled", scrolled);
+    navEl.setAttribute("data-bs-theme", scrolled ? "light" : "dark");
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+});
+</script>
