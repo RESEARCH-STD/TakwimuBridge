@@ -4,6 +4,6 @@
 // keeps each researcher's projects private. Never put the secret
 // (service_role) key here.
 window.TB_CONFIG = {
-  supabaseUrl: "",
-  supabaseAnonKey: ""
+  supabaseUrl: "https://fkhbkidnoyiljotbtyyi.supabase.co",
+  supabaseAnonKey: "sb_publishable_yTXHZ5JCdxfmUIessE4rEQ_tRNV_KtF"
 };
