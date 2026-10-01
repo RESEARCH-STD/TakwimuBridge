@@ -124,4 +124,4 @@ reference drops out of a level.
 | Demo project | `assets/demo-data.js` | Safe to delete or reset from the Projects page; its Challenges sub-themes match the functional doc's illustrative respondent×theme matrix exactly. Bump `DEMO_VERSION` when changing it: untouched older demos upgrade in place, edited ones are left alone, deleted ones stay deleted |
 | Logo | `images/logo.svg` | Simple placeholder monogram |
 | Brand colors | `custom.scss` | Deliberately distinct from `../SITE-1`'s palette |
-| Site URL | `_quarto.yml` (`website.site-url`) | Placeholder — no deployment/CI is configured yet |
+| Site URL | `_quarto.yml` (`website.site-url`) | The Vercel production URL — update it if the site moves to a custom domain (used for social-card links) |

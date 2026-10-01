@@ -20,7 +20,7 @@ project:
 website:
   title: "TakwimuBridge"
   description: "A qualitative data analysis tool for researchers, students, consultants and institutions — code, weigh, compare and visualize KIIs, FGDs, interviews and open-ended responses, entirely in your browser."
-  site-url: "https://sustainable-solutions-tz.github.io/takwimubridge-qda/"
+  site-url: "https://takwimubridge-qda.vercel.app/"
   favicon: images/logo.svg
   page-navigation: false
   bread-crumbs: false
@@ -45,5 +45,8 @@ format:
     html-table-processing: none
     toc: false
     link-external-icon: false
-    link-external-newwindow: true
+    # Quarto decides "external" by comparing each link with site-url, so on
+    # any other host (Vercel previews, a future custom domain) it would open
+    # every in-app link — sidebar included — in a new tab.
+    link-external-newwindow: false
     highlight-style: github
