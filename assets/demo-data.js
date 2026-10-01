@@ -1,14 +1,16 @@
 /*
  * Seeded demo project — "Community Perceptions of Environmental Challenges".
  * Mirrors the worked example used throughout TakwimuBridge's own functional
- * description and user guide (five KIIs + one FGD, environmental/governance
- * themes) so the Analysis dashboard has real, non-trivial numbers the first
- * time someone opens the tool. Safe to edit or delete from the Projects page.
+ * description and user guide (five KIIs + one FGD) so the dashboard has real,
+ * non-trivial numbers the first time someone opens the tool. The codebook is
+ * organized as Challenges / Causes / Impacts, each passage coded against all
+ * three in one pass. Safe to edit, reset or delete from the Projects page.
  */
 (function () {
   "use strict";
 
   var DEMO_ID = "proj-demo-community-perceptions";
+  var DEMO_VERSION = 2;
 
   function sentences(list) { return list.join(" "); }
 
@@ -91,18 +93,36 @@
   ]);
 
   function buildDemoProject() {
+    // Three top-level themes, one per research question, so a single reading
+    // of each transcript codes causes, challenges and impacts together.
     var themes = [
-      { id: "thm-env", name: "Environmental Challenges", parentId: null, color: "#1B4F9C",
-        memo: "Broad environmental issues raised across interviews." },
-      { id: "thm-pollution", name: "Environmental Pollution", parentId: "thm-env", color: "#8E44AD", memo: "" },
-      { id: "thm-water", name: "Water Scarcity", parentId: "thm-env", color: "#2F6FED", memo: "" },
-      { id: "thm-deforestation", name: "Deforestation", parentId: "thm-env", color: "#16A085",
-        memo: "No coded references yet in this demo — shows how an empty theme looks." },
-      { id: "thm-gov", name: "Governance & Economic Challenges", parentId: null, color: "#C0392B",
-        memo: "Planning and livelihood-related issues." },
-      { id: "thm-planning", name: "Poor Planning", parentId: "thm-gov", color: "#E08E45", memo: "" },
-      { id: "thm-unemployment", name: "Unemployment", parentId: "thm-gov", color: "#D35400", memo: "" },
-      { id: "thm-enforcement", name: "Weak Enforcement", parentId: "thm-gov", color: "#B3261E", memo: "" }
+      { id: "thm-challenges", name: "Challenges", parentId: null, color: "#1B4F9C",
+        memo: "Research question 1 — what problems do respondents describe?" },
+      { id: "thm-pollution", name: "Environmental Pollution", parentId: "thm-challenges", color: "#8E44AD", memo: "" },
+      { id: "thm-water", name: "Water Scarcity", parentId: "thm-challenges", color: "#2F6FED", memo: "" },
+      { id: "thm-planning", name: "Poor Planning", parentId: "thm-challenges", color: "#E08E45", memo: "" },
+      { id: "thm-unemployment", name: "Unemployment", parentId: "thm-challenges", color: "#D35400", memo: "" },
+      { id: "thm-deforestation", name: "Deforestation", parentId: "thm-challenges", color: "#16A085",
+        memo: "No coded references yet in this demo — shows how an empty sub-theme looks." },
+
+      { id: "thm-causes", name: "Causes", parentId: null, color: "#C0392B",
+        memo: "Research question 2 — why do respondents say these problems happen?" },
+      { id: "thm-cause-industrial", name: "Industrial Waste Discharge", parentId: "thm-causes", color: "#6D4C41", memo: "" },
+      { id: "thm-enforcement", name: "Weak Enforcement & Coordination", parentId: "thm-causes", color: "#B3261E", memo: "" },
+      { id: "thm-cause-consultation", name: "Lack of Community Consultation", parentId: "thm-causes", color: "#C2185B", memo: "" },
+      { id: "thm-cause-landuse", name: "Outdated Land-Use Planning", parentId: "thm-causes", color: "#B8860B", memo: "" },
+      { id: "thm-cause-climate", name: "Climate Variability & Drought", parentId: "thm-causes", color: "#0097A7", memo: "" },
+      { id: "thm-cause-closures", name: "Factory & Cooperative Closures", parentId: "thm-causes", color: "#546E7A", memo: "" },
+      { id: "thm-cause-budget", name: "Limited Budget & Resources", parentId: "thm-causes", color: "#827717", memo: "" },
+
+      { id: "thm-impacts", name: "Impacts", parentId: null, color: "#1E8A5F",
+        memo: "Research question 3 — what effects do these problems have on people's lives?" },
+      { id: "thm-impact-health", name: "Health Effects", parentId: "thm-impacts", color: "#E53935", memo: "" },
+      { id: "thm-impact-income", name: "Lost Income & Livelihoods", parentId: "thm-impacts", color: "#2E7D32", memo: "" },
+      { id: "thm-impact-migration", name: "Youth Migration", parentId: "thm-impacts", color: "#3949AB", memo: "" },
+      { id: "thm-impact-women", name: "Burden on Women & Girls", parentId: "thm-impacts", color: "#AD1457", memo: "" },
+      { id: "thm-impact-crops", name: "Crop, Livestock & Fish Losses", parentId: "thm-impacts", color: "#7CB342", memo: "" },
+      { id: "thm-impact-flooding", name: "Flooding & Infrastructure Damage", parentId: "thm-impacts", color: "#00838F", memo: "" }
     ];
 
     var sources = [
@@ -127,78 +147,88 @@
         text: FGD01_TEXT }
     ];
 
-    var P = "thm-pollution", W = "thm-water", G = "thm-planning", U = "thm-unemployment", E = "thm-enforcement";
+    // Challenges (the four in SST's illustrative respondent x theme table)
+    var P = "thm-pollution", W = "thm-water", G = "thm-planning", U = "thm-unemployment";
+    // Causes
+    var IW = "thm-cause-industrial", WE = "thm-enforcement", CC = "thm-cause-consultation",
+      LP = "thm-cause-landuse", CD = "thm-cause-climate", FC = "thm-cause-closures", LB = "thm-cause-budget";
+    // Impacts
+    var HE = "thm-impact-health", LL = "thm-impact-income", YM = "thm-impact-migration",
+      WG = "thm-impact-women", CL = "thm-impact-crops", FD = "thm-impact-flooding";
 
+    // Per-KII challenge counts match SST's illustrative table exactly; the
+    // cause/impact codes ride on the same coded references, as they would
+    // when a researcher reads each transcript once.
     var codingDefs = [
-      // KII-01: Pollution x4 (one multi-coded with Weak Enforcement), Poor Planning x2, Water Scarcity x1, Unemployment x3
-      { sourceId: "src-kii-01", quote: "The factory near the river keeps releasing waste into the water, and nobody stops them.", themeIds: [P, E], weight: 9 },
-      { sourceId: "src-kii-01", quote: "Every rainy season the same industrial waste turns the river black and it smells terrible.", themeIds: [P], weight: 7 },
-      { sourceId: "src-kii-01", quote: "Fishermen say the fish are dying because of the chemicals the factories dump upstream.", themeIds: [P], weight: 8 },
-      { sourceId: "src-kii-01", quote: "Even the drinking water wells near the factory now taste of chemicals.", themeIds: [P], weight: 6 },
-      { sourceId: "src-kii-01", quote: "The village layout was never planned properly, so houses and the market are too close to the dump site.", themeIds: [G], weight: 6 },
-      { sourceId: "src-kii-01", quote: "Nobody consulted us before the new road was built, and now it floods every rainy season.", themeIds: [G], weight: 5 },
-      { sourceId: "src-kii-01", quote: "During the dry months, women and girls walk more than five kilometers to fetch clean water.", themeIds: [W], weight: 7 },
+      // KII-01: Pollution x4, Poor Planning x2, Water Scarcity x1, Unemployment x3
+      { sourceId: "src-kii-01", quote: "The factory near the river keeps releasing waste into the water, and nobody stops them.", themeIds: [P, IW, WE], weight: 9 },
+      { sourceId: "src-kii-01", quote: "Every rainy season the same industrial waste turns the river black and it smells terrible.", themeIds: [P, IW], weight: 7 },
+      { sourceId: "src-kii-01", quote: "Fishermen say the fish are dying because of the chemicals the factories dump upstream.", themeIds: [P, IW, CL], weight: 8 },
+      { sourceId: "src-kii-01", quote: "Even the drinking water wells near the factory now taste of chemicals.", themeIds: [P, IW, HE], weight: 6 },
+      { sourceId: "src-kii-01", quote: "The village layout was never planned properly, so houses and the market are too close to the dump site.", themeIds: [G, LP], weight: 6 },
+      { sourceId: "src-kii-01", quote: "Nobody consulted us before the new road was built, and now it floods every rainy season.", themeIds: [G, CC, FD], weight: 5 },
+      { sourceId: "src-kii-01", quote: "During the dry months, women and girls walk more than five kilometers to fetch clean water.", themeIds: [W, CD, WG], weight: 7 },
       { sourceId: "src-kii-01", quote: "Many young people in this village have finished school but there is no work for them here.", themeIds: [U], weight: 6 },
-      { sourceId: "src-kii-01", quote: "Since the small factories closed, over a hundred casual workers lost their daily income.", themeIds: [U], weight: 8 },
-      { sourceId: "src-kii-01", quote: "Our youth are forced to migrate to Dar es Salaam because there are no jobs in agriculture processing anymore.", themeIds: [U], weight: 7 },
+      { sourceId: "src-kii-01", quote: "Since the small factories closed, over a hundred casual workers lost their daily income.", themeIds: [U, FC, LL], weight: 8 },
+      { sourceId: "src-kii-01", quote: "Our youth are forced to migrate to Dar es Salaam because there are no jobs in agriculture processing anymore.", themeIds: [U, FC, YM], weight: 7 },
 
       // KII-02: Pollution x2, Poor Planning x5, Water Scarcity x0, Unemployment x1
-      { sourceId: "src-kii-02", quote: "We have received complaints about industrial discharge into the river near the mill.", themeIds: [P], weight: 5 },
+      { sourceId: "src-kii-02", quote: "We have received complaints about industrial discharge into the river near the mill.", themeIds: [P, IW], weight: 5 },
       { sourceId: "src-kii-02", quote: "The pollution levels reported by residents are concerning and we are reviewing the permits.", themeIds: [P], weight: 4 },
-      { sourceId: "src-kii-02", quote: "Land use in this district was allocated years ago without a proper zoning plan.", themeIds: [G], weight: 6 },
-      { sourceId: "src-kii-02", quote: "Several settlements were approved in flood-prone areas because planning maps were outdated.", themeIds: [G], weight: 8 },
-      { sourceId: "src-kii-02", quote: "Budget for infrastructure planning has been limited, so many projects are delayed.", themeIds: [G], weight: 5 },
-      { sourceId: "src-kii-02", quote: "The district master plan has not been updated in over a decade.", themeIds: [G], weight: 6 },
-      { sourceId: "src-kii-02", quote: "Coordination between departments on land planning remains weak.", themeIds: [G], weight: 7 },
+      { sourceId: "src-kii-02", quote: "Land use in this district was allocated years ago without a proper zoning plan.", themeIds: [G, LP], weight: 6 },
+      { sourceId: "src-kii-02", quote: "Several settlements were approved in flood-prone areas because planning maps were outdated.", themeIds: [G, LP, FD], weight: 8 },
+      { sourceId: "src-kii-02", quote: "Budget for infrastructure planning has been limited, so many projects are delayed.", themeIds: [G, LB], weight: 5 },
+      { sourceId: "src-kii-02", quote: "The district master plan has not been updated in over a decade.", themeIds: [G, LP], weight: 6 },
+      { sourceId: "src-kii-02", quote: "Coordination between departments on land planning remains weak.", themeIds: [G, WE], weight: 7 },
       { sourceId: "src-kii-02", quote: "A few young graduates have struggled to find formal employment within the district offices.", themeIds: [U], weight: 4 },
 
       // KII-03: Pollution x5, Poor Planning x3, Water Scarcity x2, Unemployment x0
-      { sourceId: "src-kii-03", quote: "The dye from the textile workshop turns the stream a strange color every week.", themeIds: [P], weight: 8 },
-      { sourceId: "src-kii-03", quote: "Children who swim in the river often come back with skin rashes.", themeIds: [P], weight: 9 },
-      { sourceId: "src-kii-03", quote: "Livestock that drink from the lower river have been getting sick more often.", themeIds: [P], weight: 7 },
-      { sourceId: "src-kii-03", quote: "Smoke from the burning of factory waste covers the village most evenings.", themeIds: [P], weight: 6 },
-      { sourceId: "src-kii-03", quote: "Even our vegetable gardens near the river are affected by the polluted irrigation water.", themeIds: [P], weight: 7 },
-      { sourceId: "src-kii-03", quote: "The market was built without proper drainage, so it floods whenever it rains.", themeIds: [G], weight: 6 },
-      { sourceId: "src-kii-03", quote: "Nobody planned for the population growth, so the school is now overcrowded.", themeIds: [G], weight: 5 },
-      { sourceId: "src-kii-03", quote: "The old settlement plan did not leave room for a proper waste collection point.", themeIds: [G], weight: 6 },
-      { sourceId: "src-kii-03", quote: "The borehole that used to serve our section of the village has been dry for two years.", themeIds: [W], weight: 8 },
-      { sourceId: "src-kii-03", quote: "During the dry season we sometimes go two days without any water from the tap.", themeIds: [W], weight: 9 },
+      { sourceId: "src-kii-03", quote: "The dye from the textile workshop turns the stream a strange color every week.", themeIds: [P, IW], weight: 8 },
+      { sourceId: "src-kii-03", quote: "Children who swim in the river often come back with skin rashes.", themeIds: [P, HE], weight: 9 },
+      { sourceId: "src-kii-03", quote: "Livestock that drink from the lower river have been getting sick more often.", themeIds: [P, CL], weight: 7 },
+      { sourceId: "src-kii-03", quote: "Smoke from the burning of factory waste covers the village most evenings.", themeIds: [P, IW, HE], weight: 6 },
+      { sourceId: "src-kii-03", quote: "Even our vegetable gardens near the river are affected by the polluted irrigation water.", themeIds: [P, CL], weight: 7 },
+      { sourceId: "src-kii-03", quote: "The market was built without proper drainage, so it floods whenever it rains.", themeIds: [G, LP, FD], weight: 6 },
+      { sourceId: "src-kii-03", quote: "Nobody planned for the population growth, so the school is now overcrowded.", themeIds: [G, LP], weight: 5 },
+      { sourceId: "src-kii-03", quote: "The old settlement plan did not leave room for a proper waste collection point.", themeIds: [G, LP], weight: 6 },
+      { sourceId: "src-kii-03", quote: "The borehole that used to serve our section of the village has been dry for two years.", themeIds: [W, CD], weight: 8 },
+      { sourceId: "src-kii-03", quote: "During the dry season we sometimes go two days without any water from the tap.", themeIds: [W, CD], weight: 9 },
 
       // KII-04: Pollution x1, Poor Planning x4, Water Scarcity x4, Unemployment x2
-      { sourceId: "src-kii-04", quote: "There was one reported case of chemical runoff from a processing plant last quarter.", themeIds: [P], weight: 5 },
-      { sourceId: "src-kii-04", quote: "Many of the current land disputes trace back to poor planning decisions made a decade ago.", themeIds: [G], weight: 7 },
-      { sourceId: "src-kii-04", quote: "We inherited a settlement pattern that was never properly surveyed.", themeIds: [G], weight: 6 },
-      { sourceId: "src-kii-04", quote: "Road planning in this district did not account for the seasonal rivers, so bridges keep washing away.", themeIds: [G], weight: 8 },
-      { sourceId: "src-kii-04", quote: "The district has struggled to plan new water points because of unclear land ownership.", themeIds: [G], weight: 7 },
+      { sourceId: "src-kii-04", quote: "There was one reported case of chemical runoff from a processing plant last quarter.", themeIds: [P, IW], weight: 5 },
+      { sourceId: "src-kii-04", quote: "Many of the current land disputes trace back to poor planning decisions made a decade ago.", themeIds: [G, LP], weight: 7 },
+      { sourceId: "src-kii-04", quote: "We inherited a settlement pattern that was never properly surveyed.", themeIds: [G, LP], weight: 6 },
+      { sourceId: "src-kii-04", quote: "Road planning in this district did not account for the seasonal rivers, so bridges keep washing away.", themeIds: [G, LP, FD], weight: 8 },
+      { sourceId: "src-kii-04", quote: "The district has struggled to plan new water points because of unclear land ownership.", themeIds: [G, LP], weight: 7 },
       { sourceId: "src-kii-04", quote: "Three of our wards have gone without reliable water supply for over a year.", themeIds: [W], weight: 9 },
       { sourceId: "src-kii-04", quote: "The water scheme that was supposed to serve this area was never completed.", themeIds: [W], weight: 8 },
       { sourceId: "src-kii-04", quote: "Water rationing has become normal here, even in villages near the river.", themeIds: [W], weight: 9 },
-      { sourceId: "src-kii-04", quote: "Farmers cannot irrigate their fields properly because the canal has run dry.", themeIds: [W], weight: 7 },
+      { sourceId: "src-kii-04", quote: "Farmers cannot irrigate their fields properly because the canal has run dry.", themeIds: [W, CD, CL], weight: 7 },
       { sourceId: "src-kii-04", quote: "Unemployment among young people leaving secondary school remains one of our biggest challenges.", themeIds: [U], weight: 8 },
-      { sourceId: "src-kii-04", quote: "Many former agricultural workers have not found new jobs since the cooperative closed.", themeIds: [U], weight: 6 },
+      { sourceId: "src-kii-04", quote: "Many former agricultural workers have not found new jobs since the cooperative closed.", themeIds: [U, FC, LL], weight: 6 },
 
       // KII-05: Pollution x3, Poor Planning x2, Water Scarcity x3, Unemployment x4
-      { sourceId: "src-kii-05", quote: "Waste from the rice processing factory flows directly into our irrigation channel.", themeIds: [P], weight: 7 },
-      { sourceId: "src-kii-05", quote: "The smell from the factory drainage affects the whole eastern side of the village.", themeIds: [P], weight: 6 },
-      { sourceId: "src-kii-05", quote: "We have noticed more skin problems among children who play near the drainage canal.", themeIds: [P], weight: 8 },
-      { sourceId: "src-kii-05", quote: "Our farmland was allocated without considering where the water sources were.", themeIds: [G], weight: 6 },
-      { sourceId: "src-kii-05", quote: "The cooperative building was constructed far from most farmers because of poor site planning.", themeIds: [G], weight: 5 },
-      { sourceId: "src-kii-05", quote: "This year the irrigation dam has almost no water left for the second planting season.", themeIds: [W], weight: 9 },
-      { sourceId: "src-kii-05", quote: "Women in our group now spend most mornings searching for water instead of farming.", themeIds: [W], weight: 7 },
-      { sourceId: "src-kii-05", quote: "The river that used to feed our farms has become seasonal instead of permanent.", themeIds: [W], weight: 8 },
-      { sourceId: "src-kii-05", quote: "Many young women in our group have no steady income outside the farming season.", themeIds: [U], weight: 6 },
-      { sourceId: "src-kii-05", quote: "When the rice mill reduced its workers, dozens of women in this village lost their jobs.", themeIds: [U], weight: 8 },
+      { sourceId: "src-kii-05", quote: "Waste from the rice processing factory flows directly into our irrigation channel.", themeIds: [P, IW, CL], weight: 7 },
+      { sourceId: "src-kii-05", quote: "The smell from the factory drainage affects the whole eastern side of the village.", themeIds: [P, IW], weight: 6 },
+      { sourceId: "src-kii-05", quote: "We have noticed more skin problems among children who play near the drainage canal.", themeIds: [P, HE], weight: 8 },
+      { sourceId: "src-kii-05", quote: "Our farmland was allocated without considering where the water sources were.", themeIds: [G, LP], weight: 6 },
+      { sourceId: "src-kii-05", quote: "The cooperative building was constructed far from most farmers because of poor site planning.", themeIds: [G, LP], weight: 5 },
+      { sourceId: "src-kii-05", quote: "This year the irrigation dam has almost no water left for the second planting season.", themeIds: [W, CD, CL], weight: 9 },
+      { sourceId: "src-kii-05", quote: "Women in our group now spend most mornings searching for water instead of farming.", themeIds: [W, WG, LL], weight: 7 },
+      { sourceId: "src-kii-05", quote: "The river that used to feed our farms has become seasonal instead of permanent.", themeIds: [W, CD], weight: 8 },
+      { sourceId: "src-kii-05", quote: "Many young women in our group have no steady income outside the farming season.", themeIds: [U, LL], weight: 6 },
+      { sourceId: "src-kii-05", quote: "When the rice mill reduced its workers, dozens of women in this village lost their jobs.", themeIds: [U, FC, LL], weight: 8 },
       { sourceId: "src-kii-05", quote: "Our sons and daughters finish school and sit idle because there is no work in this ward.", themeIds: [U], weight: 5 },
       { sourceId: "src-kii-05", quote: "Even members with farming skills cannot find paid work during the dry months.", themeIds: [U], weight: 7 },
 
       // FGD-01: speaker-level coding demo
-      { sourceId: "src-fgd-01", speakerId: "p1", quote: "The waste from the small mill behind the market pollutes the stream we use for washing.", themeIds: [P], weight: 7 },
-      { sourceId: "src-fgd-01", speakerId: "p2", quote: "Even our chickens have been getting sick from the water near the mill.", themeIds: [P], weight: 6 },
-      { sourceId: "src-fgd-01", speakerId: "p3", quote: "We were never involved when the mill's drainage plan was approved, and now we live with the consequences.", themeIds: [G, E], weight: 8 },
-      { sourceId: "src-fgd-01", speakerId: "p1", quote: "Water is also becoming harder to find, our shallow wells dry up earlier every year.", themeIds: [W], weight: 7 },
-      { sourceId: "src-fgd-01", speakerId: "p2", quote: "Many of us, especially the women, have no reliable income once the farming season ends.", themeIds: [U], weight: 6 },
-      { sourceId: "src-fgd-01", speakerId: "p3", quote: "Some of our sons left for the city because there is no work here between harvests.", themeIds: [U], weight: 7 },
-      { sourceId: "src-fgd-01", speakerId: "p1", quote: "The market itself was built without proper drainage, so during rains it becomes unusable.", themeIds: [G], weight: 5 }
+      { sourceId: "src-fgd-01", speakerId: "p1", quote: "The waste from the small mill behind the market pollutes the stream we use for washing.", themeIds: [P, IW], weight: 7 },
+      { sourceId: "src-fgd-01", speakerId: "p2", quote: "Even our chickens have been getting sick from the water near the mill.", themeIds: [P, CL], weight: 6 },
+      { sourceId: "src-fgd-01", speakerId: "p3", quote: "We were never involved when the mill's drainage plan was approved, and now we live with the consequences.", themeIds: [G, CC, WE], weight: 8 },
+      { sourceId: "src-fgd-01", speakerId: "p1", quote: "Water is also becoming harder to find, our shallow wells dry up earlier every year.", themeIds: [W, CD], weight: 7 },
+      { sourceId: "src-fgd-01", speakerId: "p2", quote: "Many of us, especially the women, have no reliable income once the farming season ends.", themeIds: [U, LL, WG], weight: 6 },
+      { sourceId: "src-fgd-01", speakerId: "p3", quote: "Some of our sons left for the city because there is no work here between harvests.", themeIds: [U, YM], weight: 7 },
+      { sourceId: "src-fgd-01", speakerId: "p1", quote: "The market itself was built without proper drainage, so during rains it becomes unusable.", themeIds: [G, LP, FD], weight: 5 }
     ];
 
     var sourceMap = {};
@@ -235,6 +265,7 @@
       date: "2026-01-15",
       weightingEnabled: true,
       memo: "This is bundled seed/demo content — safe to edit or delete. Create a new project from the Projects page for your own research.",
+      demoVersion: DEMO_VERSION,
       createdAt: Date.now(),
       sources: sources,
       themes: themes,
@@ -242,18 +273,36 @@
     };
   }
 
+  // Every edit re-saves a project's index entry, so a demo whose entry is
+  // still stamped within a few seconds of its creation has never been edited.
+  function isUntouchedDemo(project) {
+    var entry = window.TB.listProjects().find(function (p) { return p.id === project.id; });
+    return !!(entry && project.createdAt && entry.updatedAt - project.createdAt < 5000);
+  }
+
+  function markSeeded() {
+    localStorage.setItem("tb_demo_version", String(DEMO_VERSION));
+    localStorage.setItem("tb_demo_seeded", "1");
+  }
+
   window.TB = window.TB || {};
   window.TB.DEMO_PROJECT_ID = DEMO_ID;
+  window.TB.DEMO_VERSION = DEMO_VERSION;
   window.TB.seedDemoIfNeeded = function () {
-    if (localStorage.getItem("tb_demo_seeded")) return;
-    var project = buildDemoProject();
-    window.TB.saveProject(project);
-    if (!window.TB.getActiveProjectId()) window.TB.setActiveProjectId(project.id);
-    localStorage.setItem("tb_demo_seeded", "1");
+    var seededVersion = Number(localStorage.getItem("tb_demo_version") || (localStorage.getItem("tb_demo_seeded") ? 1 : 0));
+    if (seededVersion >= DEMO_VERSION) return;
+    var existing = window.TB.loadProject(DEMO_ID);
+    // A deleted demo stays deleted; an edited one is left for the user to reset.
+    if (!seededVersion || (existing && isUntouchedDemo(existing))) {
+      window.TB.saveProject(buildDemoProject());
+      if (!window.TB.getActiveProjectId()) window.TB.setActiveProjectId(DEMO_ID);
+    }
+    markSeeded();
   };
   window.TB.rebuildDemoProject = function () {
     var project = buildDemoProject();
     window.TB.saveProject(project);
+    markSeeded();
     return project;
   };
 })();

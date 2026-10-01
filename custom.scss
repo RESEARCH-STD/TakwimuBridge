@@ -3,9 +3,11 @@
   Base theme: flatly (see _quarto.yml). This file overrides Bootstrap 5
   variables (scss:defaults) and adds component-level styling (scss:rules).
 
-  Brand palette — the company's brand color is blue (kept from the earlier
-  correction), distinct from the sibling ../SITE-1 project's teal-blue/amber
-  palette via a deeper, more saturated blue:
+  Layout: an application dashboard — fixed navy sidebar
+  (_includes/app-shell.html), light canvas, white cards — deliberately
+  unlike ../SITE-1's marketing-site hero layout.
+
+  Brand palette — the company's brand color is blue:
     Primary   #1B4F9C  deep blue       (analysis, research, focus)
     Secondary #123166  darker navy
     Accent    #17B8A6  teal            (CTAs, highlights)
@@ -14,21 +16,16 @@
     Warning   #E08E45  amber-orange
     Danger    #C0392B  red
 
-  Typography, shape language (radius/shadow/border), card hover treatment,
-  and the transparent-to-frosted navbar are adopted from geoai-africa.com's
-  design system (its actual compiled CSS, not a guess) — colors kept blue
-  per an explicit decision to keep that correction rather than adopt its
-  orange palette too.
+  Typography (Space Grotesk + Inter), radii and soft tinted shadows are
+  adopted from geoai-africa.com's design system, colors kept blue.
 */
 
 /*-- scss:defaults --*/
 
 // NOTE: Quarto's bundled Bootstrap omits the classic .row/.col-* responsive
-// grid (it expects its own .grid/.g-col-* CSS-grid system instead). This
-// site's layouts use Quarto's .grid/.g-col-* classes rather than
-// Bootstrap's row/col-*, for the same reason SITE-1 does.
+// grid (it expects its own .grid/.g-col-* CSS-grid system instead), so all
+// layouts here use .grid/.g-col-* or plain CSS grid.
 
-// Brand colors
 $primary:   #1B4F9C;
 $secondary: #123166;
 $success:   #1E8A5F;
@@ -40,31 +37,22 @@ $dark:      #0F1E36;
 
 $accent:    #17B8A6; // not a native Bootstrap theme color; used via custom utility classes below
 
-// Typography — Space Grotesk (display/headings) + Inter (body), the same
-// pairing geoai-africa.com uses.
 $font-family-sans-serif: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 $headings-font-family: "Space Grotesk", $font-family-sans-serif;
 $headings-font-weight: 600;
 $body-color: #1E2A3A;
 $link-color: $primary;
 
-// Shape language — adopted from geoai-africa.com: rounder radii, a subtle
-// primary-tinted card border, and a soft tinted shadow instead of a flat
-// borderless card.
-$border-radius: 0.75rem;      // 12px
+$border-radius: 0.75rem;
 $border-radius-sm: 0.6rem;
-$border-radius-lg: 1.25rem;   // 20px
-$card-border-radius: 0.75rem;
+$border-radius-lg: 1.25rem;
+$card-border-radius: 0.9rem;
 $card-border-width: 1px;
-$card-border-color: rgba(27, 79, 156, 0.12);
+$card-border-color: rgba(27, 79, 156, 0.10);
 $card-box-shadow: 0 4px 24px rgba(27, 79, 156, 0.08);
-$btn-border-radius: 0.75rem;
+$btn-border-radius: 0.65rem;
+$btn-border-radius-sm: 0.55rem;
 $btn-font-weight: 600;
-
-// Navbar
-$navbar-dark-color: rgba(255, 255, 255, 0.88);
-$navbar-dark-hover-color: #ffffff;
-$navbar-dark-active-color: #ffffff;
 
 /*-- scss:rules --*/
 
@@ -72,135 +60,282 @@ $navbar-dark-active-color: #ffffff;
   --brand-accent: #{$accent};
   --brand-primary: #{$primary};
   --brand-secondary: #{$secondary};
-  --border: #{$card-border-color};
-  --border-hover: rgba(27, 79, 156, 0.35);
-  --shadow: #{$card-box-shadow};
+  --tb-sidebar-w: 268px;
+  --tb-canvas: #F3F6FB;
+  --tb-ink: #0F1E36;
+  --tb-muted: #5B6B82;
+  --tb-line: rgba(27, 79, 156, 0.10);
+  --tb-line-strong: rgba(27, 79, 156, 0.22);
+  --shadow: 0 1px 2px rgba(15, 30, 54, 0.04), 0 4px 18px rgba(27, 79, 156, 0.06);
   --shadow-hover: 0 8px 32px rgba(27, 79, 156, 0.14);
-  --bg-off: #EEF2F7;      // a step darker than $light, for alternating section backgrounds
-  --radius-xl: 1.75rem;   // 28px, for large showcase elements
+  --border-hover: rgba(27, 79, 156, 0.35);
 }
 
+// Only the page canvas is tinted; --bs-body-bg stays white because
+// Bootstrap 5.3 also uses it for cards, modals and inputs.
 body {
+  background: var(--tb-canvas);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-.grid > * {
-  min-width: 0;
-}
+.grid > * { min-width: 0; }
+.badge { white-space: normal; }
 
-.badge {
-  white-space: normal;
-}
-
+.min-w-0 { min-width: 0; }
 .text-accent { color: var(--brand-accent) !important; }
 .bg-accent { background-color: var(--brand-accent) !important; }
+.text-ink { color: var(--tb-ink) !important; }
+
 .btn-accent {
   background: linear-gradient(135deg, var(--brand-accent), #12988a);
   border-color: transparent;
   color: #ffffff;
-  box-shadow: 0 4px 20px rgba(23, 184, 166, 0.25);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(23, 184, 166, 0.22);
 }
-.btn-accent:hover, .btn-accent:focus {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(23, 184, 166, 0.35);
-  color: #ffffff;
-}
+.btn-accent:hover, .btn-accent:focus { color: #ffffff; box-shadow: 0 6px 22px rgba(23, 184, 166, 0.32); filter: brightness(1.04); }
+.btn-accent:disabled { color: #fff; opacity: .55; }
 .btn-primary {
   background: linear-gradient(135deg, $primary, $secondary);
   border-color: transparent;
-  box-shadow: 0 4px 20px rgba(27, 79, 156, 0.25);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px rgba(27, 79, 156, 0.22);
 }
-.btn-primary:hover, .btn-primary:focus {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(27, 79, 156, 0.35);
-}
-.eyebrow {
-  display: inline-block;
+.btn-primary:hover, .btn-primary:focus { box-shadow: 0 6px 22px rgba(27, 79, 156, 0.32); filter: brightness(1.06); }
+
+.tb-eyebrow {
+  display: block;
+  font-size: .7rem;
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
-  font-size: .78rem;
-  color: var(--brand-accent);
-  margin-bottom: .4rem;
+  color: var(--tb-muted);
+  margin-bottom: .25rem;
 }
 
-/* ---------------- Full-bleed home page ---------------- */
-// index.qmd's banded sections use .column-screen so their backgrounds reach
-// the viewport edge instead of stopping at Quarto's grid.body-width column.
-// That makes Quarto classify <main> as .page-full, which — only in that
-// variant — carries its own top margin/padding meant for a title block we
-// don't render. Zero it so the hero sits flush under the navbar.
-main#quarto-document-content.page-full {
-  margin-top: 0;
-  padding-top: 0;
+/* ================================================================ shell */
+.tb-sidebar {
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  width: var(--tb-sidebar-w);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem .9rem 1rem;
+  background: linear-gradient(180deg, #0E2A5C 0%, #0A1D40 100%);
+  color: rgba(255, 255, 255, .78);
+  overflow-y: auto;
+  z-index: 1040;
 }
-// The (empty, since title-block-banner: false) title block still carries
-// Bootstrap's own margin-block-end below it, pushing the hero down and
-// leaving a gap where body-white shows through the transparent navbar.
-#title-block-header:empty,
-main#quarto-document-content.page-full #title-block-header {
-  margin-block-end: 0;
-}
-
-.hero-section {
-  background: linear-gradient(135deg, $primary 0%, $secondary 100%);
+.tb-brand {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  padding: .2rem .45rem;
   color: #fff;
-  // Bootstrap's `.nav-fixed` reserves body padding-top equal to the fixed
-  // navbar's height so normal-flow content starts below it. For a
-  // transparent-over-hero navbar the hero needs to bleed up behind that
-  // reserved strip instead, so it's zeroed on body (below) and added back
-  // here as extra top padding, keeping the hero's actual content clear of
-  // the (fixed, out-of-flow) navbar without shifting anything after it.
-  padding: calc(5rem + 78px) 0 4rem;
+  text-decoration: none;
 }
-.hero-section h1 { color: #fff; }
-.hero-section .lead { color: rgba(255,255,255,.88); }
-.hero-stats .stat-value { font-family: $headings-font-family; font-size: 2rem; font-weight: 700; color: #fff; }
-.hero-stats .stat-label { font-size: .85rem; color: rgba(255,255,255,.7); }
+.tb-brand:hover { color: #fff; }
+.tb-brand img { border-radius: .6rem; box-shadow: 0 0 0 1px rgba(255, 255, 255, .14); }
+.tb-brand-text { display: flex; flex-direction: column; line-height: 1.15; }
+.tb-brand-name { font-family: $headings-font-family; font-weight: 700; font-size: 1.08rem; }
+.tb-brand-sub { font-size: .66rem; letter-spacing: .07em; text-transform: uppercase; color: rgba(255, 255, 255, .55); margin-top: .15rem; }
 
-/* Navbar: transparent over the hero, frosted/blurred once scrolled —
-   adopted from geoai-africa.com. Scoped with :has() to whichever page
-   actually has a hero (index.qmd) — other pages have no hero to float
-   over, and a transparent navbar there would be unreadable against a
-   plain white body. The scroll listener that adds .navbar-scrolled and
-   flips data-bs-theme lives in _includes/head-extra.html. */
-// !important because Quarto's own JS measures the fixed navbar's actual
-// rendered height and sets it as an inline style on <body> at runtime
-// (data-bs-offset) — inline styles beat any stylesheet selector, however
-// specific, short of !important.
-body:has(.hero-section) {
-  padding-top: 0 !important;
+.tb-sidebar-project {
+  display: block;
+  padding: .75rem .85rem;
+  border-radius: .85rem;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .09);
+  color: #fff;
+  text-decoration: none;
+  transition: background .2s ease;
 }
-body:has(.hero-section) #quarto-header .navbar {
+.tb-sidebar-project:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.tb-sidebar-label {
+  display: block;
+  font-size: .64rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .5);
+  margin-bottom: .25rem;
+}
+.tb-sidebar-project-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 600;
+  font-size: .88rem;
+  line-height: 1.3;
+}
+.tb-sidebar-project-meta { display: block; font-size: .72rem; color: rgba(255, 255, 255, .6); margin-top: .25rem; }
+.tb-sidebar-project-switch { display: inline-flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 600; color: var(--brand-accent); margin-top: .45rem; }
+
+.tb-nav { display: flex; flex-direction: column; gap: .12rem; }
+.tb-nav-label {
+  font-size: .64rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .42);
+  padding: .85rem .75rem .35rem;
+}
+.tb-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .55rem .75rem;
+  border-radius: .65rem;
+  color: rgba(255, 255, 255, .74);
+  font-size: .9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background .15s ease, color .15s ease;
+}
+.tb-nav-link i { width: 1.2rem; text-align: center; font-size: 1.02rem; color: rgba(255, 255, 255, .55); }
+.tb-nav-link:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.tb-nav-link:hover i { color: #fff; }
+.tb-nav-link.active { background: rgba(255, 255, 255, .12); color: #fff; font-weight: 600; }
+.tb-nav-link.active i { color: var(--brand-accent); }
+.tb-nav-link.active::before {
+  content: "";
+  position: absolute;
+  left: -.9rem; top: .45rem; bottom: .45rem;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--brand-accent);
+}
+
+.tb-sidebar-footer {
+  margin-top: auto;
+  display: flex;
+  gap: .55rem;
+  padding: .8rem .6rem 0;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  font-size: .72rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, .55);
+}
+.tb-sidebar-footer a { color: rgba(255, 255, 255, .88); }
+
+.tb-mobilebar {
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: -1rem -1rem 1.25rem;
+  padding: .55rem .9rem;
+  background: #0E2A5C;
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(10, 29, 64, .25);
+}
+.tb-mobilebar-toggle {
+  border: 0;
+  background: rgba(255, 255, 255, .1);
+  color: #fff;
+  width: 38px; height: 38px;
+  border-radius: .6rem;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.tb-mobilebar-brand { display: inline-flex; align-items: center; gap: .5rem; color: #fff; text-decoration: none; font-family: $headings-font-family; font-weight: 700; }
+.tb-mobilebar-brand:hover { color: #fff; }
+
+@media (min-width: 992px) {
+  body { padding-left: var(--tb-sidebar-w); }
+  .tb-mobilebar, .tb-sidebar-backdrop { display: none; }
+}
+@media (max-width: 991.98px) {
+  .tb-sidebar { transform: translateX(-100%); transition: transform .25s ease, box-shadow .25s ease; }
+  body.tb-sidebar-open { overflow: hidden; }
+  body.tb-sidebar-open .tb-sidebar { transform: none; box-shadow: 0 0 40px rgba(0, 0, 0, .35); }
+  .tb-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1039;
+    background: rgba(10, 29, 64, .45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  body.tb-sidebar-open .tb-sidebar-backdrop { opacity: 1; pointer-events: auto; }
+}
+
+/* page area (every page uses page-layout: custom, so this is the whole
+   content column next to the sidebar) */
+#quarto-content.page-layout-custom {
+  max-width: 1640px;
+  margin: 0 auto;
+  padding: 1.75rem 2.25rem 2.5rem;
+  min-height: calc(100vh - 3.5rem);
+}
+@media (max-width: 991.98px) {
+  #quarto-content.page-layout-custom { padding: 1rem 1rem 2rem; }
+}
+
+#title-block-header { margin: 0 0 1.4rem; }
+#title-block-header .title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--tb-ink);
+  margin: 0 0 .2rem;
+}
+#title-block-header .subtitle { font-size: .96rem; font-weight: 400; color: var(--tb-muted); margin: 0; max-width: 62rem; }
+#title-block-header .quarto-title-meta { display: none; }
+
+.footer { background: transparent; }
+.nav-footer {
+  max-width: 1640px;
+  margin: 0 auto;
+  min-height: 3.5rem;
+  padding: .9rem 2.25rem;
+  border-top: 1px solid var(--tb-line);
   background: transparent;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
+  color: var(--tb-muted);
+  font-size: .78rem;
 }
-body:has(.hero-section) #quarto-header.navbar-scrolled .navbar {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 2px 16px rgba(27, 79, 156, 0.10);
+.nav-footer p { margin: 0; }
+
+.tb-prose { max-width: 860px; }
+.tb-prose h2 { margin-top: 2rem; font-size: 1.35rem; }
+
+/* ================================================================ cards */
+.card { border-color: var(--tb-line); box-shadow: var(--shadow); }
+.tb-panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem .75rem;
+  padding: .8rem 1.1rem;
+  background: #fff;
+  border-bottom: 1px solid var(--tb-line);
+  font-family: $headings-font-family;
+  font-weight: 600;
+  font-size: .98rem;
+  color: var(--tb-ink);
 }
+.tb-panel-header .tb-panel-sub { font-family: $font-family-sans-serif; font-weight: 400; font-size: .76rem; color: var(--tb-muted); }
+.tb-panel-body { padding: 1rem 1.1rem; }
+.tb-chart-box { position: relative; height: 300px; }
+.tb-chart-box.tall { height: 360px; }
+.tb-cloud-box { position: relative; height: 300px; }
+.tb-cloud-box.tall { height: 400px; }
+.tb-cloud-box canvas { display: block; width: 100%; height: 100%; }
+// In a stretched (h-100) card the chart grows to the card's height instead
+// of leaving blank space under a short chart; sizes become minimums.
+.tb-fill { display: flex; flex-direction: column; }
+.tb-fill > .tb-chart-box, .tb-fill > .tb-cloud-box { flex: 1 1 auto; height: auto; min-height: 260px; }
+.tb-fill > .tb-cloud-box.tall { min-height: 400px; }
 
-.section { padding: 4rem 0; }
-.section-tight { padding: 2rem 0; }
-.section-alt { background: var(--bg-off); }
-
-// .step-card/.tb-stat-card/.tb-panel* are companion modifier classes used
-// alongside Bootstrap's own .card/.card-header/.card-body (not replacements
-// for them — same pattern ../SITE-1 uses, e.g. `card border-0 shadow-soft`).
-// $card-border-radius/$card-box-shadow/$card-border-width/$card-border-color
-// above already theme every plain .card; these modifiers add the bits
-// Bootstrap doesn't have an opinion on (hover-lift, accent bar, header
-// typography, stat typography).
+// Hover-lift cards (projects, exports) — adopted from geoai-africa.com.
 .step-card {
-  padding: 1.5rem;
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s ease;
+  transition: transform .3s cubic-bezier(.4, 0, .2, 1), box-shadow .3s cubic-bezier(.4, 0, .2, 1), border-color .3s ease;
 }
 .step-card::before {
   content: "";
@@ -210,158 +345,297 @@ body:has(.hero-section) #quarto-header.navbar-scrolled .navbar {
   background: linear-gradient(90deg, var(--brand-primary), var(--brand-accent));
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.4s ease;
+  transition: transform .4s ease;
 }
-.step-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--border-hover);
-}
-.step-card:hover::before {
-  transform: scaleX(1);
-}
-.step-number {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 2.2rem; height: 2.2rem; border-radius: 50%;
-  background: var(--brand-accent); color: #fff; font-weight: 700; margin-bottom: .75rem;
-}
-.step-icon { font-size: 1.8rem; color: var(--brand-primary); margin-bottom: .5rem; display: block; }
+.step-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: var(--border-hover); }
+.step-card:hover::before { transform: scaleX(1); }
 
-// Boxed icon treatment for the feature-grid cards (a 48x48 tinted-gradient
-// swatch behind the icon), adopted from geoai-africa.com's .pillar-icon.
-.step-icon-box {
-  width: 48px;
-  height: 48px;
-  margin: 0 auto 1rem;
-  background: linear-gradient(135deg, rgba(27, 79, 156, .14), rgba(23, 184, 166, .10));
-  border-radius: var(--bs-border-radius-sm);
+/* KPI value boxes */
+.tb-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 1rem; }
+.tb-kpi { height: 100%; }
+.tb-kpi .card-body { display: flex; align-items: center; gap: .75rem; padding: 1rem 1rem; }
+.tb-kpi-icon {
+  flex: none;
+  width: 42px; height: 42px;
+  border-radius: .8rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.25rem;
+  color: var(--kpi, #{$primary});
+  background: color-mix(in srgb, var(--kpi, #{$primary}) 12%, #fff);
 }
-.step-icon-box .step-icon {
-  font-size: 1.2rem;
-  margin-bottom: 0;
-  display: block;
-}
+.tb-kpi-value { font-family: $headings-font-family; font-size: 1.55rem; font-weight: 700; line-height: 1.1; color: var(--tb-ink); }
+.tb-kpi-label { font-size: .78rem; font-weight: 500; color: var(--tb-muted); }
+.tb-kpi-sub { font-size: .7rem; color: var(--tb-muted); opacity: .85; white-space: nowrap; }
 
-/* ---------------- App shell (workspace / analysis / etc.) ---------------- */
-.tb-app-shell {
-  background: $light;
-  border-radius: var(--bs-border-radius-lg);
-  padding: 1rem;
-}
-.tb-panel-header {
-  font-weight: 600;
-  font-size: .85rem;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-  color: $secondary;
-  background: #fff;
+/* toolbar + segmented level switch */
+.tb-toolbar .card-body { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem; padding: .75rem 1.1rem; }
+.tb-toolbar-group { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.tb-toolbar-label { font-size: .7rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--tb-muted); }
+.tb-segmented .btn { font-size: .78rem; font-weight: 600; padding: .3rem .75rem; }
+.tb-segmented .btn-outline-primary { background: #fff; color: var(--tb-muted); border-color: var(--tb-line-strong); }
+.tb-segmented .btn-outline-primary:hover { background: rgba(27, 79, 156, .06); color: $primary; }
+.tb-segmented .btn-check:checked + .btn { background: $primary; border-color: $primary; color: #fff; }
+
+/* project banner (dashboard) */
+.tb-project-banner .card-body { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.3rem; }
+.tb-project-banner h2 { font-size: 1.3rem; margin: 0 0 .3rem; color: var(--tb-ink); }
+.tb-project-icon {
+  flex: none;
+  width: 52px; height: 52px;
+  border-radius: .9rem;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: .5rem;
+  justify-content: center;
+  font-size: 1.45rem;
+  color: #fff;
+  background: linear-gradient(135deg, $primary, var(--brand-accent));
 }
-.tb-panel-body {
-  overflow-y: auto;
+.tb-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .15rem .55rem;
+  border-radius: 999px;
+  background: var(--tb-canvas);
+  color: var(--tb-muted);
+  font-size: .74rem;
+  margin: .15rem .25rem .15rem 0;
 }
+
+/* lists inside dashboard cards */
+.tb-list { list-style: none; margin: 0; padding: 0; }
+.tb-list > li { padding: .7rem 0; border-bottom: 1px solid var(--tb-line); }
+.tb-list > li:last-child { border-bottom: 0; padding-bottom: 0; }
+.tb-list > li:first-child { padding-top: 0; }
+.tb-quote-snippet { font-size: .88rem; color: var(--tb-ink); }
+
+.tb-progress { height: 6px; border-radius: 6px; background: var(--tb-line); overflow: hidden; }
+.tb-progress > span { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--brand-accent), $primary); }
+
+.tb-empty-state { text-align: center; padding: 2.25rem 1rem; color: var(--tb-muted); }
+.tb-empty-state i { font-size: 2rem; color: var(--tb-line-strong); display: block; margin-bottom: .5rem; }
+
+/* ============================================================ theme chips */
+.tb-chip,
+.tb-chip-static {
+  --chip-color: #{$primary};
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--chip-color) 35%, #fff);
+  background: color-mix(in srgb, var(--chip-color) 7%, #fff);
+  color: var(--tb-ink);
+  line-height: 1.25;
+  text-align: left;
+}
+.tb-chip { padding: .24rem .58rem; font-size: .77rem; font-weight: 500; cursor: pointer; transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease; }
+.tb-chip-static { padding: .12rem .5rem; font-size: .72rem; font-weight: 500; margin: .1rem .25rem .1rem 0; }
+.tb-chip .dot, .tb-chip-static .dot { flex: none; width: .58rem; height: .58rem; border-radius: 50%; background: var(--chip-color); }
+.tb-chip .n { font-size: .7rem; font-weight: 600; color: var(--tb-muted); }
+.tb-chip:hover { border-color: var(--chip-color); }
+.tb-chip:focus-visible { outline: 2px solid var(--chip-color); outline-offset: 2px; }
+.tb-chip[aria-pressed="true"] {
+  background: var(--chip-color);
+  border-color: var(--chip-color);
+  color: #fff;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--chip-color) 35%, transparent);
+}
+.tb-chip[aria-pressed="true"] .dot { background: #fff; }
+.tb-chip[aria-pressed="true"] .n { color: rgba(255, 255, 255, .85); }
+.tb-chip-add { border-style: dashed; background: #fff; color: var(--tb-muted); }
+.tb-chip-input { font-size: .8rem; padding: .25rem .6rem; border-radius: 999px; border: 1px solid var(--tb-line-strong); min-width: 0; width: 13rem; max-width: 100%; }
+
+/* ========================================================== workspace */
+.tb-ws-toolbar .card-body { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; padding: .8rem 1.1rem; }
+
 .tb-workspace-row {
   display: grid;
-  grid-template-columns: 240px 1fr 300px;
+  grid-template-columns: 230px minmax(0, 1fr) 360px;
   gap: 1rem;
   align-items: stretch;
 }
-@media (max-width: 992px) {
-  .tb-workspace-row { grid-template-columns: 1fr; }
+// No max-height on the sources/transcript cards on purpose: they extend to
+// fit their content and the page scrolls. Only the coding panel sticks, so
+// the codebook stays beside the passage being read on a long transcript.
+// The transcript is at least a screen tall so the sticky panel always has
+// room and is never pushed up off-screen at the end of a short transcript.
+.tb-workspace-row > .card { min-height: 60vh; }
+@media (min-width: 768px) {
+  .tb-workspace-row > .tb-transcript-card { min-height: calc(100vh - 2rem); }
 }
-// No max-height here on purpose: panels extend to fit their content (a long
-// transcript, a long codebook) instead of being capped to a viewport-height
-// box with its own internal scrollbar — the page scrolls naturally instead.
-.tb-workspace-row .card { min-height: 60vh; }
+// 8rem leaves room for the page padding + footer below the workspace, so at
+// the bottom of the page the panel still fits on screen instead of being
+// pushed up past its header.
+.tb-coding-panel {
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 8rem);
+  display: flex;
+  flex-direction: column;
+}
+.tb-workspace-row > .tb-coding-panel.card { min-height: 0; }
+.tb-coding-panel > .card-body { overflow-y: auto; }
+// Quote + status (top) and Apply (footer) stay put; only the theme list
+// between them scrolls, keeping its position from one passage to the next.
+.tb-cp-top { padding: .8rem 1.1rem .7rem; border-bottom: 1px solid var(--tb-line); }
+.tb-cp-top .tb-cp-quote { max-height: 4.6rem; }
+.tb-cp-top #tb-cp-refs:empty { display: none; }
+.tb-cp-footer { background: #fff; border-top: 1px solid var(--tb-line); padding: .7rem 1.1rem; }
+
+@media (max-width: 1399.98px) {
+  .tb-workspace-row { grid-template-columns: minmax(0, 1fr) 340px; }
+  .tb-sources-card { grid-column: 1 / -1; }
+  .tb-workspace-row > .tb-sources-card { min-height: 0; }
+  .tb-sources-card #tb-sources-list { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .tb-sources-card .tb-source-item { margin: 0; min-width: 170px; flex: 0 1 200px; }
+}
+@media (max-width: 767.98px) {
+  .tb-workspace-row { grid-template-columns: minmax(0, 1fr); }
+  .tb-sources-card .tb-source-item { min-width: 0; flex: 1 1 140px; }
+  .tb-coding-panel { position: static; max-height: none; }
+  // On phones the panel becomes a bottom sheet while a passage is selected.
+  .tb-coding-panel.has-selection {
+    position: fixed;
+    left: .5rem; right: .5rem; bottom: .5rem;
+    max-height: 68vh;
+    z-index: 1045;
+    box-shadow: 0 -8px 40px rgba(10, 29, 64, .3);
+  }
+}
 
 .tb-source-item {
-  padding: .5rem .6rem;
+  padding: .55rem .65rem;
   border-radius: var(--bs-border-radius-sm);
-  cursor: pointer;
-  font-size: .9rem;
-  margin-bottom: .3rem;
   border: 1px solid transparent;
-}
-.tb-source-item:hover { background: $light; }
-.tb-source-item.active { background: rgba(27,79,156,.08); border-color: rgba(27,79,156,.25); font-weight: 600; }
-.tb-source-item .tb-source-type-badge { font-size: .65rem; }
-
-.tb-transcript {
-  font-size: .96rem;
-  line-height: 1.85;
-  white-space: pre-wrap;
-}
-.tb-transcript mark.tb-coded {
-  padding: .05rem 0;
-  border-radius: .2rem;
   cursor: pointer;
-  box-shadow: inset 0 -2px 0 rgba(0,0,0,.15);
+  font-size: .88rem;
+  margin-bottom: .35rem;
 }
-.tb-transcript mark.tb-coded.tb-selected-ref {
-  outline: 2px solid $dark;
-}
+.tb-source-item:hover { background: var(--tb-canvas); }
+.tb-source-item.active { background: rgba(27, 79, 156, .07); border-color: rgba(27, 79, 156, .25); }
+.tb-source-item.active .tb-source-name { font-weight: 600; }
+.tb-source-item .tb-source-type-badge { font-size: .62rem; }
+.tb-source-item .tb-progress { height: 4px; margin-top: .4rem; }
 
-.tb-code-chip {
+.tb-lens {
+  --chip-color: #{$primary};
   display: inline-flex;
   align-items: center;
   gap: .35rem;
-  padding: .2rem .55rem;
+  padding: .12rem .55rem;
   border-radius: 999px;
-  font-size: .78rem;
-  font-weight: 600;
-  color: #fff;
-  margin: .15rem .25rem .15rem 0;
-}
-.tb-code-chip .swatch {
-  width: .55rem; height: .55rem; border-radius: 50%; background: #fff; opacity: .85;
-}
-
-.tb-theme-row {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .35rem .4rem;
-  border-radius: var(--bs-border-radius-sm);
+  border: 1px solid var(--tb-line-strong);
+  background: #fff;
+  font-family: $font-family-sans-serif;
+  font-size: .72rem;
+  font-weight: 500;
+  color: var(--tb-ink);
   cursor: pointer;
 }
-.tb-theme-row:hover { background: $light; }
-.tb-theme-row.selected { background: rgba(23,184,166,.12); }
-.tb-theme-swatch { width: .8rem; height: .8rem; border-radius: 3px; flex: none; }
-.tb-theme-indent-1 { margin-left: 1.1rem; }
+.tb-lens .dot { width: .55rem; height: .55rem; border-radius: 50%; background: var(--chip-color); }
+.tb-lens[aria-pressed="false"] { opacity: .5; text-decoration: line-through; }
+
+.tb-transcript {
+  font-size: .97rem;
+  line-height: 2;
+  white-space: pre-wrap;
+}
+.tb-transcript mark.tb-coded {
+  --hl: #{$warning};
+  padding: .1rem 0 .3rem;
+  border-radius: .15rem;
+  background: color-mix(in srgb, var(--hl) 15%, transparent);
+  color: inherit;
+  cursor: pointer;
+}
+.tb-transcript mark.tb-coded:hover { background: color-mix(in srgb, var(--hl) 28%, transparent); }
+// Count of overlapping references drawn with ::after so it never becomes
+// part of the transcript's DOM text (selection offsets depend on that).
+.tb-transcript mark.tb-coded[data-count]::after {
+  content: "×" attr(data-count);
+  font-size: .62rem;
+  font-weight: 700;
+  vertical-align: super;
+  margin-left: .1rem;
+  color: var(--tb-muted);
+}
+.tb-transcript mark.tb-coded.tb-selected-ref { outline: 2px solid var(--tb-ink); outline-offset: 1px; }
+.tb-transcript mark.tb-pending {
+  background: rgba(23, 184, 166, .22);
+  outline: 2px dashed var(--brand-accent);
+  outline-offset: 1px;
+  color: inherit;
+}
+.tb-transcript mark.tb-flash { animation: tb-flash 1.2s ease 2; }
+@keyframes tb-flash { 50% { background: rgba(23, 184, 166, .55); } }
+
+.tb-cp-quote {
+  font-size: .86rem;
+  font-style: italic;
+  padding: .55rem .75rem;
+  border-left: 3px solid var(--brand-accent);
+  border-radius: 0 .6rem .6rem 0;
+  background: var(--tb-canvas);
+  max-height: 7.5rem;
+  overflow: auto;
+}
+.tb-cp-quote.is-empty { font-style: normal; color: var(--tb-muted); border-left-color: var(--tb-line-strong); }
+.tb-cp-group {
+  --group-color: #{$primary};
+  border: 1px solid var(--tb-line);
+  border-left: 4px solid var(--group-color);
+  border-radius: .75rem;
+  padding: .6rem .7rem .7rem;
+  margin-bottom: .6rem;
+  background: #fff;
+}
+.tb-cp-group-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .5rem; }
+.tb-cp-group-head .tb-chip { font-weight: 700; }
+.tb-cp-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+.tb-cp-nested { margin-top: .45rem; padding-left: .6rem; border-left: 2px solid var(--tb-line); }
+.tb-cp-nested-label { font-size: .7rem; color: var(--tb-muted); margin-bottom: .25rem; }
+.tb-cp-section-label { font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--tb-muted); margin: .9rem 0 .45rem; }
 
 .tb-weight-slider { width: 100%; }
 
-.tb-matrix-table td.tb-cell-heat {
+/* =========================================================== analysis */
+.tb-matrix-table { font-size: .84rem; margin-bottom: .5rem; }
+.tb-matrix-table th { position: sticky; top: 0; background: #fff; font-weight: 600; vertical-align: bottom; }
+.tb-matrix-table thead th .dot { display: inline-block; width: .55rem; height: .55rem; border-radius: 50%; margin-right: .3rem; }
+.tb-matrix-table tr.tb-matrix-groups th {
   text-align: center;
-  font-weight: 600;
-  color: #fff;
-  cursor: pointer;
+  font-size: .7rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--tb-muted);
+  border-bottom: 3px solid var(--group-color, #{$primary});
 }
-.tb-matrix-table th { position: sticky; top: 0; background: #fff; }
+.tb-matrix-table td.tb-cell-heat { text-align: center; font-weight: 600; cursor: pointer; }
+.tb-matrix-table tfoot th, .tb-matrix-table tfoot td { background: var(--tb-canvas); font-weight: 700; text-align: center; }
+.tb-matrix-table tfoot th:first-child { text-align: left; }
+
+.tb-hier-table { font-size: .86rem; }
+.tb-hier-table tbody tr { cursor: pointer; }
+.tb-hier-table td.tb-hier-name { padding-left: calc(.5rem + var(--depth, 0) * 1.4rem); }
+.tb-hier-table tr.depth-0 td { font-weight: 700; background: color-mix(in srgb, var(--row-color, #{$primary}) 6%, #fff); }
+.tb-hier-table .dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 50%; margin-right: .45rem; }
 
 .tb-evidence-quote {
   border-left: 3px solid var(--brand-accent);
-  padding: .5rem .8rem;
-  background: $light;
+  padding: .55rem .85rem;
+  background: var(--tb-canvas);
   border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
-  margin-bottom: .6rem;
+  margin-bottom: .65rem;
 }
 
-.tb-stat-value { font-family: $headings-font-family; font-size: 1.9rem; font-weight: 700; color: $primary; }
-.tb-stat-label { font-size: .8rem; color: #6b6478; text-transform: uppercase; letter-spacing: .03em; }
-
 .tb-demo-banner {
-  background: rgba(23,184,166,.1);
-  border: 1px solid rgba(23,184,166,.3);
+  background: rgba(23, 184, 166, .1);
+  border: 1px solid rgba(23, 184, 166, .3);
   border-radius: var(--bs-border-radius);
   padding: .6rem 1rem;
   font-size: .88rem;
 }
-
-.partner-logo-strip img { height: 40px; opacity: .8; }

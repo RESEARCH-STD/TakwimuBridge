@@ -3,6 +3,8 @@ title: "Simple User Guide"
 subtitle: "How the qualitative data analysis tool works — no statistics background required."
 ---
 
+:::: {.tb-prose}
+
 ## What is TakwimuBridge?
 
 TakwimuBridge is designed to help a researcher analyse information collected through interviews, Key Informant Interviews (KIIs), Focus Group Discussions (FGDs), open-ended questions and other written qualitative information.
@@ -22,7 +24,7 @@ You decide that this statement is talking about **Environmental Pollution**. You
 If another respondent discusses pollution, you highlight that statement using the same theme. The frequency becomes two. You continue doing this across all interviews.
 
 ::: {.callout-note}
-This exact example — five KIIs discussing environmental pollution, water scarcity, poor planning and unemployment — is bundled into TakwimuBridge as the **demo project** on the [Projects](projects.html) page, already fully coded, so you can see the finished result before coding your own data.
+This exact example — five KIIs plus one FGD discussing environmental pollution, water scarcity, poor planning and unemployment — is bundled into TakwimuBridge as the **demo project** on the [Projects](projects.html) page, already fully coded for its *Challenges*, *Causes* and *Impacts*, so you can see the finished result before coding your own data.
 :::
 
 ## Giving Importance to a Statement
@@ -41,6 +43,17 @@ Every time you find a statement relating to one of these issues, you highlight i
 
 You can also organize related issues under broader themes. For example, *Environmental Challenges* may contain *Environmental Pollution*, *Water Shortage* and *Deforestation*. *Governance Challenges* may contain *Poor Planning*, *Weak Enforcement* and *Limited Community Participation*.
 
+## Reading Once, Coding Several Themes
+
+Most studies ask more than one question of the same interviews — for example, *what are the challenges*, *what causes them*, and *what are their impacts*. You should not have to read every transcript three times.
+
+Make one broad theme per question — say **Challenges**, **Causes** and **Impacts** — each with its own sub-themes. In the [Coding Workspace](workspace.html), the coding panel beside the transcript shows all of them at once. Select a passage, then tick every sub-theme it speaks to, from any group:
+
+> *"The factory near the river keeps releasing waste into the water, and nobody stops them."*
+> → **Challenges** › Environmental Pollution, **Causes** › Industrial Waste Discharge, **Causes** › Weak Enforcement
+
+One click on **Apply** records all three. If a new idea comes up while you read, add it as a new sub-theme right there in the panel — no need to stop and open the codebook. The highlight in the transcript shows one coloured stripe per theme, and the **Highlight** buttons above the transcript let you show or hide each group.
+
 ## What TakwimuBridge Does Automatically
 
 While you concentrate on reading and coding, the software does the counting and organization. For every theme, it calculates:
@@ -52,9 +65,11 @@ While you concentrate on reading and coding, the software does the counting and 
 
 This avoids a common mistake: one person mentioning an issue ten times is different from ten different people each mentioning it once. TakwimuBridge shows both.
 
+You can read these results at the **theme** level (for example, everything coded under *Impacts*) or at the **sub-theme** level (for example, *Health Effects* compared with *Youth Migration*) — switch with the *Themes / Sub-themes* buttons on the [Dashboard](index.html) and [Theme Analysis](analysis.html) pages. A theme counts each coded statement once, even when the statement was coded to two of its sub-themes.
+
 ## Seeing What People Actually Said
 
-TakwimuBridge does not only give you numbers. Click a theme, such as *Environmental Pollution*, on the [Analysis Dashboard](analysis.html) and it shows every statement you highlighted under that theme, and where it came from — so when writing a report, you can move from a number straight back to the evidence behind it.
+TakwimuBridge does not only give you numbers. Click a theme, such as *Environmental Pollution*, on the [Theme Analysis](analysis.html) page and it shows every statement you highlighted under that theme, and where it came from — so when writing a report, you can move from a number straight back to the evidence behind it.
 
 ## Comparing Different Groups
 
@@ -62,25 +77,27 @@ If you entered basic respondent attributes, TakwimuBridge can compare groups suc
 
 ## Creating Graphs and Word Clouds
 
-Bar charts show the most frequently discussed themes. Weighted bar charts show themes with the highest combined importance scores. Word clouds show commonly occurring words, sized by frequency. Heat maps show which themes are more common among different respondents. Comparison charts compare themes between groups.
+Bar charts show the most frequently discussed themes. Weighted bar charts show themes with the highest combined importance scores. The **theme cloud** shows your themes sized by how often each was coded, while the **word cloud** shows commonly occurring words, sized by frequency. Heat maps show which themes are more common among different respondents. Comparison charts compare themes between groups.
 
 ## The Process in Ten Simple Steps
 
 1. Upload what people said.
 2. Read the interviews or discussions.
 3. Highlight important statements.
-4. Give each statement a theme.
+4. Give each statement every theme it speaks to.
 5. Give the theme or code a colour.
 6. Optionally give the coded statement an importance score from 1–10.
 7. TakwimuBridge counts and organizes the coded information.
 8. Compare themes and respondents.
-9. Create graphs, tables, heat maps and word clouds.
+9. Create graphs, tables, heat maps and theme or word clouds.
 10. Export the findings for your report.
 
 ## In Simple Terms
 
 A beginner does not need to understand complicated programming or statistical commands. **You** do the interpretation; TakwimuBridge helps organize, quantify, compare and visualize the qualitative evidence.
 
-<div class="text-center my-5">
+<div class="my-5">
 <a href="workspace.html" class="btn btn-accent btn-lg"><i class="bi bi-highlighter me-1"></i> Try the Coding Workspace</a>
 </div>
+
+::::

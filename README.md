@@ -2,13 +2,16 @@
 
 **Live:** https://takwimubridge-qda.vercel.app — auto-deployed from this repo's `main` branch via Vercel (see "Deploying" below for how the build installs Quarto in Vercel's cloud build).
 
-A **Quarto + Bootstrap 5** website implementing SST's ("Sustainable Solutions
-Tanzania") qualitative data analysis (QDA) tool: import KIIs, FGDs,
-interviews and open-ended responses, highlight and code passages, assign
-themes/sub-themes and an optional 1–10 importance weight, then get live
-frequency/coverage/weighted-score analytics, a respondent×theme matrix, word
-frequency & word clouds, group comparisons, and CSV/Excel/Word/PNG/JSON
-exports — entirely in the browser, no server.
+A **Quarto + Bootstrap 5** web app implementing SST's ("Sustainable Solutions
+Tanzania") qualitative data analysis (QDA) tool, laid out as a dashboard
+(sidebar navigation, project overview home page): import KIIs, FGDs,
+interviews and open-ended responses, highlight and code passages — one
+passage can be coded to several theme groups (e.g. a cause, a challenge and
+an impact) in a single reading — with an optional 1–10 importance weight,
+then get live frequency/coverage/weighted-score analytics at theme,
+sub-theme or code level, a respondent×theme matrix, theme clouds (themes
+sized by coded frequency) and word clouds, group comparisons, and
+CSV/Excel/Word/PNG/JSON exports — entirely in the browser, no server.
 
 Built from two source documents (already incorporated into the app and
 pages): `TakwimuBridge_Qualitative_Data_Analysis_Tool_Functional_Description.docx`
@@ -32,9 +35,10 @@ only way to deliver the tool's actual workflow without standing up a server.
 | Feature | Status |
 |---|---|
 | Coding workspace (highlight → theme → colour → weight) | ✅ Real |
-| Frequency / coverage / total weight / average weight analysis | ✅ Real, computed live |
+| Coding one passage to several theme groups in one reading, adding sub-themes inline | ✅ Real |
+| Frequency / coverage / total weight / average weight analysis, at theme, sub-theme or code level | ✅ Real, computed live |
 | Respondent × Theme matrix, heat map, group comparison | ✅ Real |
-| Word frequency & word cloud (all text or coded-passages-only) | ✅ Real |
+| Theme cloud (themes sized by coded frequency), word frequency & word cloud | ✅ Real |
 | CSV, Excel (.xlsx), Word-compatible report, PNG, JSON export | ✅ Real |
 | DOCX / TXT / CSV import | ✅ Real (mammoth.js / SheetJS, client-side) |
 | Multi-user / team projects, cloud sync | ❌ Not implemented — single-browser storage only |
@@ -67,23 +71,31 @@ To deploy manually instead (e.g. to test before pushing): `quarto render` locall
 ## Project Structure
 
 ```
-_quarto.yml                Site config: navbar, footer, search, theme
-custom.scss                 Bootstrap variable overrides + component styles (blue/teal palette)
+_quarto.yml                Site config: footer, theme, page-layout: custom, html-table-processing: none
+custom.scss                 Bootstrap variable overrides + dashboard/component styles (blue/teal palette)
 _includes/head-extra.html   Fonts + CDN libraries (Chart.js, wordcloud2.js, SheetJS, mammoth.js) + app scripts
+_includes/app-shell.html    Dashboard sidebar navigation + mobile top bar (included before every page body)
 assets/app.js                Core data model, localStorage persistence, all analysis computations
-assets/demo-data.js          Seeded demo project (5 KIIs + 1 FGD) matching the functional doc's illustrative matrix
-assets/coding-ui.js          Coding Workspace behaviour: sources, transcript highlighting, codebook, import
-assets/charts.js             Chart.js / word-cloud / heat-colour rendering helpers
+assets/demo-data.js          Seeded demo project (5 KIIs + 1 FGD, Challenges/Causes/Impacts), versioned upgrades
+assets/ui.js                 Sidebar behaviour, evidence modal, theme chips, Themes/Sub-themes level switch
+assets/coding-ui.js          Coding Workspace: sources, transcript highlighting, coding panel, codebook, import
+assets/charts.js             Chart.js / theme cloud / word cloud / heat-colour rendering helpers
 assets/export.js             CSV / XLSX / Word-report / PNG / JSON export + JSON import
-index.qmd                    Home (marketing/explainer)
+index.qmd                    Dashboard (home): active project KPIs, theme charts, coding progress, latest quotes
 guide.qmd                    Simple User Guide (adapted from the source .docx)
-projects.qmd                 Create / open / delete / import projects
-workspace.qmd                 The coding tool (3-panel layout)
-analysis.qmd                  Analysis dashboard, matrix, group comparison, evidence drill-down
-wordfrequency.qmd             Word frequency table + word cloud
+projects.qmd                 Create / open / delete / import projects, reset the demo
+workspace.qmd                 The coding tool (sources · transcript · coding panel)
+analysis.qmd                  Theme analysis at any level, matrix, group comparison, hierarchy, evidence drill-down
+wordfrequency.qmd             Theme cloud (default) and word cloud, with tables
 export.qmd                    Export center
 about.qmd                     Scope, credits, and the SITE-1 naming-collision note
 ```
+
+Two Quarto settings matter here: every page uses `page-layout: custom` so
+the sidebar shell controls the layout, and `html-table-processing: none` is
+required — the tables are empty shells filled by JavaScript, and with
+processing on, Quarto fails to convert them and drops the raw HTML that
+precedes them in the same block.
 
 ## Data model
 
@@ -96,15 +108,20 @@ Theme   { id, parentId (null|themeId), name, color, memo }   // self-referential
 Coding  { id, sourceId, speakerId?, themeIds: [...], start, end, quote, weight?: 1-10, memo }
 ```
 
-`Coding.themeIds` is an array so one passage can carry multiple codes.
-Analysis rolls a coding up to every ancestor of its theme(s), so a parent
-theme's stats include all its descendants automatically.
+`Coding.themeIds` is an array so one passage can carry multiple codes —
+including codes from different top-level themes, which is how a single
+reading codes causes, challenges and impacts together. Analysis rolls a
+coding up to every ancestor of its theme(s), so a parent theme's stats
+include all its descendants automatically, counting each coded reference
+once per theme. The analysis "level" (`TB.themesAtLevel`) is a cut through
+the tree at one depth, plus any leaf that stops short of it, so no coded
+reference drops out of a level.
 
 ## Where placeholders / seed content live
 
 | Item | Where | Notes |
 |---|---|---|
-| Demo project | `assets/demo-data.js` | Safe to delete from the Projects page; matches the functional doc's illustrative respondent×theme matrix exactly |
+| Demo project | `assets/demo-data.js` | Safe to delete or reset from the Projects page; its Challenges sub-themes match the functional doc's illustrative respondent×theme matrix exactly. Bump `DEMO_VERSION` when changing it: untouched older demos upgrade in place, edited ones are left alone, deleted ones stay deleted |
 | Logo | `images/logo.svg` | Simple placeholder monogram |
 | Brand colors | `custom.scss` | Deliberately distinct from `../SITE-1`'s palette |
 | Site URL | `_quarto.yml` (`website.site-url`) | Placeholder — no deployment/CI is configured yet |

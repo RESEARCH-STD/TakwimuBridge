@@ -1,6 +1,6 @@
 ---
 title: "Coding Workspace"
-subtitle: "Read, highlight, and code — sources on the left, transcript in the centre, theme and weight on the right."
+subtitle: "Read each transcript once: select a passage, then tick every theme it speaks to — causes, challenges, impacts — in one go."
 ---
 
 ```{=html}
@@ -8,30 +8,33 @@ subtitle: "Read, highlight, and code — sources on the left, transcript in the 
 <i class="bi bi-exclamation-triangle"></i> No active project selected. <a href="projects.html">Go to Projects</a> to create or open one.
 </div>
 
-<div id="tb-workspace-content" class="tb-app-shell d-none">
-<div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
-<div>
-<h4 class="mb-0" id="tb-project-title">—</h4>
+<div id="tb-workspace-content" class="d-none">
+<div class="card tb-ws-toolbar mb-3">
+<div class="card-body">
+<div class="min-w-0">
+<span class="tb-eyebrow">Project</span>
+<h2 class="h5 mb-0 text-truncate" id="tb-project-title">—</h2>
 <div class="text-muted small" id="tb-project-meta">—</div>
 </div>
-<div class="d-flex gap-2">
-<button class="btn btn-outline-secondary btn-sm" id="tb-manage-themes-btn"><i class="bi bi-diagram-3"></i> Codebook</button>
-<button class="btn btn-accent btn-sm" id="tb-add-source-btn"><i class="bi bi-plus-lg"></i> Add Source</button>
+<div class="d-flex flex-wrap gap-2">
+<button type="button" class="btn btn-outline-secondary btn-sm" id="tb-manage-themes-btn"><i class="bi bi-diagram-3"></i> Codebook</button>
+<button type="button" class="btn btn-accent btn-sm" id="tb-add-source-btn"><i class="bi bi-plus-lg"></i> Add Source</button>
+</div>
 </div>
 </div>
 
 <div class="tb-workspace-row">
-<!-- LEFT: Sources -->
-<div class="card tb-panel">
-<div class="card-header tb-panel-header">Sources</div>
+<!-- Sources -->
+<div class="card tb-panel tb-sources-card">
+<div class="card-header tb-panel-header"><span>Sources</span><span class="tb-panel-sub" id="tb-sources-count"></span></div>
 <div class="card-body tb-panel-body" id="tb-sources-list"></div>
 </div>
 
-<!-- CENTRE: Transcript -->
-<div class="card tb-panel">
+<!-- Transcript -->
+<div class="card tb-panel tb-transcript-card">
 <div class="card-header tb-panel-header">
 <span id="tb-active-source-name">—</span>
-<span class="text-muted" style="font-size:.72rem;font-weight:400;text-transform:none;">select text to code it</span>
+<div class="d-flex flex-wrap align-items-center gap-1" id="tb-lens-bar"></div>
 </div>
 <div class="card-body tb-panel-body">
 <div id="tb-source-attributes" class="mb-2"></div>
@@ -39,16 +42,49 @@ subtitle: "Read, highlight, and code — sources on the left, transcript in the 
 </div>
 </div>
 
-<!-- RIGHT: Codebook reference -->
-<div class="card tb-panel">
-<div class="card-header tb-panel-header">Codebook</div>
-<div class="card-body tb-panel-body" id="tb-codebook-tree"></div>
+<!-- Coding panel -->
+<div class="card tb-panel tb-coding-panel" id="tb-coding-panel">
+<div class="card-header tb-panel-header">
+<span id="tb-cp-title"><i class="bi bi-highlighter me-1"></i>Code a passage</span>
+<button type="button" class="btn btn-sm btn-link p-0 text-muted d-none" id="tb-cp-cancel" title="Clear (Esc)" aria-label="Clear selection"><i class="bi bi-x-lg"></i></button>
+</div>
+<div class="tb-cp-top">
+<div id="tb-cp-quote" class="tb-cp-quote is-empty">Select a passage in the transcript to code it.</div>
+<div id="tb-cp-refs" class="small mt-2"></div>
+<div class="alert alert-success py-1 px-2 small mt-2 mb-0 d-none" id="tb-cp-status" role="status"></div>
+</div>
+<div class="card-body tb-panel-body">
+<p class="small text-muted mb-0" id="tb-cp-hint">Tick every theme the passage speaks to. One passage can carry a cause, a challenge and an impact at once, so each transcript only needs one reading.</p>
+
+<div class="tb-cp-section-label">Themes</div>
+<div id="tb-cp-themes"></div>
+
+<div class="tb-cp-section-label">Details</div>
+<div data-speaker-wrap class="mb-2 d-none">
+<label class="form-label small mb-1" for="tb-cp-speaker">Speaker (FGD)</label>
+<select class="form-select form-select-sm" id="tb-cp-speaker"></select>
+</div>
+<div class="form-check form-switch mb-1">
+<input class="form-check-input" type="checkbox" id="tb-cp-weight-toggle">
+<label class="form-check-label small" for="tb-cp-weight-toggle">Importance score (1–10)</label>
+</div>
+<div class="d-flex align-items-center gap-2 mb-2">
+<input type="range" min="1" max="10" value="5" class="form-range tb-weight-slider" id="tb-cp-weight" aria-label="Importance score">
+<span class="badge bg-secondary" id="tb-cp-weight-value">5</span>
+</div>
+<label class="form-label small mb-1" for="tb-cp-memo">Memo (optional)</label>
+<textarea class="form-control form-control-sm" id="tb-cp-memo" rows="2"></textarea>
+</div>
+<div class="card-footer tb-cp-footer d-flex gap-2">
+<button type="button" class="btn btn-accent flex-grow-1" id="tb-cp-apply" disabled><i class="bi bi-check2 me-1"></i><span id="tb-cp-apply-label">Apply codes</span></button>
+<button type="button" class="btn btn-outline-danger d-none" id="tb-cp-delete" title="Delete this coded reference" aria-label="Delete coded reference"><i class="bi bi-trash"></i></button>
+</div>
 </div>
 </div>
 </div>
 
-<button id="tb-code-selection-btn" class="btn btn-sm btn-accent d-none" style="position:absolute;z-index:1050;">
-<i class="bi bi-highlighter"></i> Code Selection
+<button type="button" id="tb-code-selection-btn" class="btn btn-sm btn-accent d-none" style="position:absolute;z-index:1050;">
+<i class="bi bi-highlighter"></i> Code selection
 </button>
 
 <!-- ============================ MODAL: Add/Edit Source ============================ -->
@@ -140,79 +176,6 @@ subtitle: "Read, highlight, and code — sources on the left, transcript in the 
 <p class="text-muted small mt-3 mb-0">Colours are a visual aid only — the theme/code <em>name</em> carries the analytical meaning (per TakwimuBridge's design principle).</p>
 </div>
 <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
-</div>
-</div>
-</div>
-
-<!-- ============================ MODAL: Apply Code (new) ============================ -->
-<div class="modal fade" id="tb-modal-apply-code" tabindex="-1">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header"><h5 class="modal-title">Code Selection</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-<div class="modal-body">
-<div class="tb-evidence-quote" id="tb-apply-quote-preview" style="font-style:italic;"></div>
-
-<label class="form-label">Theme(s) / Code(s) — you may choose more than one</label>
-<div id="tb-apply-theme-checks" class="mb-3" style="max-height:180px;overflow-y:auto;"></div>
-
-<div data-speaker-wrap class="mb-3">
-<label class="form-label small">Speaker (FGD)</label>
-<select class="form-select form-select-sm" id="tb-apply-speaker-select"></select>
-</div>
-
-<div class="form-check form-switch mb-2">
-<input class="form-check-input" type="checkbox" id="tb-apply-weight-toggle">
-<label class="form-check-label">Assign importance / salience score</label>
-</div>
-<div class="d-flex align-items-center gap-2 mb-3">
-<input type="range" min="1" max="10" class="form-range tb-weight-slider" id="tb-apply-weight-slider">
-<span class="badge bg-secondary" id="tb-apply-weight-value">5</span>
-</div>
-
-<label class="form-label">Memo (optional)</label>
-<textarea class="form-control" id="tb-apply-memo" rows="2"></textarea>
-</div>
-<div class="modal-footer">
-<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-<button class="btn btn-accent" id="tb-save-coding-btn">Apply Code</button>
-</div>
-</div>
-</div>
-</div>
-
-<!-- ============================ MODAL: Edit Coding ============================ -->
-<div class="modal fade" id="tb-modal-edit-coding" tabindex="-1">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header"><h5 class="modal-title">Coded Reference</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-<div class="modal-body">
-<div class="tb-evidence-quote" id="tb-edit-quote-preview" style="font-style:italic;"></div>
-
-<label class="form-label">Theme(s) / Code(s)</label>
-<div id="tb-edit-theme-checks" class="mb-3" style="max-height:180px;overflow-y:auto;"></div>
-
-<div data-speaker-wrap class="mb-3">
-<label class="form-label small">Speaker (FGD)</label>
-<select class="form-select form-select-sm" id="tb-edit-speaker-select"></select>
-</div>
-
-<div class="form-check form-switch mb-2">
-<input class="form-check-input" type="checkbox" id="tb-edit-weight-toggle">
-<label class="form-check-label">Assign importance / salience score</label>
-</div>
-<div class="d-flex align-items-center gap-2 mb-3">
-<input type="range" min="1" max="10" class="form-range tb-weight-slider" id="tb-edit-weight-slider">
-<span class="badge bg-secondary" id="tb-edit-weight-value">5</span>
-</div>
-
-<label class="form-label">Memo (optional)</label>
-<textarea class="form-control" id="tb-edit-memo" rows="2"></textarea>
-</div>
-<div class="modal-footer">
-<button class="btn btn-outline-danger me-auto" id="tb-delete-coding-btn"><i class="bi bi-trash"></i> Delete</button>
-<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-<button class="btn btn-accent" id="tb-update-coding-btn">Save Changes</button>
-</div>
 </div>
 </div>
 </div>

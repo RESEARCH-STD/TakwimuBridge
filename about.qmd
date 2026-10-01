@@ -3,6 +3,8 @@ title: "About & Scope"
 subtitle: "What TakwimuBridge is, who built it, and exactly what \"runs in your browser\" means for your data."
 ---
 
+:::: {.tb-prose}
+
 ## What this is
 
 TakwimuBridge is a qualitative data analysis (QDA) tool designed by **Sustainable Solutions Tanzania (SST)** for researchers, students, consultants, institutions and organizations working with Key Informant Interviews (KIIs), Focus Group Discussions (FGDs), individual interviews, open-ended survey responses, and other textual qualitative data.
@@ -16,8 +18,9 @@ This is a **static site with no backend, no database, and no server-side account
 | Capability | Status |
 |---|---|
 | Highlighting, coding, theming, weighting | ✅ Real — genuinely computed, not mocked |
-| Frequency, coverage, weighted-score, average-weight analysis | ✅ Real — recalculated live from your actual coded data |
-| Charts, heat map, word frequency, word cloud | ✅ Real — rendered client-side from your data |
+| Coding one passage to several theme groups (e.g. a cause, a challenge and an impact) in one reading | ✅ Real |
+| Frequency, coverage, weighted-score, average-weight analysis, at theme, sub-theme or code level | ✅ Real — recalculated live from your actual coded data |
+| Charts, heat map, theme cloud, word frequency, word cloud | ✅ Real — rendered client-side from your data |
 | CSV / Excel / Word-report / image / JSON export | ✅ Real — generated client-side, downloads directly |
 | DOCX / TXT / CSV import | ✅ Real — parsed client-side (mammoth.js / SheetJS); nothing is uploaded anywhere |
 | Multi-user projects / team coding | ❌ Not implemented — one browser, one person, one copy of the data |
@@ -37,3 +40,5 @@ This product's real name, **"TakwimuBridge"**, comes directly from SST's own fun
 ## Credits
 
 Functional description and user guide: **Sustainable Solutions Tanzania (SST)**. Built with [Quarto](https://quarto.org) and Bootstrap 5. Charts by [Chart.js](https://www.chartjs.org/), word clouds by [wordcloud2.js](https://wordcloud2-js.timdream.org/), spreadsheet export by [SheetJS](https://sheetjs.com/), DOCX import by [mammoth.js](https://github.com/mwilliamson/mammoth.js).
+
+::::

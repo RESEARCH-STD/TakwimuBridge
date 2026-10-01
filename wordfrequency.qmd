@@ -1,6 +1,6 @@
 ---
-title: "Word Frequency & Word Cloud"
-subtitle: "Words are not codes, and codes are not themes — use this to spot vocabulary patterns, not to replace coding."
+title: "Theme & Word Cloud"
+subtitle: "The theme cloud sizes each theme by how often it was coded; the word cloud shows raw vocabulary. Words are not codes, and codes are not themes."
 ---
 
 ```{=html}
@@ -10,55 +10,67 @@ subtitle: "Words are not codes, and codes are not themes — use this to spot vo
 
 <div id="tb-wf-content" class="d-none">
 
-<div class="alert alert-secondary small">
-<i class="bi bi-lightbulb"></i> <strong>Important:</strong> "factory waste", "dirty river" and "smoke" might all be coded as <em>Environmental Pollution</em> — so the coded reference count for a theme can be much higher than the count of any single word. Word frequency is a vocabulary check, not a substitute for coding.
+<div class="card tb-toolbar mb-4">
+<div class="card-body">
+<div class="tb-toolbar-group"><span class="tb-toolbar-label">Cloud of</span>
+<div class="btn-group btn-group-sm tb-segmented" role="group" aria-label="Cloud type">
+<input type="radio" class="btn-check" name="tbCloudMode" id="tb-cloud-mode-themes" value="themes" checked>
+<label class="btn btn-outline-primary" for="tb-cloud-mode-themes"><i class="bi bi-diagram-3 me-1"></i>Themes</label>
+<input type="radio" class="btn-check" name="tbCloudMode" id="tb-cloud-mode-words" value="words">
+<label class="btn btn-outline-primary" for="tb-cloud-mode-words"><i class="bi bi-fonts me-1"></i>Words</label>
+</div>
 </div>
 
-<div class="card tb-panel mb-4">
-<div class="card-header tb-panel-header">Scope</div>
-<div class="card-body tb-panel-body">
-<div class="grid gap-3">
-<div class="g-col-12 g-col-md-4">
-<div class="btn-group-vertical w-100" role="group">
+<div class="tb-toolbar-group" data-mode="themes"><span class="tb-toolbar-label">Level</span><div id="tb-tc-level"></div></div>
+<div class="tb-toolbar-group" data-mode="themes" id="tb-tc-within-wrap"><span class="tb-toolbar-label">Within</span>
+<select class="form-select form-select-sm" style="width:auto;max-width:18rem;" id="tb-tc-within" aria-label="Limit to one theme"></select>
+</div>
+<div class="tb-toolbar-group" data-mode="themes"><span class="tb-toolbar-label">Size by</span>
+<select class="form-select form-select-sm" style="width:auto;" id="tb-tc-measure" aria-label="Size themes by">
+<option value="frequency">Frequency (coded references)</option>
+<option value="coverageCount">Respondents raising it</option>
+<option value="totalWeight">Total weighted score</option>
+</select>
+</div>
+
+<div class="tb-toolbar-group d-none" data-mode="words"><span class="tb-toolbar-label">Text</span>
+<div class="btn-group btn-group-sm tb-segmented" role="group" aria-label="Text scope">
 <input type="radio" class="btn-check" name="wfScope" id="tb-wf-scope-all" value="all" checked>
-<label class="btn btn-outline-secondary text-start" for="tb-wf-scope-all">All transcript text</label>
+<label class="btn btn-outline-primary" for="tb-wf-scope-all">All transcript text</label>
 <input type="radio" class="btn-check" name="wfScope" id="tb-wf-scope-coded" value="coded">
-<label class="btn btn-outline-secondary text-start" for="tb-wf-scope-coded">Coded passages only</label>
+<label class="btn btn-outline-primary" for="tb-wf-scope-coded">Coded passages only</label>
 </div>
 </div>
-<div class="g-col-12 g-col-md-4" id="tb-wf-theme-wrap" style="display:none;">
-<label class="form-label small">Limit to theme(s)</label>
-<div id="tb-wf-theme-checks" style="max-height:120px;overflow-y:auto;"></div>
+<div class="tb-toolbar-group d-none" data-mode="words" id="tb-wf-theme-wrap"><span class="tb-toolbar-label">Under</span>
+<select class="form-select form-select-sm" style="width:auto;max-width:18rem;" id="tb-wf-theme" aria-label="Limit coded passages to a theme"></select>
 </div>
-<div class="g-col-12 g-col-md-4">
-<label class="form-label small">Extra stopwords (comma-separated)</label>
-<input class="form-control form-control-sm" id="tb-wf-stopwords" placeholder="e.g. village, district">
+<div class="tb-toolbar-group d-none" data-mode="words"><span class="tb-toolbar-label">Ignore</span>
+<input class="form-control form-control-sm" style="width:15rem;" id="tb-wf-stopwords" placeholder="extra stopwords, comma-separated" aria-label="Extra stopwords">
 </div>
-</div>
-<button class="btn btn-accent btn-sm mt-3" id="tb-wf-apply-btn"><i class="bi bi-arrow-repeat"></i> Update</button>
 </div>
 </div>
 
-<div class="grid gap-3 mb-4">
-<div class="g-col-12 g-col-lg-7">
-<div class="card tb-panel" style="height:420px;">
-<div class="card-header tb-panel-header">Word Cloud <button class="btn btn-sm btn-link p-0" id="tb-wf-cloud-png" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
+<div class="grid gap-4">
+<div class="g-col-12">
+<div class="card">
+<div class="card-header tb-panel-header"><span id="tb-cloud-title">Theme cloud</span><button type="button" class="btn btn-sm btn-link p-0" id="tb-wf-cloud-png" title="Save as PNG"><i class="bi bi-camera"></i></button></div>
 <div class="card-body tb-panel-body">
-<canvas id="tb-wf-cloud" width="700" height="360" style="width:100%;height:100%;"></canvas>
+<div class="tb-cloud-box tall"><canvas id="tb-wf-cloud"></canvas></div>
+<p class="small text-muted mb-0 mt-2" id="tb-cloud-note"></p>
 </div>
 </div>
 </div>
-<div class="g-col-12 g-col-lg-5">
-<div class="card tb-panel" style="height:420px;">
-<div class="card-header tb-panel-header">
-Word Frequency Table
-<button class="btn btn-sm btn-outline-secondary" id="tb-wf-export-btn"><i class="bi bi-download"></i> CSV</button>
-</div>
-<div class="card-body tb-panel-body">
-<table class="table table-sm table-striped">
-<thead><tr><th>Word</th><th class="text-end">Count</th></tr></thead>
+<div class="g-col-12">
+<div class="card">
+<div class="card-header tb-panel-header"><span id="tb-table-title">Themes</span><button type="button" class="btn btn-sm btn-outline-secondary" id="tb-wf-export-btn"><i class="bi bi-download"></i> CSV</button></div>
+<div class="card-body p-0">
+<div class="table-responsive">
+<table class="table table-sm table-hover align-middle mb-0">
+<thead id="tb-wf-table-head"></thead>
 <tbody id="tb-wf-table-body"></tbody>
 </table>
+</div>
+<p class="small text-muted px-3 py-2 mb-0" id="tb-table-note"></p>
 </div>
 </div>
 </div>
@@ -68,53 +80,125 @@ Word Frequency Table
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-  if (window.TB && window.TB.seedDemoIfNeeded) window.TB.seedDemoIfNeeded();
   var TB = window.TB;
+  if (TB.seedDemoIfNeeded) TB.seedDemoIfNeeded();
   var project = TB.getActiveProject();
   if (!project) { document.getElementById("tb-no-project-alert").classList.remove("d-none"); return; }
   document.getElementById("tb-wf-content").classList.remove("d-none");
 
+  function $(id) { return document.getElementById(id); }
   function esc(s) { return TB.escapeHtml(s); }
-  var lastResult = [];
+  var MEASURES = { frequency: "Frequency", coverageCount: "Respondents", totalWeight: "Total weight" };
+  var WORD_ROWS = 60;
+  var state = { mode: "themes", level: Math.min(1, Math.max(0, TB.maxThemeDepth(project))), within: "", measure: "frequency" };
+  var lastThemes = [], lastWords = [];
 
-  function renderThemeChecks() {
-    document.getElementById("tb-wf-theme-checks").innerHTML = project.themes.map(function (t) {
-      return '<div class="form-check"><input class="form-check-input tb-wf-theme-check" type="checkbox" value="' + t.id + '" id="wfchk-' + t.id + '">' +
-        '<label class="form-check-label" for="wfchk-' + t.id + '">' + esc(t.name) + "</label></div>";
-    }).join("") || '<p class="text-muted small">No themes yet.</p>';
+  function renderWithin() {
+    var options = TB.themesInTreeOrder(project).filter(function (t) { return TB.themeDepth(project, t.id) < state.level; });
+    if (!options.some(function (t) { return t.id === state.within; })) state.within = "";
+    $("tb-tc-within").innerHTML = '<option value="">All themes</option>' + options.map(function (t) {
+      return '<option value="' + esc(t.id) + '"' + (t.id === state.within ? " selected" : "") + ">" + esc(TB.themePath(project, t.id)) + "</option>";
+    }).join("");
+    $("tb-tc-within-wrap").classList.toggle("d-none", state.mode !== "themes" || !options.length);
   }
 
-  function toggleThemeWrap() {
-    var coded = document.getElementById("tb-wf-scope-coded").checked;
-    document.getElementById("tb-wf-theme-wrap").style.display = coded ? "" : "none";
+  function renderThemeSelect() {
+    $("tb-wf-theme").innerHTML = '<option value="">Any theme</option>' + TB.themesInTreeOrder(project).map(function (t) {
+      return '<option value="' + esc(t.id) + '">' + esc(TB.themePath(project, t.id)) + "</option>";
+    }).join("");
+  }
+  function toggleWordThemeSelect() {
+    var coded = $("tb-wf-scope-coded").checked;
+    $("tb-wf-theme-wrap").classList.toggle("d-none", state.mode !== "words" || !coded);
   }
 
-  function update() {
+  function renderThemes() {
+    var items = TB.themeLevelItems(project, state.level, state.within || null);
+    lastThemes = TB.sortThemeItems(items, state.measure, false);
+    TB.charts.renderThemeCloud("tb-wf-cloud", items.map(function (i) {
+      return { id: i.id, label: i.label, value: i.stats[state.measure], color: i.color };
+    }), { onClick: function (item) { TB.ui.showThemeEvidence(project, item.id); } });
+    $("tb-cloud-title").textContent = "Theme cloud";
+    $("tb-cloud-note").textContent = "Each theme is sized by its " + MEASURES[state.measure].toLowerCase() +
+      ", using its own colour. Click a theme to read the quotations behind it.";
+    $("tb-table-title").textContent = "Themes by " + MEASURES[state.measure].toLowerCase();
+    $("tb-wf-table-head").innerHTML = '<tr><th class="ps-3">Theme</th><th class="text-end">Frequency</th><th class="text-end">Respondents</th><th class="text-end pe-3">Total weight</th></tr>';
+    $("tb-wf-table-body").innerHTML = lastThemes.length ? lastThemes.map(function (i) {
+      var parent = i.path.indexOf(" › ") !== -1 ? i.path.slice(0, i.path.lastIndexOf(" › ")) : "";
+      return '<tr role="button" data-theme-id="' + esc(i.id) + '"><td class="ps-3"><span class="d-inline-block rounded-circle me-2" style="width:.6rem;height:.6rem;background:' + esc(i.color) + '"></span>' +
+        esc(i.theme.name) + (parent ? '<div class="small text-muted ms-3">' + esc(parent) + "</div>" : "") + "</td>" +
+        '<td class="text-end">' + i.stats.frequency + "</td>" +
+        '<td class="text-end">' + i.stats.coverageCount + "/" + i.stats.coverageTotal + "</td>" +
+        '<td class="text-end pe-3">' + i.stats.totalWeight + "</td></tr>";
+    }).join("") : '<tr><td colspan="4" class="text-muted ps-3">No themes yet.</td></tr>';
+    $("tb-table-note").textContent = "";
+    Array.prototype.forEach.call($("tb-wf-table-body").querySelectorAll("tr[data-theme-id]"), function (tr) {
+      tr.addEventListener("click", function () { TB.ui.showThemeEvidence(project, tr.getAttribute("data-theme-id")); });
+    });
+  }
+
+  function renderWords() {
     var scope = document.querySelector('input[name="wfScope"]:checked').value;
-    var themeIds = Array.prototype.map.call(document.querySelectorAll(".tb-wf-theme-check:checked"), function (c) { return c.value; });
-    var extra = document.getElementById("tb-wf-stopwords").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
-    lastResult = TB.wordFrequency(project, { scope: scope, themeIds: themeIds.length ? themeIds : null, extraStopwords: extra });
-
-    TB.charts.renderWordCloud("tb-wf-cloud", lastResult);
-
-    var body = document.getElementById("tb-wf-table-body");
-    body.innerHTML = lastResult.length
-      ? lastResult.slice(0, 200).map(function (w) { return "<tr><td>" + esc(w.word) + "</td><td class=\"text-end\">" + w.count + "</td></tr>"; }).join("")
-      : '<tr><td colspan="2" class="text-muted">No words found for this scope.</td></tr>';
+    var themeId = $("tb-wf-theme").value;
+    var extra = $("tb-wf-stopwords").value.split(",").map(function (s) { return s.trim(); }).filter(Boolean);
+    lastWords = TB.wordFrequency(project, { scope: scope, themeIds: scope === "coded" && themeId ? [themeId] : null, extraStopwords: extra });
+    TB.charts.renderWordCloud("tb-wf-cloud", lastWords);
+    $("tb-cloud-title").textContent = "Word cloud";
+    $("tb-cloud-note").textContent = "“Factory waste”, “dirty river” and “smoke” may all be coded Environmental Pollution, so a theme's frequency can be far higher than any single word's — use this as a vocabulary check, not a substitute for coding.";
+    $("tb-table-title").textContent = "Word frequency";
+    $("tb-wf-table-head").innerHTML = '<tr><th class="ps-3">Word</th><th class="text-end pe-3">Count</th></tr>';
+    $("tb-wf-table-body").innerHTML = lastWords.length ? lastWords.slice(0, WORD_ROWS).map(function (w) {
+      return '<tr><td class="ps-3">' + esc(w.word) + '</td><td class="text-end pe-3">' + w.count + "</td></tr>";
+    }).join("") : '<tr><td colspan="2" class="text-muted ps-3">No words found for this scope.</td></tr>';
+    $("tb-table-note").textContent = lastWords.length > WORD_ROWS
+      ? "Showing the top " + WORD_ROWS + " of " + lastWords.length + " words — the CSV has them all." : "";
   }
 
-  document.getElementById("tb-wf-apply-btn").addEventListener("click", update);
-  document.querySelectorAll('input[name="wfScope"]').forEach(function (r) { r.addEventListener("change", function () { toggleThemeWrap(); update(); }); });
-  document.getElementById("tb-wf-export-btn").addEventListener("click", function () {
-    TB.exportUtil.exportWordFrequencyCSV(lastResult, TB.exportUtil.slug(project.title) + "-word-frequency");
+  function render() { if (state.mode === "themes") renderThemes(); else renderWords(); }
+
+  function setMode(mode) {
+    state.mode = mode;
+    Array.prototype.forEach.call(document.querySelectorAll("[data-mode]"), function (el) {
+      el.classList.toggle("d-none", el.getAttribute("data-mode") !== mode);
+    });
+    renderWithin();
+    toggleWordThemeSelect();
+    $("tb-tc-level").closest(".tb-toolbar-group").classList.toggle("d-none", mode !== "themes" || TB.levelOptions(project).length < 2);
+    render();
+  }
+
+  state.level = TB.ui.levelControl($("tb-tc-level"), project, {
+    name: "tbCloudLevel", value: state.level,
+    onChange: function (v) { state.level = v; renderWithin(); render(); }
   });
-  document.getElementById("tb-wf-cloud-png").addEventListener("click", function () {
-    TB.exportUtil.canvasToPNG("tb-wf-cloud", TB.exportUtil.slug(project.title) + "-word-cloud.png");
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="tbCloudMode"]'), function (r) {
+    r.addEventListener("change", function () { setMode(r.value); });
+  });
+  $("tb-tc-within").addEventListener("change", function (e) { state.within = e.target.value; render(); });
+  $("tb-tc-measure").addEventListener("change", function (e) { state.measure = e.target.value; render(); });
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="wfScope"]'), function (r) {
+    r.addEventListener("change", function () { toggleWordThemeSelect(); render(); });
+  });
+  $("tb-wf-theme").addEventListener("change", render);
+  $("tb-wf-stopwords").addEventListener("change", render);
+
+  $("tb-wf-export-btn").addEventListener("click", function () {
+    var base = TB.exportUtil.slug(project.title);
+    if (state.mode === "words") { TB.exportUtil.exportWordFrequencyCSV(lastWords, base + "-word-frequency"); return; }
+    TB.exportUtil.downloadBlob(base + "-theme-cloud.csv", TB.exportUtil.toCSV(
+      ["Theme", "Theme path", "Frequency", "Respondents Covered", "Coverage %", "Total Weighted Score"],
+      lastThemes.map(function (i) { return [i.theme.name, i.path, i.stats.frequency, i.stats.coverageCount, i.stats.coveragePct, i.stats.totalWeight]; })
+    ), "text/csv");
+  });
+  $("tb-wf-cloud-png").addEventListener("click", function () {
+    TB.exportUtil.canvasToPNG("tb-wf-cloud", TB.exportUtil.slug(project.title) + "-" + (state.mode === "words" ? "word" : "theme") + "-cloud.png");
   });
 
-  renderThemeChecks();
-  toggleThemeWrap();
-  update();
+  renderThemeSelect();
+  setMode("themes");
+
+  var resizeTimer = null;
+  window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 250); });
 });
 </script>
 ```

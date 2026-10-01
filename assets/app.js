@@ -24,6 +24,12 @@
     return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   }
 
+  // Theme colours end up inside style attributes; imported backups are
+  // untrusted, so only plain hex colours are ever rendered.
+  function safeColor(c) {
+    return /^#[0-9a-f]{3,8}$/i.test(String(c || "")) ? c : "#1B4F9C";
+  }
+
   var PALETTE = ["#1B4F9C", "#17B8A6", "#E08E45", "#C0392B", "#2F6FED", "#1E8A5F",
     "#8E44AD", "#D35400", "#16A085", "#B3261E", "#2C3E50", "#7D3C98"];
   var paletteCursor = 0;
@@ -31,6 +37,11 @@
     var c = PALETTE[paletteCursor % PALETTE.length];
     paletteCursor++;
     return c;
+  }
+  function suggestColor(project) {
+    var used = {};
+    (project ? project.themes : []).forEach(function (t) { used[String(t.color).toLowerCase()] = true; });
+    return PALETTE.find(function (c) { return !used[c.toLowerCase()]; }) || nextColor();
   }
 
   // ---------------------------------------------------------------- storage
@@ -132,7 +143,7 @@
       id: uid("thm"),
       name: fields.name || "Untitled Theme",
       parentId: fields.parentId || null,
-      color: fields.color || nextColor(),
+      color: fields.color || suggestColor(project),
       memo: fields.memo || ""
     };
     project.themes.push(theme);
@@ -192,6 +203,48 @@
   function themeDepth(project, themeId) {
     return ancestorsAndSelf(project, themeId).length - 1;
   }
+  function topLevelThemeId(project, themeId) {
+    var chain = ancestorsAndSelf(project, themeId);
+    return chain.length ? chain[chain.length - 1] : null;
+  }
+  function themePath(project, themeId, sep) {
+    return ancestorsAndSelf(project, themeId).reverse().map(function (id) {
+      var t = themeById(project, id); return t ? t.name : "";
+    }).join(sep || " › ");
+  }
+  function maxThemeDepth(project) {
+    var max = -1;
+    project.themes.forEach(function (t) { max = Math.max(max, themeDepth(project, t.id)); });
+    return max;
+  }
+  function themesInTreeOrder(project) {
+    var out = [];
+    (function walk(nodes) {
+      nodes.forEach(function (n) { out.push(themeById(project, n.id)); walk(n.children); });
+    })(themeTree(project));
+    return out;
+  }
+  // A "cut" through the codebook at one depth (0 = themes, 1 = sub-themes,
+  // 2 = codes): every node at that depth plus any leaf that stops short of
+  // it, so no coded reference falls out of the analysis. Tree order.
+  function themesAtLevel(project, level, withinThemeId) {
+    var result = [];
+    function walk(node, depth) {
+      if (depth >= level || !node.children.length) { result.push(themeById(project, node.id)); return; }
+      node.children.forEach(function (c) { walk(c, depth + 1); });
+    }
+    var tree = themeTree(project);
+    if (withinThemeId) {
+      var found = null;
+      (function find(nodes) {
+        nodes.forEach(function (n) { if (n.id === withinThemeId) found = n; else if (!found) find(n.children); });
+      })(tree);
+      if (found) walk(found, themeDepth(project, found.id));
+    } else {
+      tree.forEach(function (n) { walk(n, 0); });
+    }
+    return result;
+  }
 
   // ---------------------------------------------------------------- codings
   function addCoding(project, fields) {
@@ -232,6 +285,31 @@
       ancestorsAndSelf(project, id).forEach(function (a) { set[a] = true; });
     });
     return set;
+  }
+  function recentCodings(project, limit) {
+    return project.codings.slice().sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }).slice(0, limit || 5);
+  }
+
+  // Characters inside at least one coded reference (overlaps merged), as a
+  // coding-progress indicator — not an analytical measure.
+  function codedCharacterCount(project, sourceId) {
+    var ranges = codingsForSource(project, sourceId).map(function (c) { return [c.start, c.end]; })
+      .sort(function (a, b) { return a[0] - b[0]; });
+    var total = 0, curStart = 0, curEnd = 0;
+    ranges.forEach(function (r) {
+      if (r[0] > curEnd) { total += curEnd - curStart; curStart = r[0]; curEnd = r[1]; }
+      else curEnd = Math.max(curEnd, r[1]);
+    });
+    return total + (curEnd - curStart);
+  }
+  function sourceCodedPct(project, source) {
+    var len = (source.text || "").length;
+    return len ? Math.min(100, Math.round((codedCharacterCount(project, source.id) / len) * 1000) / 10) : 0;
+  }
+  function projectCodedPct(project) {
+    var len = 0, coded = 0;
+    project.sources.forEach(function (s) { len += (s.text || "").length; coded += codedCharacterCount(project, s.id); });
+    return len ? Math.min(100, Math.round((coded / len) * 1000) / 10) : 0;
   }
 
   // ------------------------------------------------------------ respondents
@@ -287,6 +365,42 @@
       weightedCount: weightedCount,
       avgWeight: weightedCount ? Math.round((totalWeight / weightedCount) * 100) / 100 : null
     };
+  }
+
+  var LEVEL_NAMES = ["Themes", "Sub-themes", "Codes"];
+  function levelOptions(project) {
+    var out = [];
+    for (var i = 0; i <= Math.max(0, maxThemeDepth(project)); i++) {
+      out.push({ value: i, label: LEVEL_NAMES[i] || ("Level " + (i + 1)) });
+    }
+    return out;
+  }
+
+  // Themes at one analysis level with their stats; labels fall back to the
+  // full path when two themes at that level share a name.
+  function themeLevelItems(project, level, withinThemeId) {
+    var themes = themesAtLevel(project, level, withinThemeId);
+    var nameCount = {};
+    themes.forEach(function (t) { nameCount[t.name] = (nameCount[t.name] || 0) + 1; });
+    var topOrder = {};
+    themeTree(project).forEach(function (n, i) { topOrder[n.id] = i; });
+    return themes.map(function (t) {
+      var path = themePath(project, t.id);
+      var topId = topLevelThemeId(project, t.id);
+      return {
+        id: t.id, theme: t, color: safeColor(t.color), path: path,
+        label: nameCount[t.name] > 1 ? path : t.name,
+        topId: topId, topOrder: topOrder[topId] || 0,
+        stats: themeStats(project, t.id)
+      };
+    });
+  }
+  // Sort by a stat, keeping sub-themes grouped under their theme.
+  function sortThemeItems(items, key, grouped) {
+    return items.slice().sort(function (a, b) {
+      if (grouped && a.topOrder !== b.topOrder) return a.topOrder - b.topOrder;
+      return (b.stats[key] || 0) - (a.stats[key] || 0);
+    });
   }
 
   function allThemeStats(project) {
@@ -454,7 +568,9 @@
   }
 
   window.TB = {
-    uid: uid, escapeHtml: escapeHtml, nextColor: nextColor,
+    uid: uid, escapeHtml: escapeHtml, escapeRegExp: escapeRegExp,
+    nextColor: nextColor, suggestColor: suggestColor, safeColor: safeColor,
+    levelOptions: levelOptions, themeLevelItems: themeLevelItems, sortThemeItems: sortThemeItems,
     listProjects: listProjects, loadProject: loadProject, saveProject: saveProject, deleteProject: deleteProject,
     getActiveProjectId: getActiveProjectId, setActiveProjectId: setActiveProjectId, getActiveProject: getActiveProject,
     createProject: createProject,
@@ -462,8 +578,11 @@
     addTheme: addTheme, updateTheme: updateTheme, deleteTheme: deleteTheme, themeById: themeById,
     childThemes: childThemes, themeTree: themeTree, ancestorsAndSelf: ancestorsAndSelf,
     descendantThemeIds: descendantThemeIds, themeDepth: themeDepth,
+    topLevelThemeId: topLevelThemeId, themePath: themePath, maxThemeDepth: maxThemeDepth,
+    themesInTreeOrder: themesInTreeOrder, themesAtLevel: themesAtLevel,
     addCoding: addCoding, updateCoding: updateCoding, deleteCoding: deleteCoding,
     codingsForSource: codingsForSource, codingEffectiveThemeIds: codingEffectiveThemeIds,
+    recentCodings: recentCodings, sourceCodedPct: sourceCodedPct, projectCodedPct: projectCodedPct,
     respondentsOf: respondentsOf, respondentIdForCoding: respondentIdForCoding,
     themeStats: themeStats, allThemeStats: allThemeStats, matrixData: matrixData,
     evidenceForTheme: evidenceForTheme, groupComparison: groupComparison,

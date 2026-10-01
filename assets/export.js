@@ -28,14 +28,20 @@
     return lines.join("\r\n");
   }
 
+  var LEVEL_NAMES = ["Theme", "Sub-theme", "Code"];
+  function levelName(project, themeId) {
+    var d = window.TB.themeDepth(project, themeId);
+    return LEVEL_NAMES[d] || ("Level " + (d + 1));
+  }
+
   function themeStatsRows(project) {
-    var stats = window.TB.allThemeStats(project);
-    return stats.map(function (s) {
-      return [s.theme.name, s.frequency, s.coverageCount, s.coverageTotal, s.coveragePct + "%",
+    return window.TB.themesInTreeOrder(project).map(function (t) {
+      var s = window.TB.themeStats(project, t.id);
+      return [t.name, levelName(project, t.id), window.TB.themePath(project, t.id), s.frequency, s.coverageCount, s.coverageTotal, s.coveragePct + "%",
         s.totalWeight, s.avgWeight === null ? "" : s.avgWeight];
     });
   }
-  var THEME_STATS_HEADERS = ["Theme", "Frequency", "Respondents Covered", "Total Respondents", "Coverage %", "Total Weighted Score", "Average Weight"];
+  var THEME_STATS_HEADERS = ["Theme", "Level", "Theme Path", "Frequency", "Respondents Covered", "Total Respondents", "Coverage %", "Total Weighted Score", "Average Weight"];
 
   function codedReferenceRows(project) {
     var respondents = window.TB.respondentsOf(project);
@@ -43,17 +49,18 @@
     return project.codings.map(function (c) {
       var src = project.sources.find(function (s) { return s.id === c.sourceId; });
       var r = respMap[window.TB.respondentIdForCoding(c)];
-      var themeNames = (c.themeIds || []).map(function (id) {
-        var t = window.TB.themeById(project, id); return t ? t.name : "";
-      }).filter(Boolean).join(" | ");
-      return [src ? src.name : "", r ? r.label : "", themeNames, c.weight === null ? "" : c.weight, c.memo || "", c.quote];
+      var themePaths = (c.themeIds || []).filter(function (id) { return window.TB.themeById(project, id); })
+        .map(function (id) { return window.TB.themePath(project, id); }).join(" | ");
+      return [src ? src.name : "", r ? r.label : "", themePaths, c.weight === null ? "" : c.weight, c.memo || "", c.quote];
     });
   }
   var CODED_REFERENCE_HEADERS = ["Source", "Respondent", "Theme(s)", "Weight", "Memo", "Quote"];
 
   function matrixRows(project, metric) {
-    var m = window.TB.matrixData(project, null);
-    var headers = ["Respondent"].concat(m.themes.map(function (t) { return t.name; }));
+    var ordered = window.TB.themesInTreeOrder(project);
+    var m = window.TB.matrixData(project, ordered.map(function (t) { return t.id; }));
+    m.themes = ordered;
+    var headers = ["Respondent"].concat(m.themes.map(function (t) { return window.TB.themePath(project, t.id); }));
     var rows = m.respondents.map(function (r) {
       return [r.label].concat(m.themes.map(function (t) {
         var cell = m.cells[r.id][t.id];
@@ -102,23 +109,30 @@
   }
 
   // -------------------------------------------------------- Word-compatible
+  // Theme by theme, each followed by its sub-themes (sorted by frequency),
+  // so the report reads at theme level first, then drills down.
   function exportThemeReportWord(project) {
-    var stats = window.TB.allThemeStats(project).sort(function (a, b) { return b.frequency - a.frequency; });
+    function section(node, depth) {
+      var s = window.TB.themeStats(project, node.id);
+      var tag = "h" + Math.min(depth + 2, 6);
+      var evidence = window.TB.evidenceForTheme(project, node.id).slice(0, node.children.length ? 2 : 3);
+      var children = node.children.slice().sort(function (a, b) {
+        return window.TB.themeStats(project, b.id).frequency - window.TB.themeStats(project, a.id).frequency;
+      });
+      return "<" + tag + " style=\"color:#1B4F9C;\">" + esc(node.name) + "</" + tag + ">" +
+        "<p><b>Frequency:</b> " + s.frequency + " &nbsp; <b>Respondent Coverage:</b> " + s.coverageCount + "/" + s.coverageTotal + " (" + s.coveragePct + "%) &nbsp; " +
+        "<b>Total Weighted Score:</b> " + s.totalWeight + " &nbsp; <b>Average Weight:</b> " + (s.avgWeight === null ? "—" : s.avgWeight) + "</p>" +
+        (node.memo ? "<p><i>Memo: " + esc(node.memo) + "</i></p>" : "") +
+        (evidence.length ? "<p><b>Supporting evidence:</b></p><ul>" + evidence.map(function (e) {
+          return "<li>&ldquo;" + esc(e.quote) + "&rdquo; — " + esc(e.sourceName) + (e.respondentLabel ? " (" + esc(e.respondentLabel) + ")" : "") + (e.weight !== null ? ", weight " + e.weight + "/10" : "") + "</li>";
+        }).join("") + "</ul>" : "<p><i>No coded references yet.</i></p>") +
+        children.map(function (c) { return section(c, depth + 1); }).join("");
+    }
     var html = "<html><head><meta charset='utf-8'><title>" + esc(project.title) + " — Coding Report</title></head><body style=\"font-family:Calibri,Arial,sans-serif;\">" +
       "<h1>" + esc(project.title) + "</h1>" +
       "<p><em>" + esc(project.description || "") + "</em></p>" +
       "<p>Researcher: " + esc(project.researcher || "—") + " &nbsp;|&nbsp; Organization: " + esc(project.org || "—") + " &nbsp;|&nbsp; Date: " + esc(project.date || "—") + "</p>" +
-      "<h2>Theme Summary</h2>" +
-      stats.map(function (s) {
-        var evidence = window.TB.evidenceForTheme(project, s.themeId).slice(0, 3);
-        return "<h3 style=\"color:#1B4F9C;\">" + esc(s.theme.name) + "</h3>" +
-          "<p><b>Frequency:</b> " + s.frequency + " &nbsp; <b>Respondent Coverage:</b> " + s.coverageCount + "/" + s.coverageTotal + " (" + s.coveragePct + "%) &nbsp; " +
-          "<b>Total Weighted Score:</b> " + s.totalWeight + " &nbsp; <b>Average Weight:</b> " + (s.avgWeight === null ? "—" : s.avgWeight) + "</p>" +
-          (s.theme.memo ? "<p><i>Memo: " + esc(s.theme.memo) + "</i></p>" : "") +
-          (evidence.length ? "<p><b>Supporting evidence:</b></p><ul>" + evidence.map(function (e) {
-            return "<li>&ldquo;" + esc(e.quote) + "&rdquo; — " + esc(e.sourceName) + (e.respondentLabel ? " (" + esc(e.respondentLabel) + ")" : "") + (e.weight !== null ? ", weight " + e.weight + "/10" : "") + "</li>";
-          }).join("") + "</ul>" : "<p><i>No coded references yet.</i></p>");
-      }).join("") +
+      window.TB.themeTree(project).map(function (n) { return section(n, 0); }).join("") +
       "<hr><p style=\"font-size:11px;color:#666;\">Generated by TakwimuBridge — client-side qualitative analysis tool. This file is HTML formatted for Word compatibility, not a native .docx binary.</p>" +
       "</body></html>";
     downloadBlob(slug(project.title) + "-coding-report.doc", html, "application/msword");
@@ -133,7 +147,10 @@
     reader.onload = function () {
       try {
         var project = JSON.parse(reader.result);
-        if (!project.id || !project.sources || !project.themes || !project.codings) throw new Error("Not a recognizable TakwimuBridge project file.");
+        if (!project || !project.id || !Array.isArray(project.sources) || !Array.isArray(project.themes) || !Array.isArray(project.codings)) {
+          throw new Error("Not a recognizable TakwimuBridge project file.");
+        }
+        project.themes.forEach(function (t) { t.color = window.TB.safeColor(t.color); });
         project.id = window.TB.uid("proj");
         window.TB.saveProject(project);
         onDone(null, project);

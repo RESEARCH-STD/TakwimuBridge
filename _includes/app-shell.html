@@ -1,0 +1,45 @@
+<!-- A <div>, not <aside>: Quarto treats <aside> as margin content and
+     re-flows the page grid around it. -->
+<div class="tb-sidebar" id="tb-sidebar">
+  <a class="tb-brand" href="index.html">
+    <img src="images/logo.svg" alt="" width="36" height="36">
+    <span class="tb-brand-text">
+      <span class="tb-brand-name">TakwimuBridge</span>
+      <span class="tb-brand-sub">Qualitative Data Analysis</span>
+    </span>
+  </a>
+
+  <a class="tb-sidebar-project" href="projects.html" title="Switch project">
+    <span class="tb-sidebar-label">Active project</span>
+    <span class="tb-sidebar-project-name" id="tb-sidebar-project-name">No project selected</span>
+    <span class="tb-sidebar-project-meta" id="tb-sidebar-project-meta">Open or create a project</span>
+    <span class="tb-sidebar-project-switch"><i class="bi bi-arrow-left-right"></i> Switch</span>
+  </a>
+
+  <nav class="tb-nav" aria-label="Main navigation">
+    <div class="tb-nav-label">Analysis</div>
+    <a class="tb-nav-link" href="index.html"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a>
+    <a class="tb-nav-link" href="projects.html"><i class="bi bi-folder2-open"></i><span>Projects</span></a>
+    <a class="tb-nav-link" href="workspace.html"><i class="bi bi-highlighter"></i><span>Coding Workspace</span></a>
+    <a class="tb-nav-link" href="analysis.html"><i class="bi bi-bar-chart-line"></i><span>Theme Analysis</span></a>
+    <a class="tb-nav-link" href="wordfrequency.html"><i class="bi bi-cloud"></i><span>Theme &amp; Word Cloud</span></a>
+    <a class="tb-nav-link" href="export.html"><i class="bi bi-box-arrow-down"></i><span>Export</span></a>
+
+    <div class="tb-nav-label">Help</div>
+    <a class="tb-nav-link" href="guide.html"><i class="bi bi-journal-text"></i><span>User Guide</span></a>
+    <a class="tb-nav-link" href="about.html"><i class="bi bi-info-circle"></i><span>About &amp; Scope</span></a>
+  </nav>
+
+  <div class="tb-sidebar-footer">
+    <i class="bi bi-hdd"></i>
+    <span>Saved in this browser only. <a href="export.html">Back up a project</a> to move it to another computer.</span>
+  </div>
+</div>
+<div class="tb-sidebar-backdrop" id="tb-sidebar-backdrop"></div>
+
+<div class="tb-mobilebar">
+  <button type="button" class="tb-mobilebar-toggle" id="tb-sidebar-toggle" aria-label="Open navigation" aria-controls="tb-sidebar" aria-expanded="false">
+    <i class="bi bi-list"></i>
+  </button>
+  <a href="index.html" class="tb-mobilebar-brand"><img src="images/logo.svg" alt="" width="26" height="26"> TakwimuBridge</a>
+</div>
