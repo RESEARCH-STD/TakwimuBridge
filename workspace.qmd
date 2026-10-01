@@ -181,9 +181,9 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(function () {
   if (window.TB && window.TB.seedDemoIfNeeded) window.TB.seedDemoIfNeeded();
   if (window.TB && window.TB.workspace) window.TB.workspace.init();
-});
+}); });
 </script>
 ```

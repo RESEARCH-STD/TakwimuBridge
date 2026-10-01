@@ -292,12 +292,21 @@
     var seededVersion = Number(localStorage.getItem("tb_demo_version") || (localStorage.getItem("tb_demo_seeded") ? 1 : 0));
     if (seededVersion >= DEMO_VERSION) return;
     var existing = window.TB.loadProject(DEMO_ID);
-    // A deleted demo stays deleted; an edited one is left for the user to reset.
-    if (!seededVersion || (existing && isUntouchedDemo(existing))) {
+    // A deleted demo stays deleted, an edited one is left for the user to
+    // reset, and one already here (e.g. just synced from the researcher's
+    // account) is never overwritten unless it is an untouched older version.
+    var stale = existing && (existing.demoVersion || 1) < DEMO_VERSION && isUntouchedDemo(existing);
+    if ((!existing && !seededVersion) || stale) {
       window.TB.saveProject(buildDemoProject());
       if (!window.TB.getActiveProjectId()) window.TB.setActiveProjectId(DEMO_ID);
     }
     markSeeded();
+  };
+  window.TB.isUntouchedDemo = isUntouchedDemo;
+  window.TB.markDemoSeeded = markSeeded;
+  window.TB.forgetDemoSeed = function () {
+    localStorage.removeItem("tb_demo_version");
+    localStorage.removeItem("tb_demo_seeded");
   };
   window.TB.rebuildDemoProject = function () {
     var project = buildDemoProject();

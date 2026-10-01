@@ -1,6 +1,6 @@
 ---
 title: "Projects"
-subtitle: "One project per study. Create, switch, back up or restore — projects are stored in this browser."
+subtitle: "One project per study. Create, switch, back up or restore — sign in to keep projects in your account and open them on any computer."
 ---
 
 ```{=html}
@@ -50,7 +50,7 @@ The bundled demo project — five KIIs and one FGD, each coded for Challenges, C
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(function () {
   var TB = window.TB;
   if (TB.seedDemoIfNeeded) TB.seedDemoIfNeeded();
 
@@ -68,6 +68,10 @@ document.addEventListener("DOMContentLoaded", function () {
       var project = TB.loadProject(p.id) || { sources: [], themes: [], codings: [] };
       var isDemo = p.id === TB.DEMO_PROJECT_ID;
       var top = TB.childThemes(project, null).length;
+      var sync = TB.cloud ? TB.cloud.syncState(p.id) : null;
+      var syncPill = sync === "cloud" ? '<span class="tb-meta-pill tb-sync-cloud"><i class="bi bi-cloud-check"></i>In your account</span>'
+        : sync === "pending" ? '<span class="tb-meta-pill"><i class="bi bi-cloud-upload"></i>Saving to your account…</span>'
+        : sync === "local" ? '<span class="tb-meta-pill"><i class="bi bi-hdd"></i>This browser only</span>' : "";
       return '<div class="g-col-12 g-col-md-6 g-col-xxl-4">' +
         '<div class="card step-card h-100"><div class="card-body d-flex flex-column">' +
         '<div class="d-flex justify-content-between align-items-start gap-2 mb-1">' +
@@ -80,6 +84,7 @@ document.addEventListener("DOMContentLoaded", function () {
         '<span class="tb-meta-pill"><i class="bi bi-file-earmark-text"></i>' + project.sources.length + " sources</span>" +
         '<span class="tb-meta-pill"><i class="bi bi-diagram-3"></i>' + top + " themes · " + (project.themes.length - top) + " sub-themes</span>" +
         '<span class="tb-meta-pill"><i class="bi bi-bookmark-check"></i>' + project.codings.length + " coded refs</span>" +
+        syncPill +
         "</div>" +
         '<p class="small text-muted mb-3"><i class="bi bi-person"></i> ' + esc(p.researcher || "—") + " · updated " + esc(TB.ui.relativeTime(p.updatedAt)) + "</p>" +
         '<div class="d-flex flex-wrap gap-2 mt-auto">' +
@@ -150,6 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   render();
   if (window.location.hash === "#new") new bootstrap.Modal(document.getElementById("tb-modal-new-project")).show();
-});
+}); });
 </script>
 ```

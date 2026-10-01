@@ -1,6 +1,6 @@
 ---
 title: "About & Scope"
-subtitle: "What TakwimuBridge is, who built it, and exactly what \"runs in your browser\" means for your data."
+subtitle: "What TakwimuBridge is, who built it, and where your data is kept."
 ---
 
 :::: {.tb-prose}
@@ -11,9 +11,15 @@ TakwimuBridge is a qualitative data analysis (QDA) tool designed by **Sustainabl
 
 This build implements SST's own **Version 1.0 (MVP) workflow**: upload a transcript → identify the respondent/source → read → highlight → code → assign a colour → optionally score importance 1–10 → automatically count → compare respondents/themes → retrieve quotations → generate charts/word cloud → export results.
 
-## What "runs in your browser" means
+## Where your data is kept
 
-This is a **static site with no backend, no database, and no server-side account system**. Every project, source, code and coded reference you create is stored in your web browser's local storage, on your own device.
+Every project, source, code and coded reference you create is stored in your web browser's local storage, on your own device — that copy is the one you work on, so the tool stays fast and keeps working offline. All analysis runs in your browser.
+
+**With an account.** When accounts are switched on for this site (look for **Sign in to sync** at the bottom of the sidebar), signing in also keeps each of your projects in your TakwimuBridge account, held in a cloud database (Supabase), so you can sign in on another computer and carry on where you left off. Your projects are private to you: the database only ever returns a researcher's own projects. If the same project is changed on two computers before they sync, nothing is overwritten — the other version is kept as a separate "conflicted copy". Signing out removes your projects from that browser, which matters on shared computers.
+
+**Without an account**, everything stays in this browser only: clearing your browser's site data, using a different browser, or switching computers means your projects won't be there. Use **Export → Full Project Backup (JSON)** to move a project by hand.
+
+Interview transcripts can contain personal information. Before storing real data in an account, check that this fits your consent forms and data-protection obligations (for example Tanzania's Personal Data Protection Act).
 
 | Capability | Status |
 |---|---|
@@ -23,15 +29,13 @@ This is a **static site with no backend, no database, and no server-side account
 | Charts, heat map, theme cloud, word frequency, word cloud | ✅ Real — rendered client-side from your data |
 | CSV / Excel / Word-report / image / JSON export | ✅ Real — generated client-side, downloads directly |
 | DOCX / TXT / CSV import | ✅ Real — parsed client-side (mammoth.js / SheetJS); nothing is uploaded anywhere |
-| Multi-user projects / team coding | ❌ Not implemented — one browser, one person, one copy of the data |
+| Cross-device access | ✅ With an account — sign in on any computer. Without one, move projects with **Export → Full Project Backup (JSON)** |
+| Multi-user projects / team coding | ❌ Not implemented — each account holds one researcher's own projects |
 | Inter-coder reliability, advanced compound queries, codebooks-as-templates | ❌ Not implemented in v1 — the data model anticipates them (see below) but no UI yet |
-| Cloud sync / cross-device access | ❌ Not implemented — use **Export → Full Project Backup (JSON)** to move a project between browsers or computers |
 
-Because everything lives in local storage: clearing your browser's site data, using a different browser, or switching devices means your projects won't be there. **Export a JSON backup of any project you care about.**
+## What later versions could add
 
-## What a server-backed Version 2 would add
-
-Per SST's own functional description, later versions could add: codebooks as reusable templates, inter-coder reliability checks, team/multi-user projects with shared codebooks, more advanced compound queries ("Pollution AND Weak Enforcement", or "Pollution among District A respondents"), relationship/network maps between codes, and more sophisticated FGD speaker-level analysis. The data model here (themes with a parent/child hierarchy, and codings that can carry multiple theme IDs) is deliberately structured so those features can be added without a redesign.
+Per SST's own functional description, later versions could add: codebooks as reusable templates, inter-coder reliability checks, team/multi-user projects with shared codebooks, more advanced compound queries ("Pollution AND Weak Enforcement", or "Pollution among District A respondents"), relationship/network maps between codes, and more sophisticated FGD speaker-level analysis. AI-suggested codes, which the researcher accepts or rejects like proofreading, are planned next. The data model here (themes with a parent/child hierarchy, and codings that can carry multiple theme IDs) is deliberately structured so those features can be added without a redesign.
 
 ## A naming note
 

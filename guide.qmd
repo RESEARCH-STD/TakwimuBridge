@@ -79,6 +79,12 @@ If you entered basic respondent attributes, TakwimuBridge can compare groups suc
 
 Bar charts show the most frequently discussed themes. Weighted bar charts show themes with the highest combined importance scores. The **theme cloud** shows your themes sized by how often each was coded, while the **word cloud** shows commonly occurring words, sized by frequency. Heat maps show which themes are more common among different respondents. Comparison charts compare themes between groups.
 
+## Working on More Than One Computer
+
+If accounts are switched on for your site, sign in with **Sign in to sync** at the bottom of the sidebar. Your projects are then kept in your account as well as in the browser, so you can sign in on another computer and carry on. On a shared computer, sign out when you finish — that removes your projects from that browser.
+
+Without an account, projects stay in the browser you used. To move one, use **Export → Full Project Backup (JSON)** and restore it on the other computer.
+
 ## The Process in Ten Simple Steps
 
 1. Upload what people said.

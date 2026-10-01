@@ -103,7 +103,7 @@ subtitle: "Frequency, respondent coverage and weighted importance — at theme, 
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(function () {
   var TB = window.TB;
   if (TB.seedDemoIfNeeded) TB.seedDemoIfNeeded();
   var project = TB.getActiveProject();
@@ -335,6 +335,6 @@ document.addEventListener("DOMContentLoaded", function () {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function () { renderCloud(currentItems()); }, 250);
   });
-});
+}); });
 </script>
 ```

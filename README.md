@@ -26,11 +26,12 @@ and `TakwimuBridge_Simple_User_Guide.docx` (kept in the parent
 
 ## What this is (and isn't)
 
-This is a **static site** — no backend, no database, no accounts. Unlike a
-typical "proof of concept" that mocks its core workflow, the qualitative
-coding and analysis here is **genuinely functional**: it runs entirely as
-client-side JavaScript against the browser's `localStorage`, which is the
-only way to deliver the tool's actual workflow without standing up a server.
+This is a **static site**. Unlike a typical "proof of concept" that mocks
+its core workflow, the qualitative coding and analysis here is **genuinely
+functional**: it runs entirely as client-side JavaScript against the
+browser's `localStorage`. Optionally (see "Cloud sync" below), researchers
+can sign in and their projects sync to a Supabase database so they can
+continue on another computer; the browser copy remains the working copy.
 
 | Feature | Status |
 |---|---|
@@ -41,7 +42,8 @@ only way to deliver the tool's actual workflow without standing up a server.
 | Theme cloud (themes sized by coded frequency), word frequency & word cloud | ✅ Real |
 | CSV, Excel (.xlsx), Word-compatible report, PNG, JSON export | ✅ Real |
 | DOCX / TXT / CSV import | ✅ Real (mammoth.js / SheetJS, client-side) |
-| Multi-user / team projects, cloud sync | ❌ Not implemented — single-browser storage only |
+| Accounts + cloud sync across computers (Supabase), conflict-safe | ✅ Real, once `assets/config.js` is filled in |
+| Multi-user / team projects | ❌ Not implemented — each account holds one researcher's own projects |
 | Inter-coder reliability, advanced compound queries | ❌ Not implemented — data model anticipates them |
 
 See [about.qmd](about.qmd) for the full scope table.
@@ -68,6 +70,25 @@ Vercel's build image doesn't include Quarto, so `vercel.json`'s `buildCommand` d
 
 To deploy manually instead (e.g. to test before pushing): `quarto render` locally, then `npx vercel deploy ./_site --prod --yes --project takwimubridge-qda`.
 
+## Cloud sync (optional)
+
+With `assets/config.js` empty the app is browser-only. To switch accounts on:
+
+1. Create a Supabase project and run [`supabase/setup.sql`](supabase/setup.sql) once in its SQL Editor — a `projects` table (one JSON document per project, keyed by owner + project id), database-set `updated_at` version stamps, and row-level security so each user can only read or change their own rows.
+2. In Authentication → URL Configuration, set the Site URL to the live site and allow `https://<site>/**` as a redirect URL (email confirmation and password-reset links return there).
+3. Put the Project URL and the **public** (anon / publishable) key in `assets/config.js`. Never the secret / service_role key.
+
+How it behaves (`assets/cloud.js`):
+
+- The browser copy is always the working copy; every page still reads and writes it synchronously. Each save is uploaded about a second later; each page load first pulls the account's version list (ids + stamps only) and downloads full data just for projects that changed.
+- Transcripts live in their own `sources` column and are only re-uploaded when they change, so coding a passage sends a few kilobytes rather than every transcript — this matters on mobile data.
+- Browsers cap local storage at roughly 5 MB per site, and signing in brings the whole account into the browser. Very large accounts would need a move to IndexedDB.
+- An upload only applies if the account still holds the version this browser last saw. If a project changed on two computers, the account's version keeps the original and this browser's edits become a separate "(conflicted copy)" project — nothing is silently overwritten.
+- Deletions are stored as tombstones so they reach the user's other computers; a project edited elsewhere after this browser last saw it is restored rather than deleted.
+- Offline edits stay marked and upload when the connection returns (or on the next page load).
+- Signing in on a browser that already has projects asks whether to add them to the account; signing out removes the account's projects from that browser (important on shared computers).
+- The Supabase client (`@supabase/supabase-js`, pinned, with an SRI hash) is only downloaded when sync is configured.
+
 ## Project Structure
 
 ```
@@ -75,8 +96,11 @@ _quarto.yml                Site config: footer, theme, page-layout: custom, html
 custom.scss                 Bootstrap variable overrides + dashboard/component styles (blue/teal palette)
 _includes/head-extra.html   Fonts + CDN libraries (Chart.js, wordcloud2.js, SheetJS, mammoth.js) + app scripts
 _includes/app-shell.html    Dashboard sidebar navigation + mobile top bar (included before every page body)
+assets/config.js             Cloud sync settings (Supabase URL + public key); empty = browser-only
 assets/app.js                Core data model, localStorage persistence, all analysis computations
 assets/demo-data.js          Seeded demo project (5 KIIs + 1 FGD, Challenges/Causes/Impacts), versioned upgrades
+assets/cloud.js              Optional sign-in + sync to Supabase (pull on page load, push on save, conflict copies)
+supabase/setup.sql           One-time database setup: projects table, version stamps, row-level security
 assets/ui.js                 Sidebar behaviour, evidence modal, theme chips, Themes/Sub-themes level switch
 assets/coding-ui.js          Coding Workspace: sources, transcript highlighting, coding panel, codebook, import
 assets/charts.js             Chart.js / theme cloud / word cloud / heat-colour rendering helpers

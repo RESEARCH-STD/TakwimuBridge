@@ -1,7 +1,8 @@
 /*
  * TakwimuBridge core module — storage, data model (CRUD), and analysis
- * computations. Everything runs client-side against localStorage; there is
- * no server. Attaches a single global `TB` namespace used by every page.
+ * computations. Everything runs client-side against localStorage, which is
+ * always the working copy (assets/cloud.js optionally mirrors it to the
+ * signed-in researcher's account). Attaches the global `TB` namespace.
  */
 (function () {
   "use strict";
@@ -50,9 +51,9 @@
     catch (e) { return []; }
   }
 
-  function saveIndexEntry(project) {
+  function saveIndexEntry(project, updatedAt) {
     var idx = listProjects().filter(function (p) { return p.id !== project.id; });
-    idx.push({ id: project.id, title: project.title, researcher: project.researcher, updatedAt: Date.now() });
+    idx.push({ id: project.id, title: project.title, researcher: project.researcher, updatedAt: updatedAt || Date.now() });
     idx.sort(function (a, b) { return b.updatedAt - a.updatedAt; });
     localStorage.setItem(LS_INDEX, JSON.stringify(idx));
   }
@@ -62,17 +63,44 @@
     catch (e) { return null; }
   }
 
-  function saveProject(project) {
-    localStorage.setItem(LS_PREFIX + project.id, JSON.stringify(project));
-    saveIndexEntry(project);
-    return project;
+  // Every user edit goes through saveProject/deleteProject, which notify
+  // listeners (cloud sync). The *Local variants write without notifying,
+  // for copies that arrive from the cloud.
+  var changeListeners = [];
+  function onProjectChange(fn) { changeListeners.push(fn); }
+  function notifyChange(type, id) {
+    changeListeners.forEach(function (fn) { fn(type, id); });
   }
 
-  function deleteProject(id) {
+  function writeProjectLocal(project, updatedAt) {
+    localStorage.setItem(LS_PREFIX + project.id, JSON.stringify(project));
+    saveIndexEntry(project, updatedAt);
+    return project;
+  }
+  function removeProjectLocal(id) {
     localStorage.removeItem(LS_PREFIX + id);
     var idx = listProjects().filter(function (p) { return p.id !== id; });
     localStorage.setItem(LS_INDEX, JSON.stringify(idx));
     if (getActiveProjectId() === id) setActiveProjectId(null);
+  }
+
+  function saveProject(project) {
+    writeProjectLocal(project);
+    notifyChange("save", project.id);
+    return project;
+  }
+
+  function deleteProject(id) {
+    removeProjectLocal(id);
+    notifyChange("delete", id);
+  }
+
+  // Pages render through whenReady so that, when cloud sync is on, they
+  // draw the account's latest copies rather than a stale browser copy.
+  var readyPromise = Promise.resolve();
+  function setReady(promise) { readyPromise = promise; }
+  function whenReady(fn) {
+    readyPromise.then(function () { setTimeout(fn, 0); });
   }
 
   function getActiveProjectId() { return localStorage.getItem(LS_ACTIVE) || null; }
@@ -572,6 +600,8 @@
     nextColor: nextColor, suggestColor: suggestColor, safeColor: safeColor,
     levelOptions: levelOptions, themeLevelItems: themeLevelItems, sortThemeItems: sortThemeItems,
     listProjects: listProjects, loadProject: loadProject, saveProject: saveProject, deleteProject: deleteProject,
+    writeProjectLocal: writeProjectLocal, removeProjectLocal: removeProjectLocal, onProjectChange: onProjectChange,
+    setReady: setReady, whenReady: whenReady,
     getActiveProjectId: getActiveProjectId, setActiveProjectId: setActiveProjectId, getActiveProject: getActiveProject,
     createProject: createProject,
     addSource: addSource, updateSource: updateSource, deleteSource: deleteSource,

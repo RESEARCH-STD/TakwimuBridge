@@ -79,7 +79,7 @@ subtitle: "The theme cloud sizes each theme by how often it was coded; the word 
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(function () {
   var TB = window.TB;
   if (TB.seedDemoIfNeeded) TB.seedDemoIfNeeded();
   var project = TB.getActiveProject();
@@ -199,6 +199,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var resizeTimer = null;
   window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 250); });
-});
+}); });
 </script>
 ```

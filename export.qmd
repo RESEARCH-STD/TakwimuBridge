@@ -64,7 +64,7 @@ subtitle: "Everything generates in your browser — nothing is uploaded anywhere
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(function () {
   if (window.TB && window.TB.seedDemoIfNeeded) window.TB.seedDemoIfNeeded();
   var TB = window.TB;
   var project = TB.getActiveProject();
@@ -93,6 +93,6 @@ document.addEventListener("DOMContentLoaded", function () {
       window.location.href = "projects.html";
     });
   });
-});
+}); });
 </script>
 ```

@@ -98,7 +98,7 @@ subtitle: "Your active project at a glance — coding progress, the themes emerg
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(function () {
   var TB = window.TB;
   if (TB.seedDemoIfNeeded) TB.seedDemoIfNeeded();
   var project = TB.getActiveProject();
@@ -258,6 +258,6 @@ document.addEventListener("DOMContentLoaded", function () {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(renderCloud, 250);
   });
-});
+}); });
 </script>
 ```
