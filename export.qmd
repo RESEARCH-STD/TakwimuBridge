@@ -20,6 +20,7 @@ subtitle: "Everything generates in your browser — nothing is uploaded anywhere
 <div class="d-flex flex-wrap gap-2">
 <button class="btn btn-sm btn-outline-primary" id="tb-exp-coded-csv">Coded References (CSV)</button>
 <button class="btn btn-sm btn-outline-primary" id="tb-exp-freq-csv">Theme Frequency (CSV)</button>
+<button class="btn btn-sm btn-outline-primary" id="tb-exp-sources-csv">Sources &amp; Participants (CSV)</button>
 </div>
 <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
 <select class="form-select form-select-sm" style="width:auto;" id="tb-exp-matrix-metric">
@@ -73,6 +74,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
 
   document.getElementById("tb-exp-coded-csv").addEventListener("click", function () { TB.exportUtil.exportCodedReferencesCSV(project); });
   document.getElementById("tb-exp-freq-csv").addEventListener("click", function () { TB.exportUtil.exportFrequencyTableCSV(project); });
+  document.getElementById("tb-exp-sources-csv").addEventListener("click", function () { TB.exportUtil.exportSourcesCSV(project); });
   document.getElementById("tb-exp-matrix-csv").addEventListener("click", function () {
     TB.exportUtil.exportMatrixCSV(project, document.getElementById("tb-exp-matrix-metric").value);
   });

@@ -12,6 +12,7 @@ subtitle: "Frequency, respondent coverage and weighted importance — at theme, 
 
 <div class="card tb-toolbar mb-4">
 <div class="card-body">
+<div class="tb-toolbar-group"><span class="tb-toolbar-label">Thematic analysis</span><div id="tb-an-analysis"></div></div>
 <div class="tb-toolbar-group"><span class="tb-toolbar-label">Analyse at</span><div id="tb-an-level"></div></div>
 <div class="tb-toolbar-group" id="tb-an-within-wrap"><span class="tb-toolbar-label">Within</span>
 <select class="form-select form-select-sm" style="width:auto;max-width:18rem;" id="tb-an-within" aria-label="Limit to one theme"></select>
@@ -112,21 +113,21 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return TB.escapeHtml(s); }
-  var state = { level: 0, within: "" };
+  var state = { analysis: null, level: 0, within: "" };
   var LEVEL_NOUN = ["themes", "sub-themes", "codes"];
 
-  function currentItems() { return TB.themeLevelItems(project, state.level, state.within || null); }
+  function currentItems() { return TB.themeLevelItems(project, state.level, state.within || null, state.analysis); }
   function grouped() { return state.level > 0; }
   function sizeBox(id, n) { $(id).style.minHeight = Math.max(240, n * 26 + 50) + "px"; }
 
   function renderWithinOptions() {
     var wrap = $("tb-an-within-wrap");
-    var options = TB.themesInTreeOrder(project).filter(function (t) { return TB.themeDepth(project, t.id) < state.level; });
+    var options = TB.themesInTreeOrder(project, state.analysis).filter(function (t) { return TB.themeDepth(project, t.id) < state.level; });
     wrap.classList.toggle("d-none", !options.length);
     if (!options.some(function (t) { return t.id === state.within; })) state.within = "";
-    $("tb-an-within").innerHTML = '<option value="">All themes</option>' + options.map(function (t) {
-      return '<option value="' + esc(t.id) + '"' + (t.id === state.within ? " selected" : "") + ">" + esc(TB.themePath(project, t.id)) + "</option>";
-    }).join("");
+    $("tb-an-within").innerHTML = '<option value="">All themes</option>' + TB.ui.themeOptionsHtml(project, function (t) {
+      return (!state.analysis || TB.analysisIdOfTheme(project, t.id) === state.analysis) && TB.themeDepth(project, t.id) < state.level;
+    }, state.within);
   }
 
   function renderNote() {
@@ -138,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
   function renderSummary(items) {
     $("tb-stat-sources").textContent = project.sources.length;
     $("tb-stat-respondents").textContent = TB.respondentsOf(project).length;
-    $("tb-stat-codedrefs").textContent = project.codings.length;
+    $("tb-stat-codedrefs").textContent = TB.codingsInAnalysis(project, state.analysis).length;
     $("tb-stat-themes").textContent = items.length;
     $("tb-stat-themes-label").textContent = (LEVEL_NOUN[state.level] || "themes").replace(/^./, function (c) { return c.toUpperCase(); }) + " shown";
   }
@@ -219,12 +220,12 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
     });
   }
 
-  var ATTRIBUTE_LABELS = { sex: "Sex", location: "Location", stakeholder: "Stakeholder", institution: "Institution" };
+  var ATTRIBUTE_LABELS = { sourceType: "Source type (KII, FGD…)", sex: "Sex", location: "Location", stakeholder: "Stakeholder type", institution: "Institution" };
   function comparableAttributes() {
     var respondents = TB.respondentsOf(project);
     return Object.keys(ATTRIBUTE_LABELS).filter(function (key) {
       var values = {};
-      respondents.forEach(function (r) { var v = (r.attributes || {})[key]; if (v) values[v] = true; });
+      respondents.forEach(function (r) { TB.respondentValues(r, key).forEach(function (v) { values[v] = true; }); });
       return Object.keys(values).length > 1;
     });
   }
@@ -273,18 +274,26 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
       max: measure === "coveragePct" ? 100 : undefined,
       tooltipTitles: list.map(function (i) { return i.path; })
     });
-    $("tb-compare-empty").textContent = measure === "coveragePct"
+    $("tb-compare-empty").textContent = (measure === "coveragePct"
       ? "Coverage within group = respondents in that group who raised the theme ÷ all respondents in that group, so groups of different sizes compare fairly."
-      : "";
+      : "") + (attrKey === "stakeholder" ? " A group that mixes stakeholder types (e.g. an FGD) counts in each of its types." : "");
   }
 
   function renderHierarchy() {
     var rows = [];
-    (function walk(nodes, depth) {
-      nodes.forEach(function (n) { rows.push({ node: n, depth: depth }); walk(n.children, depth + 1); });
-    })(TB.themeTree(project), 0);
+    var multi = project.analyses.length > 1;
+    project.analyses.forEach(function (a) {
+      if (state.analysis && a.id !== state.analysis) return;
+      if (multi) rows.push({ analysis: a });
+      (function walk(nodes, depth) {
+        nodes.forEach(function (n) { rows.push({ node: n, depth: depth }); walk(n.children, depth + 1); });
+      })(TB.themeTree(project, a.id), 0);
+    });
     var body = $("tb-theme-hierarchy");
     body.innerHTML = rows.length ? rows.map(function (r) {
+      if (r.analysis) {
+        return '<tr class="tb-hier-analysis"><td colspan="6" class="ps-3"><i class="bi bi-journal-text me-1"></i>' + esc(r.analysis.name) + "</td></tr>";
+      }
       var s = TB.themeStats(project, r.node.id);
       var c = esc(TB.safeColor(r.node.color));
       return '<tr class="depth-' + r.depth + '" data-theme-id="' + esc(r.node.id) + '" style="--depth:' + r.depth + ";--row-color:" + c + '">' +
@@ -310,10 +319,16 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
     renderCompare(items);
   }
 
-  state.level = TB.ui.levelControl($("tb-an-level"), project, {
-    name: "tbAnLevel", value: 0,
-    onChange: function (v) { state.level = v; renderLevelViews(); }
+  function setupLevel() {
+    state.level = TB.ui.levelControl($("tb-an-level"), project, {
+      name: "tbAnLevel", value: state.level, analysisId: state.analysis,
+      onChange: function (v) { state.level = v; renderLevelViews(); }
+    });
+  }
+  state.analysis = TB.ui.analysisControl($("tb-an-analysis"), project, {
+    onChange: function (id) { state.analysis = id; state.within = ""; setupLevel(); renderLevelViews(); renderHierarchy(); }
   });
+  setupLevel();
   $("tb-an-within").addEventListener("change", function (e) { state.within = e.target.value; renderLevelViews(); });
   $("tb-matrix-metric-select").addEventListener("change", function () { renderMatrix(currentItems()); });
   $("tb-compare-attribute-select").addEventListener("change", function () { renderCompare(currentItems()); });

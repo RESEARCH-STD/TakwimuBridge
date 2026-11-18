@@ -59,8 +59,36 @@
   }
 
   function loadProject(id) {
-    try { return JSON.parse(localStorage.getItem(LS_PREFIX + id)); }
+    try { return normalizeProject(JSON.parse(localStorage.getItem(LS_PREFIX + id))); }
     catch (e) { return null; }
+  }
+
+  // Brings any stored project (older versions, backups, cloud copies) up to
+  // the current shape. Deterministic, so the same project normalizes the
+  // same way on every page and computer; the result is saved on next edit.
+  var DEFAULT_ANALYSIS_ID = "ana_main";
+  function normalizeProject(p) {
+    if (!p || typeof p !== "object") return null;
+    if (!Array.isArray(p.sources)) p.sources = [];
+    if (!Array.isArray(p.themes)) p.themes = [];
+    if (!Array.isArray(p.codings)) p.codings = [];
+    if (!Array.isArray(p.analyses) || !p.analyses.length) {
+      p.analyses = [{ id: DEFAULT_ANALYSIS_ID, name: p.topic || "Thematic analysis 1", question: "" }];
+    }
+    var known = {};
+    p.analyses.forEach(function (a) { known[a.id] = true; });
+    p.themes.forEach(function (t) {
+      if (!t.parentId && !known[t.analysisId]) t.analysisId = p.analyses[0].id;
+      if (t.parentId) delete t.analysisId;
+    });
+    p.sources.forEach(function (s) {
+      var a = s.attributes = s.attributes || {};
+      if (!Array.isArray(a.stakeholder)) {
+        a.stakeholder = typeof a.stakeholder === "string" && a.stakeholder.trim() ? [a.stakeholder.trim()] : [];
+      }
+      if (!Array.isArray(s.speakers)) s.speakers = [];
+    });
+    return p;
   }
 
   // Every user edit goes through saveProject/deleteProject, which notify
@@ -116,6 +144,7 @@
   function createProject(fields) {
     fields = fields || {};
     var project = {
+      analyses: [{ id: DEFAULT_ANALYSIS_ID, name: fields.analysisName || fields.topic || "Thematic analysis 1", question: "" }],
       id: uid("proj"),
       title: fields.title || "Untitled Project",
       description: fields.description || "",
@@ -130,6 +159,13 @@
       themes: [],
       codings: []
     };
+    saveProject(project);
+    return project;
+  }
+
+  var PROJECT_FIELDS = ["title", "description", "topic", "researcher", "org", "date", "weightingEnabled", "memo"];
+  function updateProject(project, patch) {
+    PROJECT_FIELDS.forEach(function (k) { if (patch[k] !== undefined) project[k] = patch[k]; });
     saveProject(project);
     return project;
   }
@@ -164,6 +200,126 @@
     saveProject(project);
   }
 
+  // When a transcript's text is edited, each coded reference moves to the
+  // occurrence of its quote nearest its old position. Returns the new
+  // positions and the references whose quote no longer appears.
+  function planReanchor(project, sourceId, newText) {
+    var moves = [], lost = [];
+    project.codings.forEach(function (c) {
+      if (c.sourceId !== sourceId) return;
+      if (newText.slice(c.start, c.end) === c.quote) return;
+      var best = -1, bestDist = Infinity, from = 0, i;
+      while (c.quote && (i = newText.indexOf(c.quote, from)) !== -1) {
+        var d = Math.abs(i - c.start);
+        if (d < bestDist) { best = i; bestDist = d; }
+        from = i + 1;
+      }
+      if (best === -1) lost.push(c);
+      else moves.push({ id: c.id, start: best, end: best + c.quote.length });
+    });
+    return { moves: moves, lost: lost };
+  }
+  function applyReanchor(project, plan) {
+    var lost = {};
+    plan.lost.forEach(function (c) { lost[c.id] = true; });
+    plan.moves.forEach(function (m) {
+      var c = project.codings.find(function (c) { return c.id === m.id; });
+      if (c) { c.start = m.start; c.end = m.end; }
+    });
+    project.codings = project.codings.filter(function (c) { return !lost[c.id]; });
+  }
+
+  // FGD speakers keep their ids across edits (matched by label), so coded
+  // references stay attached to the right person; references to a removed
+  // speaker fall back to the whole discussion.
+  function mergeSpeakers(project, source, labels) {
+    var old = source ? (source.speakers || []) : [];
+    var used = {};
+    var speakers = labels.map(function (label) {
+      var match = old.find(function (sp) { return sp.label === label && !used[sp.id]; });
+      var id = match ? match.id : uid("sp");
+      used[id] = true;
+      return { id: id, label: label };
+    });
+    if (source) {
+      project.codings.forEach(function (c) {
+        if (c.sourceId === source.id && c.speakerId && !used[c.speakerId]) c.speakerId = null;
+      });
+    }
+    return speakers;
+  }
+
+  // ------------------------------------------------------------ attributes
+  // Every attribute reads as a list of values: stakeholder types can be
+  // several per source (an FGD often mixes stakeholders).
+  function attrValues(attributes, key) {
+    var v = attributes ? attributes[key] : null;
+    if (Array.isArray(v)) return v.filter(function (x) { return x && String(x).trim(); });
+    return v && String(v).trim() ? [String(v).trim()] : [];
+  }
+  function respondentValues(r, key) {
+    if (key === "sourceType") return r.sourceType ? [r.sourceType] : [];
+    return attrValues(r.attributes, key);
+  }
+  function participantsOf(source) {
+    var p = (source && source.attributes && source.attributes.participants) || {};
+    function n(v) { v = Number(v); return isFinite(v) && v > 0 ? Math.floor(v) : 0; }
+    var women = n(p.women), men = n(p.men), undisclosed = n(p.undisclosed);
+    return { women: women, men: men, undisclosed: undisclosed, total: women + men + undisclosed };
+  }
+  function stakeholderSuggestions(project) {
+    var seen = {}, out = [];
+    ["Community Member", "Government Official", "Farmer", "Trader", "Youth", "Women's Group", "NGO / CSO",
+      "Private Sector", "Religious Leader", "Teacher", "Health Worker", "Local Leader"].concat(
+      [].concat.apply([], project.sources.map(function (s) { return attrValues(s.attributes, "stakeholder"); }))
+    ).forEach(function (v) { var k = v.toLowerCase(); if (!seen[k]) { seen[k] = true; out.push(v); } });
+    return out;
+  }
+
+  // -------------------------------------------------------------- analyses
+  // A project can hold several thematic analyses (research questions), each
+  // with its own Theme → Sub-theme → Code tree. Only top-level themes carry
+  // analysisId; deeper themes belong to their top-level theme's analysis.
+  function analysisById(project, id) { return project.analyses.find(function (a) { return a.id === id; }) || null; }
+  function addAnalysis(project, fields) {
+    fields = fields || {};
+    var a = { id: uid("ana"), name: fields.name || "Untitled analysis", question: fields.question || "" };
+    project.analyses.push(a);
+    saveProject(project);
+    return a;
+  }
+  function updateAnalysis(project, id, patch) {
+    var a = analysisById(project, id);
+    if (!a) return null;
+    if (patch.name !== undefined) a.name = patch.name;
+    if (patch.question !== undefined) a.question = patch.question;
+    saveProject(project);
+    return a;
+  }
+  // Removes the analysis and all its themes; refuses to remove the last one.
+  function deleteAnalysis(project, id) {
+    if (project.analyses.length < 2) return false;
+    var doomed = {};
+    themesInAnalysis(project, id).forEach(function (t) { doomed[t.id] = true; });
+    project.analyses = project.analyses.filter(function (a) { return a.id !== id; });
+    removeThemes(project, doomed);
+    saveProject(project);
+    return true;
+  }
+  function analysisIdOfTheme(project, themeId) {
+    var root = themeById(project, topLevelThemeId(project, themeId));
+    return root ? root.analysisId : null;
+  }
+  function themesInAnalysis(project, analysisId) {
+    return project.themes.filter(function (t) { return analysisIdOfTheme(project, t.id) === analysisId; });
+  }
+  function codingsInAnalysis(project, analysisId) {
+    if (!analysisId) return project.codings.slice();
+    return project.codings.filter(function (c) {
+      return (c.themeIds || []).some(function (id) { return analysisIdOfTheme(project, id) === analysisId; });
+    });
+  }
+
   // ----------------------------------------------------------------- themes
   function addTheme(project, fields) {
     fields = fields || {};
@@ -174,9 +330,50 @@
       color: fields.color || suggestColor(project),
       memo: fields.memo || ""
     };
+    if (!theme.parentId) {
+      theme.analysisId = analysisById(project, fields.analysisId) ? fields.analysisId : project.analyses[0].id;
+    }
     project.themes.push(theme);
     saveProject(project);
     return theme;
+  }
+  // Re-parents a theme: under another theme (newParentId), or to the top
+  // level of an analysis (newParentId null). Refuses cycles.
+  function moveTheme(project, themeId, newParentId, analysisId) {
+    var t = themeById(project, themeId);
+    if (!t) return false;
+    if (newParentId) {
+      if (newParentId === themeId || descendantThemeIds(project, themeId).indexOf(newParentId) !== -1) return false;
+      if (!themeById(project, newParentId)) return false;
+      t.parentId = newParentId;
+      delete t.analysisId;
+    } else {
+      var target = analysisById(project, analysisId) ? analysisId : analysisIdOfTheme(project, themeId);
+      t.parentId = null;
+      t.analysisId = target || project.analyses[0].id;
+    }
+    saveProject(project);
+    return true;
+  }
+  // One level up: a sub-theme becomes a sibling of its parent.
+  function promoteTheme(project, themeId) {
+    var t = themeById(project, themeId);
+    if (!t || !t.parentId) return false;
+    var parent = themeById(project, t.parentId);
+    return moveTheme(project, themeId, parent ? parent.parentId : null, analysisIdOfTheme(project, themeId));
+  }
+  // The theme listed just above it (same parent, same analysis) becomes its parent.
+  function previousSibling(project, themeId) {
+    var t = themeById(project, themeId);
+    if (!t) return null;
+    var ana = analysisIdOfTheme(project, themeId);
+    var siblings = childThemes(project, t.parentId).filter(function (s) { return t.parentId || s.analysisId === ana; });
+    var i = siblings.findIndex(function (s) { return s.id === themeId; });
+    return i > 0 ? siblings[i - 1] : null;
+  }
+  function demoteTheme(project, themeId) {
+    var prev = previousSibling(project, themeId);
+    return prev ? moveTheme(project, themeId, prev.id) : false;
   }
   function updateTheme(project, themeId, patch) {
     var t = project.themes.find(function (t) { return t.id === themeId; });
@@ -185,22 +382,27 @@
     saveProject(project);
     return t;
   }
-  function deleteTheme(project, themeId) {
-    var toDelete = {};
-    toDelete[themeId] = true;
-    descendantThemeIds(project, themeId).forEach(function (id) { toDelete[id] = true; });
+  function removeThemes(project, toDelete) {
     project.themes = project.themes.filter(function (t) { return !toDelete[t.id]; });
     project.codings.forEach(function (c) {
       c.themeIds = c.themeIds.filter(function (id) { return !toDelete[id]; });
     });
     project.codings = project.codings.filter(function (c) { return c.themeIds.length > 0; });
+  }
+  function deleteTheme(project, themeId) {
+    var toDelete = {};
+    toDelete[themeId] = true;
+    descendantThemeIds(project, themeId).forEach(function (id) { toDelete[id] = true; });
+    removeThemes(project, toDelete);
     saveProject(project);
   }
   function themeById(project, id) { return project.themes.find(function (t) { return t.id === id; }); }
   function childThemes(project, parentId) {
     return project.themes.filter(function (t) { return (t.parentId || null) === (parentId || null); });
   }
-  function themeTree(project) {
+  // Top-level themes in analysis order (or those of one analysis), each with
+  // its subtree.
+  function themeTree(project, analysisId) {
     function build(parentId) {
       return childThemes(project, parentId).map(function (t) {
         var node = Object.assign({}, t);
@@ -208,7 +410,13 @@
         return node;
       });
     }
-    return build(null);
+    var order = {};
+    project.analyses.forEach(function (a, i) { order[a.id] = i; });
+    return build(null)
+      .filter(function (n) { return !analysisId || n.analysisId === analysisId; })
+      .map(function (n, i) { return [n, i]; })
+      .sort(function (a, b) { return ((order[a[0].analysisId] || 0) - (order[b[0].analysisId] || 0)) || (a[1] - b[1]); })
+      .map(function (x) { return x[0]; });
   }
   function ancestorsAndSelf(project, themeId) {
     var result = [];
@@ -240,28 +448,29 @@
       var t = themeById(project, id); return t ? t.name : "";
     }).join(sep || " › ");
   }
-  function maxThemeDepth(project) {
+  function maxThemeDepth(project, analysisId) {
     var max = -1;
-    project.themes.forEach(function (t) { max = Math.max(max, themeDepth(project, t.id)); });
+    (analysisId ? themesInAnalysis(project, analysisId) : project.themes)
+      .forEach(function (t) { max = Math.max(max, themeDepth(project, t.id)); });
     return max;
   }
-  function themesInTreeOrder(project) {
+  function themesInTreeOrder(project, analysisId) {
     var out = [];
     (function walk(nodes) {
       nodes.forEach(function (n) { out.push(themeById(project, n.id)); walk(n.children); });
-    })(themeTree(project));
+    })(themeTree(project, analysisId));
     return out;
   }
   // A "cut" through the codebook at one depth (0 = themes, 1 = sub-themes,
   // 2 = codes): every node at that depth plus any leaf that stops short of
   // it, so no coded reference falls out of the analysis. Tree order.
-  function themesAtLevel(project, level, withinThemeId) {
+  function themesAtLevel(project, level, withinThemeId, analysisId) {
     var result = [];
     function walk(node, depth) {
       if (depth >= level || !node.children.length) { result.push(themeById(project, node.id)); return; }
       node.children.forEach(function (c) { walk(c, depth + 1); });
     }
-    var tree = themeTree(project);
+    var tree = themeTree(project, withinThemeId ? null : analysisId);
     if (withinThemeId) {
       var found = null;
       (function find(nodes) {
@@ -347,19 +556,27 @@
       if (s.type === "FGD" && s.speakers && s.speakers.length) {
         s.speakers.forEach(function (sp) {
           list.push({
-            id: s.id + ":" + sp.id, sourceId: s.id, speakerId: sp.id,
+            id: s.id + ":" + sp.id, sourceId: s.id, speakerId: sp.id, sourceType: s.type,
             label: sp.label, sourceName: s.name, attributes: s.attributes || {}
           });
         });
       } else {
         list.push({
-          id: s.id, sourceId: s.id, speakerId: null,
+          id: s.id, sourceId: s.id, speakerId: null, sourceType: s.type,
           label: (s.attributes && s.attributes.respondentId) || s.name,
           sourceName: s.name, attributes: s.attributes || {}
         });
       }
     });
     return list;
+  }
+  // People represented: one per individual source, and an FGD's recorded
+  // participants (or, when not recorded, its speakers).
+  function peopleCount(project) {
+    return project.sources.reduce(function (sum, s) {
+      if (s.type !== "FGD") return sum + 1;
+      return sum + (participantsOf(s).total || (s.speakers || []).length || 1);
+    }, 0);
   }
   function respondentIdForCoding(coding) {
     return coding.speakerId ? (coding.sourceId + ":" + coding.speakerId) : coding.sourceId;
@@ -396,32 +613,43 @@
   }
 
   var LEVEL_NAMES = ["Themes", "Sub-themes", "Codes"];
-  function levelOptions(project) {
+  function levelOptions(project, analysisId) {
     var out = [];
-    for (var i = 0; i <= Math.max(0, maxThemeDepth(project)); i++) {
+    for (var i = 0; i <= Math.max(0, maxThemeDepth(project, analysisId)); i++) {
       out.push({ value: i, label: LEVEL_NAMES[i] || ("Level " + (i + 1)) });
     }
     return out;
   }
 
-  // Themes at one analysis level with their stats; labels fall back to the
-  // full path when two themes at that level share a name.
-  function themeLevelItems(project, level, withinThemeId) {
-    var themes = themesAtLevel(project, level, withinThemeId);
-    var nameCount = {};
-    themes.forEach(function (t) { nameCount[t.name] = (nameCount[t.name] || 0) + 1; });
+  // Themes at one analysis level with their stats. Labels fall back to the
+  // path when two themes share a name, and to the analysis-prefixed path
+  // when even that collides (the same names in two analyses).
+  function themeLevelItems(project, level, withinThemeId, analysisId) {
+    var themes = themesAtLevel(project, level, withinThemeId, analysisId);
+    var nameCount = {}, pathCount = {};
+    themes.forEach(function (t) {
+      nameCount[t.name] = (nameCount[t.name] || 0) + 1;
+      var p = themePath(project, t.id);
+      pathCount[p] = (pathCount[p] || 0) + 1;
+    });
     var topOrder = {};
     themeTree(project).forEach(function (n, i) { topOrder[n.id] = i; });
     return themes.map(function (t) {
       var path = themePath(project, t.id);
       var topId = topLevelThemeId(project, t.id);
+      var full = fullThemePath(project, t.id);
       return {
-        id: t.id, theme: t, color: safeColor(t.color), path: path,
-        label: nameCount[t.name] > 1 ? path : t.name,
-        topId: topId, topOrder: topOrder[topId] || 0,
+        id: t.id, theme: t, color: safeColor(t.color), path: full,
+        label: nameCount[t.name] < 2 ? t.name : pathCount[path] < 2 ? path : full,
+        topId: topId, topOrder: topOrder[topId] || 0, analysisId: analysisIdOfTheme(project, t.id),
         stats: themeStats(project, t.id)
       };
     });
+  }
+  // The theme path, prefixed with its analysis when the project has several.
+  function fullThemePath(project, themeId) {
+    var ana = analysisById(project, analysisIdOfTheme(project, themeId));
+    return (ana && project.analyses.length > 1 ? ana.name + ": " : "") + themePath(project, themeId);
   }
   // Sort by a stat, keeping sub-themes grouped under their theme.
   function sortThemeItems(items, key, grouped) {
@@ -493,9 +721,13 @@
       if (!groups[v]) groups[v] = { value: v, totalRespondents: 0, covered: {}, frequency: 0 };
       return groups[v];
     }
+    function valuesOf(r) {
+      var v = respondentValues(r, attributeKey);
+      return v.length ? v : ["Unspecified"];
+    }
+    // A respondent with several values (a mixed FGD) counts in each group.
     respondents.forEach(function (r) {
-      var v = (r.attributes && r.attributes[attributeKey]) || "Unspecified";
-      ensure(v).totalRespondents++;
+      valuesOf(r).forEach(function (v) { ensure(v).totalRespondents++; });
     });
     project.codings.forEach(function (c) {
       var eff = codingEffectiveThemeIds(project, c);
@@ -505,10 +737,11 @@
       var rid = respondentIdForCoding(c);
       var r = respondents.find(function (r) { return r.id === rid; });
       if (!r) return;
-      var v = (r.attributes && r.attributes[attributeKey]) || "Unspecified";
-      var g = ensure(v);
-      g.frequency++;
-      g.covered[rid] = true;
+      valuesOf(r).forEach(function (v) {
+        var g = ensure(v);
+        g.frequency++;
+        g.covered[rid] = true;
+      });
     });
     return Object.keys(groups).map(function (k) {
       var g = groups[k];
@@ -600,6 +833,14 @@
     nextColor: nextColor, suggestColor: suggestColor, safeColor: safeColor,
     levelOptions: levelOptions, themeLevelItems: themeLevelItems, sortThemeItems: sortThemeItems,
     listProjects: listProjects, loadProject: loadProject, saveProject: saveProject, deleteProject: deleteProject,
+    normalizeProject: normalizeProject, updateProject: updateProject,
+    analysisById: analysisById, addAnalysis: addAnalysis, updateAnalysis: updateAnalysis, deleteAnalysis: deleteAnalysis,
+    analysisIdOfTheme: analysisIdOfTheme, themesInAnalysis: themesInAnalysis, codingsInAnalysis: codingsInAnalysis,
+    fullThemePath: fullThemePath,
+    moveTheme: moveTheme, promoteTheme: promoteTheme, demoteTheme: demoteTheme, previousSibling: previousSibling,
+    planReanchor: planReanchor, applyReanchor: applyReanchor, mergeSpeakers: mergeSpeakers,
+    attrValues: attrValues, respondentValues: respondentValues, participantsOf: participantsOf,
+    stakeholderSuggestions: stakeholderSuggestions, peopleCount: peopleCount,
     writeProjectLocal: writeProjectLocal, removeProjectLocal: removeProjectLocal, onProjectChange: onProjectChange,
     setReady: setReady, whenReady: whenReady,
     getActiveProjectId: getActiveProjectId, setActiveProjectId: setActiveProjectId, getActiveProject: getActiveProject,

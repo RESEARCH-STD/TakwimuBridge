@@ -1,6 +1,6 @@
 ---
 title: "Coding Workspace"
-subtitle: "Read each transcript once: select a passage, then tick every theme it speaks to — causes, challenges, impacts — in one go."
+subtitle: "Read each transcript once: select a passage, then tick every theme it speaks to — in every thematic analysis you're running — in one go."
 ---
 
 ```{=html}
@@ -13,10 +13,17 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 <div class="card-body">
 <div class="min-w-0">
 <span class="tb-eyebrow">Project</span>
+<div class="d-flex align-items-center gap-2 min-w-0">
 <h2 class="h5 mb-0 text-truncate" id="tb-project-title">—</h2>
+<button type="button" class="btn btn-sm btn-link p-0 flex-shrink-0" id="tb-edit-project-btn" title="Edit project details"><i class="bi bi-pencil"></i> Edit</button>
+</div>
 <div class="text-muted small" id="tb-project-meta">—</div>
 </div>
 <div class="d-flex flex-wrap gap-2">
+<div class="btn-group btn-group-sm" role="group" aria-label="Undo and redo">
+<button type="button" class="btn btn-outline-secondary" id="tb-undo-btn" disabled title="Undo (Ctrl+Z)"><i class="bi bi-arrow-counterclockwise"></i> Undo</button>
+<button type="button" class="btn btn-outline-secondary" id="tb-redo-btn" disabled title="Redo (Ctrl+Y)"><i class="bi bi-arrow-clockwise"></i> Redo</button>
+</div>
 <button type="button" class="btn btn-outline-secondary btn-sm" id="tb-manage-themes-btn"><i class="bi bi-diagram-3"></i> Codebook</button>
 <button type="button" class="btn btn-accent btn-sm" id="tb-add-source-btn"><i class="bi bi-plus-lg"></i> Add Source</button>
 </div>
@@ -34,11 +41,18 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 <div class="card tb-panel tb-transcript-card">
 <div class="card-header tb-panel-header">
 <span id="tb-active-source-name">—</span>
-<div class="d-flex flex-wrap align-items-center gap-1" id="tb-lens-bar"></div>
+<div class="btn-group btn-group-sm tb-segmented" role="group" aria-label="Show">
+<input type="radio" class="btn-check" name="tbTxView" id="tb-view-text" value="text" checked>
+<label class="btn btn-outline-primary" for="tb-view-text"><i class="bi bi-file-text me-1"></i>Transcript</label>
+<input type="radio" class="btn-check" name="tbTxView" id="tb-view-refs" value="refs">
+<label class="btn btn-outline-primary" for="tb-view-refs"><i class="bi bi-list-check me-1"></i>Coded (<span id="tb-refs-count">0</span>)</label>
+</div>
 </div>
 <div class="card-body tb-panel-body">
 <div id="tb-source-attributes" class="mb-2"></div>
+<div class="d-flex flex-wrap align-items-center gap-1 mb-2" id="tb-lens-bar"></div>
 <div class="tb-transcript" id="tb-transcript-text"></div>
+<div class="d-none" id="tb-refs-list"></div>
 </div>
 </div>
 
@@ -54,9 +68,8 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 <div class="alert alert-success py-1 px-2 small mt-2 mb-0 d-none" id="tb-cp-status" role="status"></div>
 </div>
 <div class="card-body tb-panel-body">
-<p class="small text-muted mb-0" id="tb-cp-hint">Tick every theme the passage speaks to. One passage can carry a cause, a challenge and an impact at once, so each transcript only needs one reading.</p>
+<p class="small text-muted mb-0" id="tb-cp-hint">Tick every theme the passage speaks to, in every analysis. One passage can carry a cause, a challenge and an affected group at once, so each transcript only needs one reading.</p>
 
-<div class="tb-cp-section-label">Themes</div>
 <div id="tb-cp-themes"></div>
 
 <div class="tb-cp-section-label">Details</div>
@@ -77,7 +90,7 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 </div>
 <div class="card-footer tb-cp-footer d-flex gap-2">
 <button type="button" class="btn btn-accent flex-grow-1" id="tb-cp-apply" disabled><i class="bi bi-check2 me-1"></i><span id="tb-cp-apply-label">Apply codes</span></button>
-<button type="button" class="btn btn-outline-danger d-none" id="tb-cp-delete" title="Delete this coded reference" aria-label="Delete coded reference"><i class="bi bi-trash"></i></button>
+<button type="button" class="btn btn-outline-danger d-none" id="tb-cp-delete" title="Delete this coded reference (Delete key)"><i class="bi bi-trash me-1"></i>Delete</button>
 </div>
 </div>
 </div>
@@ -91,12 +104,12 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 <div class="modal fade" id="tb-modal-add-source" tabindex="-1">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
-<div class="modal-header"><h5 class="modal-title">Add Source</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-header"><h5 class="modal-title">Add Source</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
 <div class="modal-body" id="tb-source-form">
 <input type="hidden" id="tbf-source-id">
 <div class="grid gap-2 mb-3">
-<div class="g-col-6">
-<label class="form-label">Source Type</label>
+<div class="g-col-12 g-col-md-6">
+<label class="form-label" for="tbf-source-type">Source Type</label>
 <select class="form-select" id="tbf-source-type">
 <option value="KII">Key Informant Interview (KII)</option>
 <option value="FGD">Focus Group Discussion (FGD)</option>
@@ -105,27 +118,43 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 <option value="Document">Document</option>
 </select>
 </div>
-<div class="g-col-6">
-<label class="form-label">Source Name</label>
+<div class="g-col-12 g-col-md-6">
+<label class="form-label" for="tbf-source-name">Source Name</label>
 <input class="form-control" id="tbf-source-name" placeholder="e.g. KII-06">
 </div>
 </div>
 
 <fieldset class="border rounded p-2 mb-3">
-<legend class="float-none w-auto px-1 small text-muted">Respondent / Source Attributes</legend>
+<legend class="float-none w-auto px-1 small text-muted" id="tbf-attr-legend">Respondent / Source Attributes</legend>
 <div class="grid gap-2">
-<div class="g-col-6"><label class="form-label small">Respondent ID</label><input class="form-control form-control-sm" id="tbf-source-respondentid"></div>
-<div class="g-col-6"><label class="form-label small">Sex</label>
-<select class="form-select form-select-sm" id="tbf-source-sex"><option value=""></option><option>Female</option><option>Male</option><option>Other</option></select>
+<div class="g-col-12 g-col-md-6"><label class="form-label small" for="tbf-source-respondentid" id="tbf-respondentid-label">Respondent ID</label><input class="form-control form-control-sm" id="tbf-source-respondentid"></div>
+<div class="g-col-12 g-col-md-6" id="tbf-sex-wrap"><label class="form-label small" for="tbf-source-sex">Sex</label>
+<select class="form-select form-select-sm" id="tbf-source-sex"><option value=""></option><option>Female</option><option>Male</option><option>Other</option><option>Prefer not to say</option></select>
 </div>
-<div class="g-col-6"><label class="form-label small">Location</label><input class="form-control form-control-sm" id="tbf-source-location"></div>
-<div class="g-col-6"><label class="form-label small">Stakeholder</label><input class="form-control form-control-sm" id="tbf-source-stakeholder" placeholder="e.g. Government Official"></div>
-<div class="g-col-12"><label class="form-label small">Institution</label><input class="form-control form-control-sm" id="tbf-source-institution"></div>
+<div class="g-col-12 d-none" id="tbf-participants-wrap">
+<div class="small fw-semibold mb-1">Participants in the group</div>
+<div class="d-flex flex-wrap align-items-end gap-2">
+<div><label class="form-label small mb-0" for="tbf-part-women">Women</label><input type="number" min="0" step="1" inputmode="numeric" class="form-control form-control-sm tb-num" id="tbf-part-women"></div>
+<div><label class="form-label small mb-0" for="tbf-part-men">Men</label><input type="number" min="0" step="1" inputmode="numeric" class="form-control form-control-sm tb-num" id="tbf-part-men"></div>
+<div><label class="form-label small mb-0" for="tbf-part-undisclosed">Not disclosed</label><input type="number" min="0" step="1" inputmode="numeric" class="form-control form-control-sm tb-num" id="tbf-part-undisclosed"></div>
+<div class="tb-part-total">Total <strong id="tbf-part-total">0</strong></div>
+</div>
+</div>
+<div class="g-col-12 g-col-md-6"><label class="form-label small" for="tbf-source-location">Location</label><input class="form-control form-control-sm" id="tbf-source-location"></div>
+<div class="g-col-12 g-col-md-6"><label class="form-label small" for="tbf-source-institution">Institution</label><input class="form-control form-control-sm" id="tbf-source-institution"></div>
+<div class="g-col-12">
+<label class="form-label small" for="tbf-source-stakeholder">Stakeholder type(s)</label>
+<div class="tb-tags form-control form-control-sm" id="tbf-stakeholder-tags">
+<input id="tbf-source-stakeholder" list="tbf-stakeholder-options" autocomplete="off" placeholder="Type a stakeholder type, then press Enter">
+</div>
+<datalist id="tbf-stakeholder-options"></datalist>
+<div class="form-text">Type your own, or pick a suggestion. Add more than one when a group mixes stakeholders.</div>
+</div>
 </div>
 </fieldset>
 
 <div id="tbf-speakers-wrap" class="mb-3 d-none">
-<label class="form-label">Speakers (comma-separated, e.g. Moderator, P1, P2, P3)</label>
+<label class="form-label" for="tbf-source-speakers">Speakers (comma-separated, e.g. Moderator, P1, P2, P3)</label>
 <input class="form-control" id="tbf-source-speakers" placeholder="Moderator, P1, P2, P3">
 </div>
 
@@ -142,18 +171,20 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 </div>
 <div id="tbf-text-wrap" class="mb-3">
 <textarea class="form-control" id="tbf-source-text" rows="6" placeholder="Paste the transcript or open-ended responses here…"></textarea>
+<div class="form-text d-none" id="tbf-text-note">Coded passages follow your edits; any whose words you remove will be dropped (you'll be asked first, and can undo).</div>
 </div>
 <div id="tbf-file-wrap" class="mb-3 d-none">
 <input type="file" class="form-control" id="tbf-source-file">
 <div class="form-text">DOCX and CSV/XLSX are parsed entirely in your browser (via mammoth.js / SheetJS) — nothing is uploaded to a server.</div>
 </div>
 
-<label class="form-label">Memo</label>
+<label class="form-label" for="tbf-source-memo">Memo</label>
 <textarea class="form-control" id="tbf-source-memo" rows="2"></textarea>
 </div>
 <div class="modal-footer">
-<button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-<button class="btn btn-accent" id="tb-save-source-btn">Add Source</button>
+<button type="button" class="btn btn-outline-danger me-auto d-none" id="tb-delete-source-btn"><i class="bi bi-trash me-1"></i>Delete source</button>
+<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+<button type="button" class="btn btn-accent" id="tb-save-source-btn">Add Source</button>
 </div>
 </div>
 </div>
@@ -161,21 +192,24 @@ subtitle: "Read each transcript once: select a passage, then tick every theme it
 
 <!-- ============================ MODAL: Codebook ============================ -->
 <div class="modal fade" id="tb-modal-codebook" tabindex="-1">
-<div class="modal-dialog modal-lg">
+<div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
-<div class="modal-header"><h5 class="modal-title">Codebook — Themes, Sub-themes &amp; Codes</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-header"><h5 class="modal-title">Codebook — analyses, themes &amp; sub-themes</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
 <div class="modal-body">
-<div id="tb-theme-tree-editor" class="mb-3"></div>
+<p class="small text-muted">Each <strong>thematic analysis</strong> answers its own research question and has its own themes; one passage can be coded under several analyses at once. Use <i class="bi bi-arrow-bar-left"></i> to promote a sub-theme to a main theme, <i class="bi bi-arrow-bar-right"></i> to make a theme a sub-theme of the one above it, or <i class="bi bi-pencil"></i> to rename, recolour or move it anywhere.</p>
+<div id="tb-theme-tree-editor" class="mb-2"></div>
+<button type="button" class="btn btn-sm btn-outline-primary" id="tb-cb-add-analysis"><i class="bi bi-plus-lg"></i> New thematic analysis</button>
 <hr>
+<div class="small fw-semibold mb-2">Add a theme</div>
 <div class="grid gap-2 align-items-end">
-<div class="g-col-4"><label class="form-label small">New theme / code name</label><input class="form-control" id="tbf-theme-name"></div>
-<div class="g-col-4"><label class="form-label small">Parent (leave blank for top-level)</label><select class="form-select" id="tbf-theme-parent"></select></div>
-<div class="g-col-2"><label class="form-label small">Colour</label><input type="color" class="form-control form-control-color w-100" id="tbf-theme-color" value="#1B4F9C"></div>
-<div class="g-col-2"><button class="btn btn-accent w-100" id="tb-add-theme-btn">Add</button></div>
+<div class="g-col-12 g-col-md-4"><label class="form-label small" for="tbf-theme-name">Name</label><input class="form-control" id="tbf-theme-name"></div>
+<div class="g-col-12 g-col-md-4"><label class="form-label small" for="tbf-theme-parent">Place under</label><select class="form-select" id="tbf-theme-parent"></select></div>
+<div class="g-col-6 g-col-md-2"><label class="form-label small" for="tbf-theme-color">Colour</label><input type="color" class="form-control form-control-color w-100" id="tbf-theme-color" value="#1B4F9C"></div>
+<div class="g-col-6 g-col-md-2"><button type="button" class="btn btn-accent w-100" id="tb-add-theme-btn">Add</button></div>
 </div>
 <p class="text-muted small mt-3 mb-0">Colours are a visual aid only — the theme/code <em>name</em> carries the analytical meaning (per TakwimuBridge's design principle).</p>
 </div>
-<div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
+<div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
 </div>
 </div>
 </div>

@@ -54,6 +54,30 @@ Make one broad theme per question — say **Challenges**, **Causes** and **Impac
 
 One click on **Apply** records all three. If a new idea comes up while you read, add it as a new sub-theme right there in the panel — no need to stop and open the codebook. The highlight in the transcript shows one coloured stripe per theme, and the **Highlight** buttons above the transcript let you show or hide each group.
 
+## Running More Than One Thematic Analysis
+
+Sometimes the same interviews answer two quite different questions — for example *challenges facing youths in entrepreneurship* and *factors behind youth political uprisings*. You do not need to import the transcripts twice. Make each question its own **thematic analysis**, with its own themes and sub-themes:
+
+- In the coding panel, click **+ New thematic analysis** at the bottom, type its name and press Enter, then add its themes with **+ New theme**. (You can also do this in **Codebook**, where you can add the research question too.)
+- The coding panel shows every analysis as its own section, one after the other (click a section's title to fold it away). While you read, tick themes from both analyses for the same passage, so that when you finish a transcript, both analyses are done.
+- On the [Dashboard](index.html), [Theme Analysis](analysis.html) and [Theme & Word Cloud](wordfrequency.html) pages, choose which analysis to look at with the **Thematic analysis** selector — each has its own themes, sub-themes, charts and matrix — or pick **All analyses**.
+
+The demo project shows this: its passages are coded both for *Environmental Challenges* (challenges, causes, impacts) and for *Affected Groups* (women & girls, youth, children, farmers).
+
+## Correcting Mistakes
+
+Nothing you code is final:
+
+- **Undo / Redo** — the buttons above the workspace (or Ctrl+Z and Ctrl+Y) step back and forward through your changes: coding, deleting, editing themes or sources.
+- **Remove coding** — click a highlight to open it in the coding panel. Untick a theme to take just that theme off, or click **Delete** (or press the Delete key) to remove the whole coded passage. The **Coded** tab above the transcript lists every coded passage in the source with a bin button next to each.
+- **Fix the codebook** — in **Codebook**, rename a theme, change its colour or memo, or move it anywhere with the pencil button. The arrow buttons promote a sub-theme to a main theme, or demote a theme into a sub-theme of the one above it. Coded passages move with their themes.
+- **Edit or delete a source** — use **Edit** or the bin button above the transcript. If you edit the text, coded passages follow your changes; any whose words you remove are dropped after you confirm.
+- **Edit the project** — change the title and other details with **Edit project** on the Dashboard or **Edit** on the Projects page.
+
+## Recording Focus Group Details
+
+When you add a source of type **Focus Group Discussion**, you can record how many **women**, **men** and participants who **did not disclose** their sex took part; TakwimuBridge adds up the total for you. For any source you can type one or more **stakeholder types** in your own words (press Enter after each) — useful when a group mixes, say, farmers, traders and local leaders. Group comparisons by stakeholder type count a mixed group under each of its types.
+
 ## What TakwimuBridge Does Automatically
 
 While you concentrate on reading and coding, the software does the counting and organization. For every theme, it calculates:
@@ -81,7 +105,7 @@ Bar charts show the most frequently discussed themes. Weighted bar charts show t
 
 ## Working on More Than One Computer
 
-If accounts are switched on for your site, sign in with **Sign in to sync** at the bottom of the sidebar. Your projects are then kept in your account as well as in the browser, so you can sign in on another computer and carry on. On a shared computer, sign out when you finish — that removes your projects from that browser.
+Each researcher can open their own free account: click **Create account** near the top of the sidebar (or go to **My Account**), enter your email and a password, and open the confirmation link we email you. Your projects are then kept in your account as well as in the browser, so you can sign in on another computer and carry on. On a shared computer, sign out when you finish — that removes your projects from that browser.
 
 Without an account, projects stay in the browser you used. To move one, use **Export → Full Project Backup (JSON)** and restore it on the other computer.
 

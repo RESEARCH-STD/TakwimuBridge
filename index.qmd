@@ -15,30 +15,40 @@ subtitle: "Your active project at a glance — coding progress, the themes emerg
 </div>
 </div>
 
+<div id="tb-signup-banner"></div>
+
 <div id="tb-dash" class="d-none">
 
 <div class="card tb-project-banner mb-4">
 <div class="card-body">
-<div class="d-flex align-items-center gap-3">
+<div class="d-flex align-items-center gap-3 min-w-0">
 <div class="tb-project-icon d-none d-sm-flex"><i class="bi bi-journal-richtext"></i></div>
-<div>
+<div class="min-w-0">
 <span class="tb-eyebrow">Active project</span>
 <h2 id="tb-dash-title">—</h2>
 <div id="tb-dash-meta"></div>
 </div>
 </div>
 <div class="d-flex flex-wrap gap-2">
+<button type="button" class="btn btn-outline-secondary" id="tb-dash-edit"><i class="bi bi-pencil me-1"></i> Edit project</button>
 <a href="workspace.html" class="btn btn-primary"><i class="bi bi-highlighter me-1"></i> Continue coding</a>
 <a href="analysis.html" class="btn btn-outline-primary"><i class="bi bi-bar-chart-line me-1"></i> Theme analysis</a>
 </div>
 </div>
 </div>
 
+<div class="card tb-toolbar mb-4" id="tb-dash-analysis-bar">
+<div class="card-body">
+<div class="tb-toolbar-group"><span class="tb-toolbar-label">Thematic analysis</span><div id="tb-dash-analysis"></div></div>
+<div class="small text-muted ms-xl-auto" id="tb-dash-analysis-q"></div>
+</div>
+</div>
+
 <div class="tb-kpi-grid mb-4">
 <div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#1B4F9C"><i class="bi bi-file-earmark-text"></i></div><div><div class="tb-kpi-value" id="tb-kpi-sources">0</div><div class="tb-kpi-label">Sources</div></div></div></div>
-<div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#2F6FED"><i class="bi bi-people"></i></div><div><div class="tb-kpi-value" id="tb-kpi-respondents">0</div><div class="tb-kpi-label">Respondents</div></div></div></div>
+<div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#2F6FED"><i class="bi bi-people"></i></div><div><div class="tb-kpi-value" id="tb-kpi-respondents">0</div><div class="tb-kpi-label">Respondents</div><div class="tb-kpi-sub" id="tb-kpi-people"></div></div></div></div>
 <div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#17B8A6"><i class="bi bi-diagram-3"></i></div><div><div class="tb-kpi-value" id="tb-kpi-themes">0</div><div class="tb-kpi-label">Themes</div><div class="tb-kpi-sub" id="tb-kpi-themes-sub"></div></div></div></div>
-<div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#E08E45"><i class="bi bi-bookmark-check"></i></div><div><div class="tb-kpi-value" id="tb-kpi-codings">0</div><div class="tb-kpi-label">Coded references</div></div></div></div>
+<div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#E08E45"><i class="bi bi-bookmark-check"></i></div><div><div class="tb-kpi-value" id="tb-kpi-codings">0</div><div class="tb-kpi-label">Coded references</div><div class="tb-kpi-sub" id="tb-kpi-codings-sub"></div></div></div></div>
 <div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#1E8A5F"><i class="bi bi-check2-circle"></i></div><div><div class="tb-kpi-value" id="tb-kpi-coded-pct">0%</div><div class="tb-kpi-label" title="Share of transcript text inside at least one coded reference">Text coded</div></div></div></div>
 <div class="card tb-kpi"><div class="card-body"><div class="tb-kpi-icon" style="--kpi:#8E44AD"><i class="bi bi-speedometer2"></i></div><div><div class="tb-kpi-value" id="tb-kpi-weight">—</div><div class="tb-kpi-label">Average weight</div></div></div></div>
 </div>
@@ -105,11 +115,14 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
   function esc(s) { return TB.escapeHtml(s); }
   function $(id) { return document.getElementById(id); }
 
+  TB.ui.mountSignupBanner($("tb-signup-banner"));
   if (!project) { $("tb-dash-empty").classList.remove("d-none"); return; }
   $("tb-dash").classList.remove("d-none");
 
-  var deepest = Math.max(0, TB.maxThemeDepth(project));
-  var state = { freq: 0, cloud: Math.min(1, deepest), cov: 0 };
+  var state = { analysis: null, freq: 0, cloud: 0, cov: 0 };
+  $("tb-dash-edit").addEventListener("click", function () {
+    TB.ui.openProjectModal(project, { onSaved: function () { renderBanner(); renderProjects(); } });
+  });
 
   function renderBanner() {
     $("tb-dash-title").textContent = project.title;
@@ -125,21 +138,28 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
   }
 
   function renderKpis() {
-    var top = TB.childThemes(project, null).length;
-    var sub = project.themes.length - top;
+    var themes = state.analysis ? TB.themesInAnalysis(project, state.analysis) : project.themes;
+    var top = TB.themeTree(project, state.analysis).length;
+    var sub = themes.length - top;
     var weighted = project.codings.filter(function (c) { return c.weight !== null && c.weight !== undefined; });
     var avg = weighted.length ? weighted.reduce(function (s, c) { return s + c.weight; }, 0) / weighted.length : null;
+    var respondents = TB.respondentsOf(project).length;
+    var people = TB.peopleCount(project);
     $("tb-kpi-sources").textContent = project.sources.length;
-    $("tb-kpi-respondents").textContent = TB.respondentsOf(project).length;
+    $("tb-kpi-respondents").textContent = respondents;
+    $("tb-kpi-people").textContent = people !== respondents ? people + " people in total" : "";
+    $("tb-kpi-people").title = "Every interviewee plus every FGD participant (women, men and not disclosed)";
     $("tb-kpi-themes").textContent = top;
     $("tb-kpi-themes-sub").textContent = sub + " sub-theme" + (sub === 1 ? "" : "s");
     $("tb-kpi-codings").textContent = project.codings.length;
+    $("tb-kpi-codings-sub").textContent = state.analysis && project.analyses.length > 1
+      ? TB.codingsInAnalysis(project, state.analysis).length + " in this analysis" : "";
     $("tb-kpi-coded-pct").textContent = TB.projectCodedPct(project) + "%";
     $("tb-kpi-weight").textContent = avg === null ? "—" : (Math.round(avg * 10) / 10) + "/10";
   }
 
   function items(level, key) {
-    return TB.sortThemeItems(TB.themeLevelItems(project, level, null), key, level > 0);
+    return TB.sortThemeItems(TB.themeLevelItems(project, level, null, state.analysis), key, level > 0);
   }
   function sizeBox(boxId, count) {
     $(boxId).style.minHeight = Math.max(240, count * 26 + 50) + "px";
@@ -168,7 +188,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
   }
 
   function renderCloud() {
-    var list = TB.themeLevelItems(project, state.cloud, null);
+    var list = TB.themeLevelItems(project, state.cloud, null, state.analysis);
     TB.charts.renderThemeCloud("tb-dash-cloud", list.map(function (i) {
       return { id: i.id, label: i.label, value: i.stats.frequency, color: i.color };
     }), { onClick: function (item) { TB.ui.showThemeEvidence(project, item.id); } });
@@ -185,9 +205,11 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
     body.innerHTML = project.sources.map(function (s) {
       var a = s.attributes || {};
       var pct = TB.sourceCodedPct(project, s);
+      var pc = TB.participantsOf(s);
       var who = s.type === "FGD"
-        ? respondentCount[s.id] + " speakers"
-        : [a.sex, a.stakeholder].filter(Boolean).join(" · ");
+        ? [pc.total ? pc.total + " participants (" + pc.women + " F, " + pc.men + " M" + (pc.undisclosed ? ", " + pc.undisclosed + " n/d" : "") + ")" : "",
+          respondentCount[s.id] + " speakers"].filter(Boolean).join(" · ")
+        : [a.sex].concat(TB.attrValues(a, "stakeholder")).filter(Boolean).join(" · ");
       return "<tr>" +
         '<td class="ps-3"><div class="fw-semibold text-nowrap">' + esc(s.name) + '</div><span class="badge text-bg-light border">' + esc(s.type) + "</span></td>" +
         '<td class="small text-muted">' + esc(who || "—") + (a.location ? '<div>' + esc(a.location) + "</div>" : "") + "</td>" +
@@ -240,16 +262,31 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
     });
   }
 
-  state.freq = TB.ui.levelControl($("tb-dash-freq-level"), project, { name: "tbDashFreq", value: state.freq, onChange: function (v) { state.freq = v; renderFrequency(); } });
-  state.cloud = TB.ui.levelControl($("tb-dash-cloud-level"), project, { name: "tbDashCloud", value: state.cloud, onChange: function (v) { state.cloud = v; renderCloud(); } });
-  state.cov = TB.ui.levelControl($("tb-dash-cov-level"), project, { name: "tbDashCov", value: state.cov, onChange: function (v) { state.cov = v; renderCoverage(); } });
+  // Level switches depend on the analysis (its codebook may be deeper or
+  // shallower), so they are rebuilt whenever the analysis changes.
+  function setupLevels() {
+    var deepest = Math.max(0, TB.maxThemeDepth(project, state.analysis));
+    state.freq = TB.ui.levelControl($("tb-dash-freq-level"), project, { name: "tbDashFreq", value: 0, analysisId: state.analysis, onChange: function (v) { state.freq = v; renderFrequency(); } });
+    state.cloud = TB.ui.levelControl($("tb-dash-cloud-level"), project, { name: "tbDashCloud", value: Math.min(1, deepest), analysisId: state.analysis, onChange: function (v) { state.cloud = v; renderCloud(); } });
+    state.cov = TB.ui.levelControl($("tb-dash-cov-level"), project, { name: "tbDashCov", value: 0, analysisId: state.analysis, onChange: function (v) { state.cov = v; renderCoverage(); } });
+  }
+  function renderAnalysisViews() {
+    var a = state.analysis && TB.analysisById(project, state.analysis);
+    $("tb-dash-analysis-q").textContent = a && a.question ? a.question : "";
+    setupLevels();
+    renderKpis();
+    renderFrequency();
+    renderCloud();
+    renderCoverage();
+  }
+  state.analysis = TB.ui.analysisControl($("tb-dash-analysis"), project, {
+    onChange: function (id) { state.analysis = id; renderAnalysisViews(); }
+  });
+  $("tb-dash-analysis-bar").classList.toggle("d-none", project.analyses.length < 2);
 
   renderBanner();
-  renderKpis();
-  renderFrequency();
-  renderCloud();
+  renderAnalysisViews();
   renderSources();
-  renderCoverage();
   renderRecent();
   renderProjects();
 

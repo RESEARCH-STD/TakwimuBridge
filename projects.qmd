@@ -8,45 +8,16 @@ subtitle: "One project per study. Create, switch, back up or restore — sign in
 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
 <div class="tb-demo-banner">
 <i class="bi bi-info-circle text-accent"></i>
-The bundled demo project — five KIIs and one FGD, each coded for Challenges, Causes and Impacts in a single reading — lets you explore every feature first.
+The bundled demo project — five KIIs and one FGD, coded under two thematic analyses (Environmental Challenges and Affected Groups) in a single reading — lets you explore every feature first.
 </div>
 <div class="d-flex gap-2">
 <button type="button" class="btn btn-outline-secondary" id="tb-import-project-btn"><i class="bi bi-upload"></i> Import Backup</button>
 <input type="file" id="tb-import-project-file" accept=".json" class="d-none">
-<button type="button" class="btn btn-accent" data-bs-toggle="modal" data-bs-target="#tb-modal-new-project"><i class="bi bi-plus-lg"></i> New Project</button>
+<button type="button" class="btn btn-accent" id="tb-new-project-btn"><i class="bi bi-plus-lg"></i> New Project</button>
 </div>
 </div>
 
 <div id="tb-projects-list" class="grid gap-4"></div>
-</div>
-
-<!-- New Project Modal -->
-<div class="modal fade" id="tb-modal-new-project" tabindex="-1">
-<div class="modal-dialog">
-<div class="modal-content">
-<div class="modal-header"><h5 class="modal-title">New Project</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-<div class="modal-body">
-<div class="mb-3"><label class="form-label" for="tbf-proj-title">Project Title</label><input class="form-control" id="tbf-proj-title" placeholder="e.g. Youth Employment Perceptions in Kilosa"></div>
-<div class="mb-3"><label class="form-label" for="tbf-proj-description">Description</label><textarea class="form-control" id="tbf-proj-description" rows="2"></textarea></div>
-<div class="grid gap-2 mb-3">
-<div class="g-col-6"><label class="form-label" for="tbf-proj-topic">Research Topic</label><input class="form-control" id="tbf-proj-topic"></div>
-<div class="g-col-6"><label class="form-label" for="tbf-proj-date">Date</label><input type="date" class="form-control" id="tbf-proj-date"></div>
-</div>
-<div class="grid gap-2 mb-3">
-<div class="g-col-6"><label class="form-label" for="tbf-proj-researcher">Researcher</label><input class="form-control" id="tbf-proj-researcher"></div>
-<div class="g-col-6"><label class="form-label" for="tbf-proj-org">Organization</label><input class="form-control" id="tbf-proj-org"></div>
-</div>
-<div class="form-check form-switch">
-<input class="form-check-input" type="checkbox" id="tbf-proj-weighting" checked>
-<label class="form-check-label" for="tbf-proj-weighting">Enable 1–10 importance weighting</label>
-</div>
-</div>
-<div class="modal-footer">
-<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-<button type="button" class="btn btn-accent" id="tb-create-project-btn">Create Project</button>
-</div>
-</div>
-</div>
 </div>
 
 <script>
@@ -67,7 +38,8 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
     el.innerHTML = list.map(function (p) {
       var project = TB.loadProject(p.id) || { sources: [], themes: [], codings: [] };
       var isDemo = p.id === TB.DEMO_PROJECT_ID;
-      var top = TB.childThemes(project, null).length;
+      var top = TB.themeTree(project).length;
+      var nAnalyses = (project.analyses || []).length;
       var sync = TB.cloud ? TB.cloud.syncState(p.id) : null;
       var syncPill = sync === "cloud" ? '<span class="tb-meta-pill tb-sync-cloud"><i class="bi bi-cloud-check"></i>In your account</span>'
         : sync === "pending" ? '<span class="tb-meta-pill"><i class="bi bi-cloud-upload"></i>Saving to your account…</span>'
@@ -82,6 +54,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
         '<p class="text-muted small flex-grow-1 mt-2">' + esc(project.description || "") + "</p>" +
         '<div class="mb-2">' +
         '<span class="tb-meta-pill"><i class="bi bi-file-earmark-text"></i>' + project.sources.length + " sources</span>" +
+        (nAnalyses > 1 ? '<span class="tb-meta-pill"><i class="bi bi-journal-text"></i>' + nAnalyses + " thematic analyses</span>" : "") +
         '<span class="tb-meta-pill"><i class="bi bi-diagram-3"></i>' + top + " themes · " + (project.themes.length - top) + " sub-themes</span>" +
         '<span class="tb-meta-pill"><i class="bi bi-bookmark-check"></i>' + project.codings.length + " coded refs</span>" +
         syncPill +
@@ -89,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
         '<p class="small text-muted mb-3"><i class="bi bi-person"></i> ' + esc(p.researcher || "—") + " · updated " + esc(TB.ui.relativeTime(p.updatedAt)) + "</p>" +
         '<div class="d-flex flex-wrap gap-2 mt-auto">' +
         '<button type="button" class="btn btn-sm btn-primary tb-open-btn" data-id="' + esc(p.id) + '">Open <i class="bi bi-arrow-right"></i></button>' +
+        '<button type="button" class="btn btn-sm btn-outline-secondary tb-edit-btn" data-id="' + esc(p.id) + '" title="Edit title and details"><i class="bi bi-pencil"></i> Edit</button>' +
         '<button type="button" class="btn btn-sm btn-outline-secondary tb-export-btn" data-id="' + esc(p.id) + '" title="Export backup (.json)"><i class="bi bi-download"></i></button>' +
         (isDemo ? '<button type="button" class="btn btn-sm btn-outline-secondary tb-reset-demo-btn" title="Restore the demo to its original state"><i class="bi bi-arrow-counterclockwise"></i> Reset demo</button>' : "") +
         '<button type="button" class="btn btn-sm btn-outline-danger tb-delete-btn" data-id="' + esc(p.id) + '" title="Delete"><i class="bi bi-trash"></i></button>' +
@@ -99,6 +73,11 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
       btn.addEventListener("click", function () {
         TB.setActiveProjectId(btn.getAttribute("data-id"));
         window.location.href = "index.html";
+      });
+    });
+    Array.prototype.forEach.call(el.querySelectorAll(".tb-edit-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        TB.ui.openProjectModal(TB.loadProject(btn.getAttribute("data-id")), { onSaved: render });
       });
     });
     Array.prototype.forEach.call(el.querySelectorAll(".tb-export-btn"), function (btn) {
@@ -122,22 +101,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
     });
   }
 
-  document.getElementById("tb-create-project-btn").addEventListener("click", function () {
-    var title = document.getElementById("tbf-proj-title").value.trim();
-    if (!title) { alert("Enter a project title."); return; }
-    var project = TB.createProject({
-      title: title,
-      description: document.getElementById("tbf-proj-description").value,
-      topic: document.getElementById("tbf-proj-topic").value,
-      date: document.getElementById("tbf-proj-date").value,
-      researcher: document.getElementById("tbf-proj-researcher").value,
-      org: document.getElementById("tbf-proj-org").value,
-      weightingEnabled: document.getElementById("tbf-proj-weighting").checked
-    });
-    TB.setActiveProjectId(project.id);
-    bootstrap.Modal.getInstance(document.getElementById("tb-modal-new-project")).hide();
-    window.location.href = "workspace.html";
-  });
+  document.getElementById("tb-new-project-btn").addEventListener("click", function () { TB.ui.openProjectModal(null); });
 
   document.getElementById("tb-import-project-btn").addEventListener("click", function () {
     document.getElementById("tb-import-project-file").click();
@@ -154,7 +118,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
   });
 
   render();
-  if (window.location.hash === "#new") new bootstrap.Modal(document.getElementById("tb-modal-new-project")).show();
+  if (window.location.hash === "#new") TB.ui.openProjectModal(null);
 }); });
 </script>
 ```

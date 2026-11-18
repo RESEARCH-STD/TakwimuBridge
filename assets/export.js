@@ -34,14 +34,19 @@
     return LEVEL_NAMES[d] || ("Level " + (d + 1));
   }
 
+  function analysisName(project, themeId) {
+    var a = window.TB.analysisById(project, window.TB.analysisIdOfTheme(project, themeId));
+    return a ? a.name : "";
+  }
+
   function themeStatsRows(project) {
     return window.TB.themesInTreeOrder(project).map(function (t) {
       var s = window.TB.themeStats(project, t.id);
-      return [t.name, levelName(project, t.id), window.TB.themePath(project, t.id), s.frequency, s.coverageCount, s.coverageTotal, s.coveragePct + "%",
+      return [analysisName(project, t.id), t.name, levelName(project, t.id), window.TB.themePath(project, t.id), s.frequency, s.coverageCount, s.coverageTotal, s.coveragePct + "%",
         s.totalWeight, s.avgWeight === null ? "" : s.avgWeight];
     });
   }
-  var THEME_STATS_HEADERS = ["Theme", "Level", "Theme Path", "Frequency", "Respondents Covered", "Total Respondents", "Coverage %", "Total Weighted Score", "Average Weight"];
+  var THEME_STATS_HEADERS = ["Analysis", "Theme", "Level", "Theme Path", "Frequency", "Respondents Covered", "Total Respondents", "Coverage %", "Total Weighted Score", "Average Weight"];
 
   function codedReferenceRows(project) {
     var respondents = window.TB.respondentsOf(project);
@@ -49,18 +54,35 @@
     return project.codings.map(function (c) {
       var src = project.sources.find(function (s) { return s.id === c.sourceId; });
       var r = respMap[window.TB.respondentIdForCoding(c)];
-      var themePaths = (c.themeIds || []).filter(function (id) { return window.TB.themeById(project, id); })
-        .map(function (id) { return window.TB.themePath(project, id); }).join(" | ");
-      return [src ? src.name : "", r ? r.label : "", themePaths, c.weight === null ? "" : c.weight, c.memo || "", c.quote];
+      var ids = (c.themeIds || []).filter(function (id) { return window.TB.themeById(project, id); });
+      var themePaths = ids.map(function (id) { return window.TB.fullThemePath(project, id); }).join(" | ");
+      var analyses = ids.map(function (id) { return analysisName(project, id); })
+        .filter(function (n, i, all) { return n && all.indexOf(n) === i; }).join(" | ");
+      return [src ? src.name : "", r ? r.label : "", analyses, themePaths, c.weight === null ? "" : c.weight, c.memo || "", c.quote];
     });
   }
-  var CODED_REFERENCE_HEADERS = ["Source", "Respondent", "Theme(s)", "Weight", "Memo", "Quote"];
+  var CODED_REFERENCE_HEADERS = ["Source", "Respondent", "Analysis", "Theme(s)", "Weight", "Memo", "Quote"];
+
+  function sourceRows(project) {
+    var TB = window.TB;
+    return project.sources.map(function (s) {
+      var a = s.attributes || {};
+      var pc = TB.participantsOf(s);
+      var group = s.type === "FGD";
+      return [s.name, s.type, a.respondentId || "", group ? "" : a.sex || "", a.location || "", TB.attrValues(a, "stakeholder").join("; "), a.institution || "",
+        group ? pc.women : "", group ? pc.men : "", group ? pc.undisclosed : "", group ? pc.total : "",
+        (s.speakers || []).map(function (sp) { return sp.label; }).join("; "),
+        TB.codingsForSource(project, s.id).length, TB.sourceCodedPct(project, s) + "%"];
+    });
+  }
+  var SOURCE_HEADERS = ["Source", "Type", "Respondent / Group ID", "Sex", "Location", "Stakeholder type(s)", "Institution",
+    "Women", "Men", "Not disclosed", "Total participants", "Speakers", "Coded references", "Text coded"];
 
   function matrixRows(project, metric) {
     var ordered = window.TB.themesInTreeOrder(project);
     var m = window.TB.matrixData(project, ordered.map(function (t) { return t.id; }));
     m.themes = ordered;
-    var headers = ["Respondent"].concat(m.themes.map(function (t) { return window.TB.themePath(project, t.id); }));
+    var headers = ["Respondent"].concat(m.themes.map(function (t) { return window.TB.fullThemePath(project, t.id); }));
     var rows = m.respondents.map(function (r) {
       return [r.label].concat(m.themes.map(function (t) {
         var cell = m.cells[r.id][t.id];
@@ -89,6 +111,9 @@
     var m = matrixRows(project, metric);
     downloadBlob(slug(project.title) + "-matrix-" + metric + ".csv", toCSV(m.headers, m.rows), "text/csv");
   }
+  function exportSourcesCSV(project) {
+    downloadBlob(slug(project.title) + "-sources.csv", toCSV(SOURCE_HEADERS, sourceRows(project)), "text/csv");
+  }
   function exportWordFrequencyCSV(wordFreqArray, filenamePrefix) {
     downloadBlob((filenamePrefix || "word-frequency") + ".csv",
       toCSV(["Word", "Count"], wordFrequencyRows(wordFreqArray)), "text/csv");
@@ -100,6 +125,7 @@
     var wb = window.XLSX.utils.book_new();
     window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet([THEME_STATS_HEADERS].concat(themeStatsRows(project))), "Theme Frequency");
     window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet([CODED_REFERENCE_HEADERS].concat(codedReferenceRows(project))), "Coded References");
+    window.XLSX.utils.book_append_sheet(wb, window.XLSX.utils.aoa_to_sheet([SOURCE_HEADERS].concat(sourceRows(project))), "Sources");
     ["frequency", "totalWeight", "avgWeight"].forEach(function (metric) {
       var m = matrixRows(project, metric);
       var sheetName = "Matrix " + (metric === "frequency" ? "Freq" : metric === "totalWeight" ? "TotalWt" : "AvgWt");
@@ -109,12 +135,13 @@
   }
 
   // -------------------------------------------------------- Word-compatible
-  // Theme by theme, each followed by its sub-themes (sorted by frequency),
-  // so the report reads at theme level first, then drills down.
+  // Analysis by analysis, then theme by theme, each followed by its
+  // sub-themes (sorted by frequency), so the report reads at theme level
+  // first, then drills down.
   function exportThemeReportWord(project) {
     function section(node, depth) {
       var s = window.TB.themeStats(project, node.id);
-      var tag = "h" + Math.min(depth + 2, 6);
+      var tag = "h" + Math.min(depth + 3, 6);
       var evidence = window.TB.evidenceForTheme(project, node.id).slice(0, node.children.length ? 2 : 3);
       var children = node.children.slice().sort(function (a, b) {
         return window.TB.themeStats(project, b.id).frequency - window.TB.themeStats(project, a.id).frequency;
@@ -132,7 +159,10 @@
       "<h1>" + esc(project.title) + "</h1>" +
       "<p><em>" + esc(project.description || "") + "</em></p>" +
       "<p>Researcher: " + esc(project.researcher || "—") + " &nbsp;|&nbsp; Organization: " + esc(project.org || "—") + " &nbsp;|&nbsp; Date: " + esc(project.date || "—") + "</p>" +
-      window.TB.themeTree(project).map(function (n) { return section(n, 0); }).join("") +
+      project.analyses.map(function (a) {
+        return "<h2>" + esc(a.name) + "</h2>" + (a.question ? "<p><i>" + esc(a.question) + "</i></p>" : "") +
+          (window.TB.themeTree(project, a.id).map(function (n) { return section(n, 0); }).join("") || "<p><i>No themes yet.</i></p>");
+      }).join("") +
       "<hr><p style=\"font-size:11px;color:#666;\">Generated by TakwimuBridge — client-side qualitative analysis tool. This file is HTML formatted for Word compatibility, not a native .docx binary.</p>" +
       "</body></html>";
     downloadBlob(slug(project.title) + "-coding-report.doc", html, "application/msword");
@@ -178,7 +208,7 @@
   window.TB.exportUtil = {
     downloadBlob: downloadBlob, toCSV: toCSV,
     exportCodedReferencesCSV: exportCodedReferencesCSV, exportFrequencyTableCSV: exportFrequencyTableCSV,
-    exportMatrixCSV: exportMatrixCSV, exportWordFrequencyCSV: exportWordFrequencyCSV,
+    exportMatrixCSV: exportMatrixCSV, exportWordFrequencyCSV: exportWordFrequencyCSV, exportSourcesCSV: exportSourcesCSV,
     exportWorkbook: exportWorkbook, exportThemeReportWord: exportThemeReportWord,
     exportProjectJSON: exportProjectJSON, importProjectJSON: importProjectJSON,
     canvasToPNG: canvasToPNG, slug: slug

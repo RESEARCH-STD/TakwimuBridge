@@ -21,6 +21,7 @@ subtitle: "The theme cloud sizes each theme by how often it was coded; the word 
 </div>
 </div>
 
+<div class="tb-toolbar-group" data-mode="themes" id="tb-tc-analysis-wrap"><span class="tb-toolbar-label">Analysis</span><div id="tb-tc-analysis"></div></div>
 <div class="tb-toolbar-group" data-mode="themes"><span class="tb-toolbar-label">Level</span><div id="tb-tc-level"></div></div>
 <div class="tb-toolbar-group" data-mode="themes" id="tb-tc-within-wrap"><span class="tb-toolbar-label">Within</span>
 <select class="form-select form-select-sm" style="width:auto;max-width:18rem;" id="tb-tc-within" aria-label="Limit to one theme"></select>
@@ -90,22 +91,22 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
   function esc(s) { return TB.escapeHtml(s); }
   var MEASURES = { frequency: "Frequency", coverageCount: "Respondents", totalWeight: "Total weight" };
   var WORD_ROWS = 60;
-  var state = { mode: "themes", level: Math.min(1, Math.max(0, TB.maxThemeDepth(project))), within: "", measure: "frequency" };
+  var state = { mode: "themes", analysis: TB.ui.viewAnalysisId(project), level: 0, within: "", measure: "frequency" };
+  state.level = Math.min(1, Math.max(0, TB.maxThemeDepth(project, state.analysis)));
   var lastThemes = [], lastWords = [];
 
+  function inScope(t) { return !state.analysis || TB.analysisIdOfTheme(project, t.id) === state.analysis; }
   function renderWithin() {
-    var options = TB.themesInTreeOrder(project).filter(function (t) { return TB.themeDepth(project, t.id) < state.level; });
+    var options = TB.themesInTreeOrder(project, state.analysis).filter(function (t) { return TB.themeDepth(project, t.id) < state.level; });
     if (!options.some(function (t) { return t.id === state.within; })) state.within = "";
-    $("tb-tc-within").innerHTML = '<option value="">All themes</option>' + options.map(function (t) {
-      return '<option value="' + esc(t.id) + '"' + (t.id === state.within ? " selected" : "") + ">" + esc(TB.themePath(project, t.id)) + "</option>";
-    }).join("");
+    $("tb-tc-within").innerHTML = '<option value="">All themes</option>' + TB.ui.themeOptionsHtml(project, function (t) {
+      return inScope(t) && TB.themeDepth(project, t.id) < state.level;
+    }, state.within);
     $("tb-tc-within-wrap").classList.toggle("d-none", state.mode !== "themes" || !options.length);
   }
 
   function renderThemeSelect() {
-    $("tb-wf-theme").innerHTML = '<option value="">Any theme</option>' + TB.themesInTreeOrder(project).map(function (t) {
-      return '<option value="' + esc(t.id) + '">' + esc(TB.themePath(project, t.id)) + "</option>";
-    }).join("");
+    $("tb-wf-theme").innerHTML = '<option value="">Any theme</option>' + TB.ui.themeOptionsHtml(project);
   }
   function toggleWordThemeSelect() {
     var coded = $("tb-wf-scope-coded").checked;
@@ -113,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
   }
 
   function renderThemes() {
-    var items = TB.themeLevelItems(project, state.level, state.within || null);
+    var items = TB.themeLevelItems(project, state.level, state.within || null, state.analysis);
     lastThemes = TB.sortThemeItems(items, state.measure, false);
     TB.charts.renderThemeCloud("tb-wf-cloud", items.map(function (i) {
       return { id: i.id, label: i.label, value: i.stats[state.measure], color: i.color };
@@ -163,14 +164,21 @@ document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(
     });
     renderWithin();
     toggleWordThemeSelect();
-    $("tb-tc-level").closest(".tb-toolbar-group").classList.toggle("d-none", mode !== "themes" || TB.levelOptions(project).length < 2);
+    $("tb-tc-level").closest(".tb-toolbar-group").classList.toggle("d-none", mode !== "themes" || TB.levelOptions(project, state.analysis).length < 2);
+    $("tb-tc-analysis-wrap").classList.toggle("d-none", mode !== "themes" || project.analyses.length < 2);
     render();
   }
 
-  state.level = TB.ui.levelControl($("tb-tc-level"), project, {
-    name: "tbCloudLevel", value: state.level,
-    onChange: function (v) { state.level = v; renderWithin(); render(); }
+  function setupLevel() {
+    state.level = TB.ui.levelControl($("tb-tc-level"), project, {
+      name: "tbCloudLevel", value: state.level, analysisId: state.analysis,
+      onChange: function (v) { state.level = v; renderWithin(); render(); }
+    });
+  }
+  state.analysis = TB.ui.analysisControl($("tb-tc-analysis"), project, {
+    onChange: function (id) { state.analysis = id; state.within = ""; setupLevel(); renderWithin(); render(); }
   });
+  setupLevel();
   Array.prototype.forEach.call(document.querySelectorAll('input[name="tbCloudMode"]'), function (r) {
     r.addEventListener("change", function () { setMode(r.value); });
   });

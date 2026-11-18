@@ -2,15 +2,16 @@
  * Seeded demo project — "Community Perceptions of Environmental Challenges".
  * Mirrors the worked example used throughout TakwimuBridge's own functional
  * description and user guide (five KIIs + one FGD) so the dashboard has real,
- * non-trivial numbers the first time someone opens the tool. The codebook is
- * organized as Challenges / Causes / Impacts, each passage coded against all
- * three in one pass. Safe to edit, reset or delete from the Projects page.
+ * non-trivial numbers the first time someone opens the tool. Two thematic
+ * analyses share the same passages: "Environmental Challenges" (Challenges /
+ * Causes / Impacts) and "Affected Groups", all coded in one reading. Safe to
+ * edit, reset or delete from the Projects page.
  */
 (function () {
   "use strict";
 
   var DEMO_ID = "proj-demo-community-perceptions";
-  var DEMO_VERSION = 2;
+  var DEMO_VERSION = 3;
 
   function sentences(list) { return list.join(" "); }
 
@@ -93,10 +94,17 @@
   ]);
 
   function buildDemoProject() {
-    // Three top-level themes, one per research question, so a single reading
-    // of each transcript codes causes, challenges and impacts together.
+    // Two thematic analyses coded in the same single reading: the first has
+    // three themes (challenges, causes, impacts), the second asks who is
+    // affected.
+    var analyses = [
+      { id: "ana-env", name: "Environmental Challenges",
+        question: "What challenges do communities face, what causes them, and what are their impacts?" },
+      { id: "ana-groups", name: "Affected Groups",
+        question: "Which groups of people do respondents say are most affected?" }
+    ];
     var themes = [
-      { id: "thm-challenges", name: "Challenges", parentId: null, color: "#1B4F9C",
+      { id: "thm-challenges", name: "Challenges", parentId: null, analysisId: "ana-env", color: "#1B4F9C",
         memo: "Research question 1 — what problems do respondents describe?" },
       { id: "thm-pollution", name: "Environmental Pollution", parentId: "thm-challenges", color: "#8E44AD", memo: "" },
       { id: "thm-water", name: "Water Scarcity", parentId: "thm-challenges", color: "#2F6FED", memo: "" },
@@ -105,7 +113,7 @@
       { id: "thm-deforestation", name: "Deforestation", parentId: "thm-challenges", color: "#16A085",
         memo: "No coded references yet in this demo — shows how an empty sub-theme looks." },
 
-      { id: "thm-causes", name: "Causes", parentId: null, color: "#C0392B",
+      { id: "thm-causes", name: "Causes", parentId: null, analysisId: "ana-env", color: "#C0392B",
         memo: "Research question 2 — why do respondents say these problems happen?" },
       { id: "thm-cause-industrial", name: "Industrial Waste Discharge", parentId: "thm-causes", color: "#6D4C41", memo: "" },
       { id: "thm-enforcement", name: "Weak Enforcement & Coordination", parentId: "thm-causes", color: "#B3261E", memo: "" },
@@ -115,34 +123,42 @@
       { id: "thm-cause-closures", name: "Factory & Cooperative Closures", parentId: "thm-causes", color: "#546E7A", memo: "" },
       { id: "thm-cause-budget", name: "Limited Budget & Resources", parentId: "thm-causes", color: "#827717", memo: "" },
 
-      { id: "thm-impacts", name: "Impacts", parentId: null, color: "#1E8A5F",
+      { id: "thm-impacts", name: "Impacts", parentId: null, analysisId: "ana-env", color: "#1E8A5F",
         memo: "Research question 3 — what effects do these problems have on people's lives?" },
       { id: "thm-impact-health", name: "Health Effects", parentId: "thm-impacts", color: "#E53935", memo: "" },
       { id: "thm-impact-income", name: "Lost Income & Livelihoods", parentId: "thm-impacts", color: "#2E7D32", memo: "" },
       { id: "thm-impact-migration", name: "Youth Migration", parentId: "thm-impacts", color: "#3949AB", memo: "" },
       { id: "thm-impact-women", name: "Burden on Women & Girls", parentId: "thm-impacts", color: "#AD1457", memo: "" },
       { id: "thm-impact-crops", name: "Crop, Livestock & Fish Losses", parentId: "thm-impacts", color: "#7CB342", memo: "" },
-      { id: "thm-impact-flooding", name: "Flooding & Infrastructure Damage", parentId: "thm-impacts", color: "#00838F", memo: "" }
+      { id: "thm-impact-flooding", name: "Flooding & Infrastructure Damage", parentId: "thm-impacts", color: "#00838F", memo: "" },
+
+      { id: "thm-grp-women", name: "Women & Girls", parentId: null, analysisId: "ana-groups", color: "#D81B60", memo: "" },
+      { id: "thm-grp-youth", name: "Youth", parentId: null, analysisId: "ana-groups", color: "#5E35B1", memo: "" },
+      { id: "thm-grp-children", name: "Children", parentId: null, analysisId: "ana-groups", color: "#F57C00", memo: "" },
+      { id: "thm-grp-farmers", name: "Farmers, Fishers & Livestock Keepers", parentId: null, analysisId: "ana-groups", color: "#558B2F", memo: "" }
     ];
 
     var sources = [
       { id: "src-kii-01", type: "KII", name: "KII-01", memo: "Abbreviated for demo purposes.",
-        attributes: { respondentId: "KII-01", sex: "Female", location: "Morogoro", stakeholder: "Community Member", institution: "Village Council" },
+        attributes: { respondentId: "KII-01", sex: "Female", location: "Morogoro", stakeholder: ["Community Member"], institution: "Village Council" },
         speakers: [], text: KII01_TEXT },
       { id: "src-kii-02", type: "KII", name: "KII-02", memo: "Abbreviated for demo purposes.",
-        attributes: { respondentId: "KII-02", sex: "Male", location: "Mvomero", stakeholder: "Government Official", institution: "District Council" },
+        attributes: { respondentId: "KII-02", sex: "Male", location: "Mvomero", stakeholder: ["Government Official"], institution: "District Council" },
         speakers: [], text: KII02_TEXT },
       { id: "src-kii-03", type: "KII", name: "KII-03", memo: "Abbreviated for demo purposes.",
-        attributes: { respondentId: "KII-03", sex: "Female", location: "Morogoro", stakeholder: "Community Member", institution: "" },
+        attributes: { respondentId: "KII-03", sex: "Female", location: "Morogoro", stakeholder: ["Community Member"], institution: "" },
         speakers: [], text: KII03_TEXT },
       { id: "src-kii-04", type: "KII", name: "KII-04", memo: "Abbreviated for demo purposes.",
-        attributes: { respondentId: "KII-04", sex: "Male", location: "Kilosa", stakeholder: "Government Official", institution: "District Council" },
+        attributes: { respondentId: "KII-04", sex: "Male", location: "Kilosa", stakeholder: ["Government Official"], institution: "District Council" },
         speakers: [], text: KII04_TEXT },
       { id: "src-kii-05", type: "KII", name: "KII-05", memo: "Abbreviated for demo purposes.",
-        attributes: { respondentId: "KII-05", sex: "Female", location: "Mvomero", stakeholder: "Community Member", institution: "Farmers Association" },
+        attributes: { respondentId: "KII-05", sex: "Female", location: "Mvomero", stakeholder: ["Community Member", "Farmer"], institution: "Farmers Association" },
         speakers: [], text: KII05_TEXT },
       { id: "src-fgd-01", type: "FGD", name: "FGD-01", memo: "Community discussion, Morogoro ward. Speaker-level coding demo.",
-        attributes: { location: "Morogoro", stakeholder: "Mixed Community Group", institution: "" },
+        attributes: {
+          respondentId: "FGD-01", location: "Morogoro", stakeholder: ["Farmer", "Trader", "Community Member"], institution: "",
+          participants: { women: 4, men: 3, undisclosed: 1 }
+        },
         speakers: [{ id: "mod", label: "Moderator" }, { id: "p1", label: "P1" }, { id: "p2", label: "P2" }, { id: "p3", label: "P3" }],
         text: FGD01_TEXT }
     ];
@@ -231,6 +247,26 @@
       { sourceId: "src-fgd-01", speakerId: "p1", quote: "The market itself was built without proper drainage, so during rains it becomes unusable.", themeIds: [G, LP, FD], weight: 5 }
     ];
 
+    // Second analysis, coded on the same passages in the same reading.
+    var GW = "thm-grp-women", GY = "thm-grp-youth", GC = "thm-grp-children", GF = "thm-grp-farmers";
+    [
+      ["Fishermen say", [GF]], ["During the dry months, women and girls", [GW]],
+      ["Many young people in this village", [GY]], ["Our youth are forced", [GY]],
+      ["A few young graduates", [GY]], ["Children who swim", [GC]], ["Livestock that drink", [GF]],
+      ["Even our vegetable gardens", [GF]], ["Nobody planned for the population growth", [GC]],
+      ["Farmers cannot irrigate", [GF]], ["Unemployment among young people", [GY]],
+      ["Many former agricultural workers", [GF]], ["Waste from the rice processing factory", [GF]],
+      ["We have noticed more skin problems among children", [GC]], ["Our farmland was allocated", [GF]],
+      ["This year the irrigation dam", [GF]], ["Women in our group now spend", [GW]],
+      ["Many young women in our group", [GW, GY]], ["When the rice mill reduced its workers", [GW]],
+      ["Our sons and daughters finish school", [GY]], ["Even members with farming skills", [GF]],
+      ["Even our chickens", [GF]], ["Many of us, especially the women", [GW]], ["Some of our sons left for the city", [GY]]
+    ].forEach(function (g) {
+      var def = codingDefs.find(function (c) { return c.quote.indexOf(g[0]) === 0; });
+      if (def) def.themeIds = def.themeIds.concat(g[1]);
+      else console.warn("TakwimuBridge demo data: no coded reference starts with", g[0]);
+    });
+
     var sourceMap = {};
     sources.forEach(function (s) { sourceMap[s.id] = s; });
 
@@ -258,7 +294,7 @@
     return {
       id: DEMO_ID,
       title: "Community Perceptions of Environmental Challenges",
-      description: "Illustrative demo project bundled with TakwimuBridge, based on the tool's own worked example: five Key Informant Interviews plus one Focus Group Discussion on environmental and governance challenges in Morogoro Region, Tanzania.",
+      description: "Illustrative demo project bundled with TakwimuBridge, based on the tool's own worked example: five Key Informant Interviews plus one Focus Group Discussion on environmental and governance challenges in Morogoro Region, Tanzania — coded under two thematic analyses in a single reading.",
       topic: "Environmental & Governance Challenges",
       researcher: "Demo Researcher",
       org: "Sustainable Solutions Tanzania (SST)",
@@ -267,6 +303,7 @@
       memo: "This is bundled seed/demo content — safe to edit or delete. Create a new project from the Projects page for your own research.",
       demoVersion: DEMO_VERSION,
       createdAt: Date.now(),
+      analyses: analyses,
       sources: sources,
       themes: themes,
       codings: codings

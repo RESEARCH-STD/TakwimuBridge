@@ -1,0 +1,14 @@
+---
+title: "My Account"
+subtitle: "Create your own free account, sign in, change your password, or sign out of this computer."
+---
+
+```{=html}
+<div id="tb-account-page"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () { window.TB.whenReady(function () {
+  window.TB.ui.mountAccountPage(document.getElementById("tb-account-page"));
+}); });
+</script>
+```

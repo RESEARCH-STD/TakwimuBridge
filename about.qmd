@@ -15,7 +15,7 @@ This build implements SST's own **Version 1.0 (MVP) workflow**: upload a transcr
 
 Every project, source, code and coded reference you create is stored in your web browser's local storage, on your own device — that copy is the one you work on, so the tool stays fast and keeps working offline. All analysis runs in your browser.
 
-**With an account.** When accounts are switched on for this site (look for **Sign in to sync** at the bottom of the sidebar), signing in also keeps each of your projects in your TakwimuBridge account, held in a cloud database (Supabase), so you can sign in on another computer and carry on where you left off. Your projects are private to you: the database only ever returns a researcher's own projects. If the same project is changed on two computers before they sync, nothing is overwritten — the other version is kept as a separate "conflicted copy". Signing out removes your projects from that browser, which matters on shared computers.
+**With an account.** When accounts are switched on for this site (look for **Create account** / **Sign in** near the top of the sidebar, or the **My Account** page), signing in also keeps each of your projects in your TakwimuBridge account, held in a cloud database (Supabase), so you can sign in on another computer and carry on where you left off. Your projects are private to you: the database only ever returns a researcher's own projects. If the same project is changed on two computers before they sync, nothing is overwritten — the other version is kept as a separate "conflicted copy". Signing out removes your projects from that browser, which matters on shared computers.
 
 **Without an account**, everything stays in this browser only: clearing your browser's site data, using a different browser, or switching computers means your projects won't be there. Use **Export → Full Project Backup (JSON)** to move a project by hand.
 
@@ -25,6 +25,9 @@ Interview transcripts can contain personal information. Before storing real data
 |---|---|
 | Highlighting, coding, theming, weighting | ✅ Real — genuinely computed, not mocked |
 | Coding one passage to several theme groups (e.g. a cause, a challenge and an impact) in one reading | ✅ Real |
+| Several thematic analyses (research questions) in one project, all coded in the same reading | ✅ Real |
+| Undo / redo, deleting coding, promoting / demoting / renaming themes, editing and deleting sources and projects | ✅ Real |
+| FGD composition (women, men, not disclosed, total) and several stakeholder types per source | ✅ Real |
 | Frequency, coverage, weighted-score, average-weight analysis, at theme, sub-theme or code level | ✅ Real — recalculated live from your actual coded data |
 | Charts, heat map, theme cloud, word frequency, word cloud | ✅ Real — rendered client-side from your data |
 | CSV / Excel / Word-report / image / JSON export | ✅ Real — generated client-side, downloads directly |

@@ -1,9 +1,10 @@
 /*
  * Shared UI pieces: the dashboard shell (sidebar active state, mobile
- * toggle, active-project card, account box), the sign-in dialog and sync
- * notices, the evidence drill-down modal, theme chips and the Themes /
- * Sub-themes / Codes level switch used on every analysis view. Depends on
- * assets/app.js (window.TB), assets/cloud.js and Bootstrap's JS bundle.
+ * toggle, active-project card, account box), the sign-in form (dialog and
+ * My Account page) and sync notices, the create/edit project dialog, the
+ * evidence drill-down modal, theme chips, toasts, and the analysis / level
+ * selectors used on every analysis view. Depends on assets/app.js
+ * (window.TB), assets/cloud.js and Bootstrap's JS bundle.
  */
 (function () {
   "use strict";
@@ -32,16 +33,54 @@
     }
   }
 
+  // ---------------------------------------------------------------- toast
+  // A short notice at the bottom of the screen, optionally with one action
+  // (e.g. "Undo").
+  var toastTimer = null;
+  function toast(message, opts) {
+    opts = opts || {};
+    var el = document.getElementById("tb-toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "tb-toast";
+      el.className = "tb-toast";
+      el.setAttribute("role", "status");
+      el.setAttribute("aria-live", "polite");
+      document.body.appendChild(el);
+    }
+    el.innerHTML = '<span class="tb-toast-msg"></span>' +
+      (opts.action ? '<button type="button" class="tb-toast-action"></button>' : "") +
+      '<button type="button" class="tb-toast-close" aria-label="Dismiss"><i class="bi bi-x-lg"></i></button>';
+    el.querySelector(".tb-toast-msg").textContent = message;
+    if (opts.action) {
+      var btn = el.querySelector(".tb-toast-action");
+      btn.textContent = opts.action.label;
+      btn.addEventListener("click", function () { hideToast(); opts.action.onClick(); });
+    }
+    el.querySelector(".tb-toast-close").addEventListener("click", hideToast);
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, opts.duration || 7000);
+  }
+  function hideToast() {
+    var el = document.getElementById("tb-toast");
+    if (el) el.classList.remove("show");
+  }
+
   // ------------------------------------------------------- cloud account
   function accountHtml(s) {
     if (!s.user) {
-      var note = s.state === "connecting" ? "Connecting to your account…"
-        : s.state === "unavailable" ? "Cloud sync can't be reached right now — working in this browser only."
-        : "Saved in this browser only.";
-      return '<i class="bi bi-cloud-slash"></i><span class="min-w-0">' + note +
-        (s.state === "signed-out" ? '<button type="button" class="btn btn-sm btn-accent w-100 mt-2" id="tb-signin-btn"><i class="bi bi-person-circle me-1"></i>Sign in to sync</button>' +
-          '<span class="d-block mt-1">Sign in to continue your projects on any computer.</span>' : "") +
-        "</span>";
+      if (s.state === "connecting") {
+        return '<div class="tb-account-head"><i class="bi bi-arrow-repeat tb-spin"></i> Connecting to your account…</div>';
+      }
+      if (s.state === "unavailable") {
+        return '<div class="tb-account-head"><i class="bi bi-cloud-slash"></i> Accounts can\'t be reached right now — working in this browser only.</div>';
+      }
+      return '<div class="tb-account-head"><i class="bi bi-cloud-slash"></i> Not signed in — saved in this browser only</div>' +
+        '<div class="tb-account-actions">' +
+        '<button type="button" class="btn btn-sm btn-accent" id="tb-signup-btn">Create account</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-light" id="tb-signin-btn">Sign in</button></div>' +
+        '<div class="tb-account-hint">Free. Keeps your projects safe online so you can carry on from any computer.</div>';
     }
     var line = {
       connecting: '<i class="bi bi-arrow-repeat tb-spin"></i> Connecting…',
@@ -51,62 +90,156 @@
       offline: '<i class="bi bi-wifi-off"></i> Offline — ' + s.pending + " change(s) will sync when you're back online",
       error: '<i class="bi bi-exclamation-triangle"></i> Sync problem — retrying shortly'
     }[s.state] || "";
-    return '<i class="bi bi-person-circle"></i><span class="min-w-0">' +
-      '<span class="tb-account-email" title="' + esc(s.user.email) + '">' + esc(s.user.email) + "</span>" +
-      '<span class="tb-account-state" title="' + esc(s.state === "error" ? s.error : "") + '">' + line + "</span>" +
-      '<button type="button" class="btn btn-link btn-sm p-0 tb-account-signout" id="tb-signout-btn">Sign out</button>' +
-      "</span>";
+    return '<a class="tb-account-user" href="account.html" title="My account">' +
+      '<span class="tb-avatar">' + esc((s.user.email || "?").charAt(0).toUpperCase()) + "</span>" +
+      '<span class="min-w-0"><span class="tb-account-email">' + esc(s.user.email) + "</span>" +
+      '<span class="tb-account-state" title="' + esc(s.state === "error" ? s.error : "") + '">' + line + "</span></span></a>" +
+      '<button type="button" class="btn btn-link btn-sm p-0 tb-account-signout" id="tb-signout-btn">Sign out</button>';
+  }
+
+  function signOutNow(btn) {
+    if (btn) btn.disabled = true;
+    window.TB.cloud.signOut().then(function (done) {
+      if (done) window.location.href = "index.html";
+      else if (btn) btn.disabled = false;
+    });
   }
 
   function renderAccount(s) {
     var box = document.getElementById("tb-account");
     if (!box || !s.enabled) return;
+    box.classList.remove("d-none");
+    var note = document.getElementById("tb-sidebar-note");
+    if (note) note.classList.add("d-none");
     box.innerHTML = accountHtml(s);
     var signIn = document.getElementById("tb-signin-btn");
     if (signIn) signIn.addEventListener("click", function () { openAuth("signin"); });
+    var signUp = document.getElementById("tb-signup-btn");
+    if (signUp) signUp.addEventListener("click", function () { openAuth("signup"); });
     var signOut = document.getElementById("tb-signout-btn");
-    if (signOut) signOut.addEventListener("click", function () {
-      signOut.disabled = true;
-      window.TB.cloud.signOut().then(function (done) {
-        if (done) window.location.href = "index.html";
-        else signOut.disabled = false;
-      });
-    });
+    if (signOut) signOut.addEventListener("click", function () { signOutNow(signOut); });
   }
 
-  var authEl = null;
-  var authMode = "signin";
+  // ------------------------------------------------------------ auth form
+  // One form, used in the sign-in dialog (prefix "tb-auth") and on the
+  // My Account page; ids are prefixed so both can exist on one page.
   var AUTH_TEXT = {
     signin: { title: "Sign in", submit: "Sign in", intro: "Sign in to keep your projects in your TakwimuBridge account and continue on any computer." },
-    signup: { title: "Create your account", submit: "Create account", intro: "Your projects will be saved to this account and follow you to any computer you sign in on." },
+    signup: { title: "Create your account", submit: "Create account", intro: "Anyone can create a free account. Your projects are saved to it and follow you to any computer you sign in on — no one else can see them." },
     reset: { title: "Reset your password", submit: "Email me a reset link", intro: "Enter your account's email and we'll send a link to choose a new password." },
     recovery: { title: "Choose a new password", submit: "Save new password", intro: "Enter a new password for your account." }
   };
 
-  function setAuthMode(mode) {
-    authMode = mode;
-    var t = AUTH_TEXT[mode];
-    authEl.querySelector("#tb-auth-title").textContent = t.title;
-    authEl.querySelector("#tb-auth-intro").textContent = t.intro;
-    authEl.querySelector("#tb-auth-submit").textContent = t.submit;
-    authEl.querySelector("#tb-auth-tabs").classList.toggle("d-none", mode === "reset" || mode === "recovery");
-    authEl.querySelector('[data-field="email"]').classList.toggle("d-none", mode === "recovery");
-    authEl.querySelector('[data-field="password"]').classList.toggle("d-none", mode === "reset");
-    authEl.querySelector('[data-field="confirm"]').classList.toggle("d-none", mode !== "signup" && mode !== "recovery");
-    authEl.querySelector("#tb-auth-forgot").classList.toggle("d-none", mode !== "signin");
-    authEl.querySelector("#tb-auth-back").classList.toggle("d-none", mode !== "reset");
-    authEl.querySelector("#tb-auth-password").setAttribute("autocomplete", mode === "signin" ? "current-password" : "new-password");
-    var radio = authEl.querySelector('input[name="tbAuthMode"][value="' + mode + '"]');
-    if (radio) radio.checked = true;
-    showAuthMessage("", "");
+  function authFormHtml(p) {
+    var name = p.replace(/[^a-z]/gi, "") + "Mode";
+    return '<form id="' + p + '-form" novalidate>' +
+      '<p class="small text-muted" id="' + p + '-intro"></p>' +
+      '<div class="btn-group w-100 mb-3 tb-segmented" role="group" id="' + p + '-tabs" aria-label="Sign in or create an account">' +
+      '<input type="radio" class="btn-check" name="' + name + '" id="' + p + '-mode-signin" value="signin" checked>' +
+      '<label class="btn btn-outline-primary" for="' + p + '-mode-signin">Sign in</label>' +
+      '<input type="radio" class="btn-check" name="' + name + '" id="' + p + '-mode-signup" value="signup">' +
+      '<label class="btn btn-outline-primary" for="' + p + '-mode-signup">Create account</label></div>' +
+      '<div class="mb-2" data-field="email"><label class="form-label small mb-1" for="' + p + '-email">Email</label>' +
+      '<input type="email" class="form-control" id="' + p + '-email" autocomplete="email"></div>' +
+      '<div class="mb-2" data-field="password"><label class="form-label small mb-1" for="' + p + '-password">Password</label>' +
+      '<input type="password" class="form-control" id="' + p + '-password" autocomplete="current-password">' +
+      '<div class="form-text d-none" id="' + p + '-pw-hint">At least 8 characters.</div></div>' +
+      '<div class="mb-2 d-none" data-field="confirm"><label class="form-label small mb-1" for="' + p + '-confirm">Repeat password</label>' +
+      '<input type="password" class="form-control" id="' + p + '-confirm" autocomplete="new-password"></div>' +
+      '<div class="alert small py-2 d-none" id="' + p + '-msg" role="alert"></div>' +
+      '<button type="button" class="btn btn-link btn-sm p-0 mb-2 d-none" id="' + p + '-resend">Resend the confirmation email</button>' +
+      '<button type="submit" class="btn btn-primary w-100 mt-1" id="' + p + '-submit">Sign in</button>' +
+      '<div class="text-center mt-2"><button type="button" class="btn btn-link btn-sm" id="' + p + '-forgot">Forgot password?</button>' +
+      '<button type="button" class="btn btn-link btn-sm d-none" id="' + p + '-back">Back to sign in</button></div>' +
+      "</form>";
   }
 
-  function showAuthMessage(kind, text) {
-    var msg = authEl.querySelector("#tb-auth-msg");
-    msg.className = "alert small py-2" + (text ? " alert-" + kind : " d-none");
-    msg.textContent = text;
+  function wireAuthForm(root, p, onMode) {
+    var mode = "signin";
+    function q(id) { return root.querySelector("#" + p + "-" + id); }
+    function field(name) { return root.querySelector('[data-field="' + name + '"]'); }
+    function message(kind, text) {
+      var msg = q("msg");
+      msg.className = "alert small py-2" + (text ? " alert-" + kind : " d-none");
+      msg.textContent = text;
+    }
+    function setMode(m) {
+      mode = m;
+      var t = AUTH_TEXT[m];
+      q("intro").textContent = t.intro;
+      q("submit").textContent = t.submit;
+      q("tabs").classList.toggle("d-none", m === "reset" || m === "recovery");
+      field("email").classList.toggle("d-none", m === "recovery");
+      field("password").classList.toggle("d-none", m === "reset");
+      field("confirm").classList.toggle("d-none", m !== "signup" && m !== "recovery");
+      q("pw-hint").classList.toggle("d-none", m !== "signup" && m !== "recovery");
+      q("forgot").classList.toggle("d-none", m !== "signin");
+      q("back").classList.toggle("d-none", m !== "reset");
+      q("resend").classList.add("d-none");
+      q("password").setAttribute("autocomplete", m === "signin" ? "current-password" : "new-password");
+      var radio = q("mode-" + m);
+      if (radio) radio.checked = true;
+      message("", "");
+      if (onMode) onMode(m, t.title);
+    }
+    Array.prototype.forEach.call(root.querySelectorAll("#" + p + "-tabs input"), function (r) {
+      r.addEventListener("change", function () { setMode(r.value); });
+    });
+    q("forgot").addEventListener("click", function () { setMode("reset"); });
+    q("back").addEventListener("click", function () { setMode("signin"); });
+    q("resend").addEventListener("click", function () {
+      var email = q("email").value.trim();
+      q("resend").disabled = true;
+      window.TB.cloud.resendConfirmation(email).then(function () {
+        q("resend").disabled = false;
+        message("success", "A new confirmation link is on its way to " + email + ". Check your spam folder too.");
+      }, function (err) {
+        q("resend").disabled = false;
+        message("danger", err.message);
+      });
+    });
+    q("form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var email = q("email").value.trim();
+      var pw = q("password").value;
+      var pw2 = q("confirm").value;
+      var m = mode;
+      if (m !== "recovery" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { message("danger", "Enter a valid email address."); return; }
+      if (m !== "reset" && pw.length < 8) { message("danger", "Passwords need at least 8 characters."); return; }
+      if ((m === "signup" || m === "recovery") && pw !== pw2) { message("danger", "The two passwords don't match."); return; }
+      var submit = q("submit");
+      submit.disabled = true;
+      q("resend").classList.add("d-none");
+      message("secondary", m === "signin" || m === "signup" ? "Connecting and syncing your projects…" : "Working…");
+      var cloud = window.TB.cloud;
+      var op = m === "signin" ? cloud.signIn(email, pw)
+        : m === "signup" ? cloud.signUp(email, pw)
+        : m === "reset" ? cloud.sendReset(email)
+        : cloud.updatePassword(pw);
+      op.then(function (res) {
+        submit.disabled = false;
+        if (m === "signup" && res && res.needsConfirmation) {
+          message("success", "Almost done — we've emailed a confirmation link to " + email + ". Open it to finish; you'll be signed in. (Check your spam folder too.)");
+          q("resend").classList.remove("d-none");
+        } else if (m === "reset") {
+          message("success", "If an account exists for " + email + ", a reset link is on its way.");
+        } else if (m === "recovery") {
+          message("success", "Password updated — you're signed in.");
+          setTimeout(function () { window.location.reload(); }, 900);
+        } else {
+          window.location.reload();
+        }
+      }, function (err) {
+        submit.disabled = false;
+        message("danger", err.message);
+        if (err.code === "email_not_confirmed") q("resend").classList.remove("d-none");
+      });
+    });
+    return { setMode: setMode };
   }
 
+  var authEl = null;
+  var authForm = null;
   function ensureAuthModal() {
     if (authEl) return authEl;
     authEl = document.createElement("div");
@@ -117,74 +250,114 @@
       '<div class="modal-dialog modal-dialog-centered"><div class="modal-content">' +
       '<div class="modal-header"><h5 class="modal-title" id="tb-auth-title">Sign in</h5>' +
       '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>' +
-      '<form class="modal-body" id="tb-auth-form" novalidate>' +
-      '<p class="small text-muted" id="tb-auth-intro"></p>' +
-      '<div class="btn-group w-100 mb-3 tb-segmented" role="group" id="tb-auth-tabs" aria-label="Sign in or create an account">' +
-      '<input type="radio" class="btn-check" name="tbAuthMode" id="tb-auth-mode-signin" value="signin" checked>' +
-      '<label class="btn btn-outline-primary" for="tb-auth-mode-signin">Sign in</label>' +
-      '<input type="radio" class="btn-check" name="tbAuthMode" id="tb-auth-mode-signup" value="signup">' +
-      '<label class="btn btn-outline-primary" for="tb-auth-mode-signup">Create account</label></div>' +
-      '<div class="mb-2" data-field="email"><label class="form-label small mb-1" for="tb-auth-email">Email</label>' +
-      '<input type="email" class="form-control" id="tb-auth-email" autocomplete="email"></div>' +
-      '<div class="mb-2" data-field="password"><label class="form-label small mb-1" for="tb-auth-password">Password</label>' +
-      '<input type="password" class="form-control" id="tb-auth-password" autocomplete="current-password"></div>' +
-      '<div class="mb-2 d-none" data-field="confirm"><label class="form-label small mb-1" for="tb-auth-confirm">Repeat password</label>' +
-      '<input type="password" class="form-control" id="tb-auth-confirm" autocomplete="new-password"></div>' +
-      '<div class="alert small py-2 d-none" id="tb-auth-msg" role="alert"></div>' +
-      '<button type="submit" class="btn btn-primary w-100 mt-1" id="tb-auth-submit">Sign in</button>' +
-      '<div class="text-center mt-2"><button type="button" class="btn btn-link btn-sm" id="tb-auth-forgot">Forgot password?</button>' +
-      '<button type="button" class="btn btn-link btn-sm d-none" id="tb-auth-back">Back to sign in</button></div>' +
-      "</form></div></div>";
+      '<div class="modal-body">' + authFormHtml("tb-auth") + "</div></div></div>";
     document.body.appendChild(authEl);
-
-    Array.prototype.forEach.call(authEl.querySelectorAll('input[name="tbAuthMode"]'), function (r) {
-      r.addEventListener("change", function () { setAuthMode(r.value); });
-    });
-    authEl.querySelector("#tb-auth-forgot").addEventListener("click", function () { setAuthMode("reset"); });
-    authEl.querySelector("#tb-auth-back").addEventListener("click", function () { setAuthMode("signin"); });
-    authEl.querySelector("#tb-auth-form").addEventListener("submit", function (e) {
-      e.preventDefault();
-      var email = authEl.querySelector("#tb-auth-email").value.trim();
-      var pw = authEl.querySelector("#tb-auth-password").value;
-      var pw2 = authEl.querySelector("#tb-auth-confirm").value;
-      var mode = authMode;
-      if (mode !== "recovery" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAuthMessage("danger", "Enter a valid email address."); return; }
-      if (mode !== "reset" && pw.length < 8) { showAuthMessage("danger", "Passwords need at least 8 characters."); return; }
-      if ((mode === "signup" || mode === "recovery") && pw !== pw2) { showAuthMessage("danger", "The two passwords don't match."); return; }
-      var submit = authEl.querySelector("#tb-auth-submit");
-      submit.disabled = true;
-      showAuthMessage("secondary", mode === "signin" || mode === "signup" ? "Connecting and syncing your projects…" : "Working…");
-      var cloud = window.TB.cloud;
-      var op = mode === "signin" ? cloud.signIn(email, pw)
-        : mode === "signup" ? cloud.signUp(email, pw)
-        : mode === "reset" ? cloud.sendReset(email)
-        : cloud.updatePassword(pw);
-      op.then(function (res) {
-        submit.disabled = false;
-        if (mode === "signup" && res && res.needsConfirmation) {
-          showAuthMessage("success", "Almost done — we've emailed a confirmation link to " + email + ". Open it to finish; you'll be signed in.");
-        } else if (mode === "reset") {
-          showAuthMessage("success", "If an account exists for " + email + ", a reset link is on its way.");
-        } else if (mode === "recovery") {
-          showAuthMessage("success", "Password updated — you're signed in.");
-          setTimeout(function () { window.location.reload(); }, 900);
-        } else {
-          window.location.reload();
-        }
-      }, function (err) {
-        submit.disabled = false;
-        showAuthMessage("danger", err.message);
-      });
+    authForm = wireAuthForm(authEl, "tb-auth", function (m, title) {
+      authEl.querySelector("#tb-auth-title").textContent = title;
     });
     return authEl;
   }
 
   function openAuth(mode) {
     ensureAuthModal();
-    setAuthMode(mode || "signin");
+    authForm.setMode(mode || "signin");
     window.bootstrap.Modal.getOrCreateInstance(authEl).show();
   }
 
+  // ---------------------------------------------------- My Account page
+  function mountAccountPage(el) {
+    var cloud = window.TB.cloud;
+    function draw(s) {
+      if (!cloud || !s.enabled) {
+        el.innerHTML = '<div class="card"><div class="card-body">' +
+          '<h2 class="h5">Accounts aren\'t switched on for this site</h2>' +
+          '<p class="text-muted mb-0">Your projects are saved in this browser only. Use <a href="export.html">Export → Full Project Backup</a> to move a project to another computer.</p></div></div>';
+        return;
+      }
+      if (s.state === "connecting") {
+        el.innerHTML = '<div class="card"><div class="card-body text-muted"><i class="bi bi-arrow-repeat tb-spin"></i> Connecting to your account…</div></div>';
+        return;
+      }
+      if (!s.user) {
+        if (el.querySelector("#tb-acct-form")) return;
+        el.innerHTML = '<div class="grid gap-4">' +
+          '<div class="g-col-12 g-col-lg-6"><div class="card h-100"><div class="card-body">' +
+          '<h2 class="h5" id="tb-acct-title">Create your account</h2>' + authFormHtml("tb-acct") + "</div></div></div>" +
+          '<div class="g-col-12 g-col-lg-6"><div class="card h-100"><div class="card-body">' +
+          '<h2 class="h5">Why have an account?</h2><ul class="mb-3">' +
+          "<li>Your projects are saved online as you work, not only in this browser.</li>" +
+          "<li>Sign in on any computer — at the office, at home, in a training room — and carry on where you left off.</li>" +
+          "<li>Each researcher has their own account; nobody else can see your projects.</li>" +
+          "<li>On a shared computer, signing out removes your projects from it.</li></ul>" +
+          '<p class="small text-muted mb-0">' + (s.state === "unavailable"
+            ? "The account service can't be reached right now — check your internet connection and reload."
+            : "Without an account TakwimuBridge still works, but projects stay in the browser you used.") + "</p>" +
+          "</div></div></div></div>";
+        var form = wireAuthForm(el, "tb-acct", function (m, title) { el.querySelector("#tb-acct-title").textContent = title; });
+        form.setMode(new URLSearchParams(window.location.search).get("mode") === "signin" ? "signin" : "signup");
+        return;
+      }
+      var inAccount = window.TB.listProjects().filter(function (p) { return cloud.syncState(p.id) === "cloud"; }).length;
+      var stateText = { synced: "All changes saved", syncing: "Saving…", pending: s.pending + " change(s) waiting", offline: "Offline — changes will sync later", error: "Sync problem — retrying" }[s.state] || s.state;
+      el.innerHTML = '<div class="grid gap-4">' +
+        '<div class="g-col-12 g-col-lg-6"><div class="card h-100"><div class="card-body">' +
+        '<div class="d-flex align-items-center gap-3 mb-3"><span class="tb-avatar lg">' + esc(s.user.email.charAt(0).toUpperCase()) + "</span>" +
+        '<div class="min-w-0"><div class="tb-eyebrow">Signed in as</div><div class="fw-semibold text-truncate" id="tb-acct-email">' + esc(s.user.email) + "</div></div></div>" +
+        '<p class="mb-1"><i class="bi bi-cloud-check text-accent"></i> ' + esc(stateText) + "</p>" +
+        '<p class="text-muted small">' + inAccount + " project(s) in your account. Sign in with this email on any computer to open them.</p>" +
+        '<button type="button" class="btn btn-outline-danger" id="tb-acct-signout"><i class="bi bi-box-arrow-right me-1"></i>Sign out of this computer</button>' +
+        "</div></div></div>" +
+        '<div class="g-col-12 g-col-lg-6"><div class="card h-100"><div class="card-body">' +
+        '<h2 class="h5">Change password</h2>' +
+        '<form id="tb-acct-pw-form" novalidate>' +
+        '<div class="mb-2"><label class="form-label small mb-1" for="tb-acct-pw">New password</label><input type="password" class="form-control" id="tb-acct-pw" autocomplete="new-password"></div>' +
+        '<div class="mb-2"><label class="form-label small mb-1" for="tb-acct-pw2">Repeat new password</label><input type="password" class="form-control" id="tb-acct-pw2" autocomplete="new-password"></div>' +
+        '<div class="alert small py-2 d-none" id="tb-acct-pw-msg" role="alert"></div>' +
+        '<button type="submit" class="btn btn-primary">Save new password</button></form>' +
+        "</div></div></div></div>";
+      el.querySelector("#tb-acct-signout").addEventListener("click", function (e) { signOutNow(e.currentTarget); });
+      el.querySelector("#tb-acct-pw-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var msg = el.querySelector("#tb-acct-pw-msg");
+        function show(kind, text) { msg.className = "alert small py-2 alert-" + kind; msg.textContent = text; }
+        var pw = el.querySelector("#tb-acct-pw").value, pw2 = el.querySelector("#tb-acct-pw2").value;
+        if (pw.length < 8) { show("danger", "Passwords need at least 8 characters."); return; }
+        if (pw !== pw2) { show("danger", "The two passwords don't match."); return; }
+        cloud.updatePassword(pw).then(function () { show("success", "Password changed."); e.target.reset(); },
+          function (err) { show("danger", err.message); });
+      });
+    }
+    draw(cloud ? cloud.status() : { enabled: false });
+    if (cloud && cloud.enabled()) cloud.on("status", draw);
+  }
+
+  // A reminder on the dashboard for visitors who haven't signed in.
+  function mountSignupBanner(el) {
+    var cloud = window.TB.cloud;
+    if (!el || !cloud || !cloud.enabled()) return;
+    var dismissed = false;
+    try { dismissed = sessionStorage.getItem("tb_signup_banner_hidden") === "1"; } catch (e) { /* storage unavailable */ }
+    function draw(s) {
+      if (dismissed || s.user || s.state !== "signed-out") { el.innerHTML = ""; return; }
+      el.innerHTML = '<div class="alert tb-signup-banner d-flex flex-wrap align-items-center gap-2 mb-4" role="note">' +
+        '<i class="bi bi-person-plus fs-5"></i>' +
+        '<span class="flex-grow-1"><strong>Create your own free account</strong> to keep your projects safe online and continue on any computer.</span>' +
+        '<button type="button" class="btn btn-sm btn-primary" data-act="signup">Create account</button>' +
+        '<button type="button" class="btn btn-sm btn-outline-primary" data-act="signin">Sign in</button>' +
+        '<button type="button" class="btn-close ms-1" aria-label="Hide" data-act="hide"></button></div>';
+      el.querySelector('[data-act="signup"]').addEventListener("click", function () { openAuth("signup"); });
+      el.querySelector('[data-act="signin"]').addEventListener("click", function () { openAuth("signin"); });
+      el.querySelector('[data-act="hide"]').addEventListener("click", function () {
+        dismissed = true;
+        try { sessionStorage.setItem("tb_signup_banner_hidden", "1"); } catch (e) { /* storage unavailable */ }
+        el.innerHTML = "";
+      });
+    }
+    draw(cloud.status());
+    cloud.on("status", draw);
+  }
+
+  // ------------------------------------------------------------ modals
   function simpleModal(id, title, bodyHtml, buttons, isStatic) {
     var old = document.getElementById(id);
     if (old) old.remove();
@@ -223,6 +396,90 @@
       ]);
   }
 
+  // ------------------------------------------------- project create / edit
+  var projectEl = null;
+  function ensureProjectModal() {
+    if (projectEl) return projectEl;
+    projectEl = document.createElement("div");
+    projectEl.className = "modal fade";
+    projectEl.id = "tb-modal-new-project";
+    projectEl.tabIndex = -1;
+    projectEl.innerHTML =
+      '<div class="modal-dialog"><div class="modal-content">' +
+      '<div class="modal-header"><h5 class="modal-title" id="tb-proj-modal-title">New Project</h5>' +
+      '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>' +
+      '<div class="modal-body">' +
+      '<div class="mb-3"><label class="form-label" for="tbf-proj-title">Project Title</label><input class="form-control" id="tbf-proj-title" placeholder="e.g. Youth Employment Perceptions in Kilosa"></div>' +
+      '<div class="mb-3"><label class="form-label" for="tbf-proj-description">Description</label><textarea class="form-control" id="tbf-proj-description" rows="2"></textarea></div>' +
+      '<div class="mb-3" id="tbf-proj-analysis-wrap"><label class="form-label" for="tbf-proj-analysis">First thematic analysis</label>' +
+      '<input class="form-control" id="tbf-proj-analysis" placeholder="e.g. Challenges facing youths in entrepreneurship">' +
+      '<div class="form-text">The research question you\'ll code for. You can add more analyses later and code them all in the same reading.</div></div>' +
+      '<div class="grid gap-2 mb-3">' +
+      '<div class="g-col-6"><label class="form-label" for="tbf-proj-topic">Research Topic</label><input class="form-control" id="tbf-proj-topic"></div>' +
+      '<div class="g-col-6"><label class="form-label" for="tbf-proj-date">Date</label><input type="date" class="form-control" id="tbf-proj-date"></div></div>' +
+      '<div class="grid gap-2 mb-3">' +
+      '<div class="g-col-6"><label class="form-label" for="tbf-proj-researcher">Researcher</label><input class="form-control" id="tbf-proj-researcher"></div>' +
+      '<div class="g-col-6"><label class="form-label" for="tbf-proj-org">Organization</label><input class="form-control" id="tbf-proj-org"></div></div>' +
+      '<div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="tbf-proj-weighting" checked>' +
+      '<label class="form-check-label" for="tbf-proj-weighting">Enable 1–10 importance weighting</label></div>' +
+      "</div>" +
+      '<div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>' +
+      '<button type="button" class="btn btn-accent" id="tb-create-project-btn">Create Project</button></div>' +
+      "</div></div>";
+    document.body.appendChild(projectEl);
+    return projectEl;
+  }
+
+  // project null = create. opts.onSaved(project) runs after saving an edit.
+  function openProjectModal(project, opts) {
+    opts = opts || {};
+    var TB = window.TB;
+    var el = ensureProjectModal();
+    function f(id) { return el.querySelector("#tbf-proj-" + id); }
+    var editing = !!project;
+    el.querySelector("#tb-proj-modal-title").textContent = editing ? "Edit Project" : "New Project";
+    el.querySelector("#tb-create-project-btn").textContent = editing ? "Save Changes" : "Create Project";
+    el.querySelector("#tbf-proj-analysis-wrap").classList.toggle("d-none", editing);
+    var p = project || {};
+    f("title").value = p.title || "";
+    f("description").value = p.description || "";
+    f("analysis").value = "";
+    f("topic").value = p.topic || "";
+    f("date").value = p.date || "";
+    f("researcher").value = p.researcher || "";
+    f("org").value = p.org || "";
+    f("weighting").checked = editing ? p.weightingEnabled !== false : true;
+    var save = el.querySelector("#tb-create-project-btn");
+    var fresh = save.cloneNode(true);
+    save.parentNode.replaceChild(fresh, save);
+    fresh.addEventListener("click", function () {
+      var title = f("title").value.trim();
+      if (!title) { f("title").classList.add("is-invalid"); f("title").focus(); return; }
+      f("title").classList.remove("is-invalid");
+      var fields = {
+        title: title, description: f("description").value, topic: f("topic").value,
+        date: f("date").value, researcher: f("researcher").value, org: f("org").value,
+        weightingEnabled: f("weighting").checked
+      };
+      var modal = window.bootstrap.Modal.getInstance(el);
+      if (editing) {
+        TB.updateProject(project, fields);
+        modal.hide();
+        refreshShell();
+        if (opts.onSaved) opts.onSaved(project);
+        return;
+      }
+      fields.analysisName = f("analysis").value.trim();
+      var created = TB.createProject(fields);
+      TB.setActiveProjectId(created.id);
+      modal.hide();
+      window.location.href = "workspace.html";
+    });
+    window.bootstrap.Modal.getOrCreateInstance(el).show();
+    setTimeout(function () { f("title").focus(); }, 300);
+  }
+
+  // ---------------------------------------------------------- sync notices
   var conflicts = [];
   var conflictTimer = null;
   function queueConflict(c) {
@@ -309,7 +566,7 @@
     var t = window.TB.themeById(project, themeId);
     if (!t) return "";
     return '<span class="tb-chip-static" style="--chip-color:' + esc(window.TB.safeColor(t.color)) + '" title="' +
-      esc(window.TB.themePath(project, t.id)) + '"><span class="dot"></span>' + esc(t.name) + "</span>";
+      esc(window.TB.fullThemePath(project, t.id)) + '"><span class="dot"></span>' + esc(t.name) + "</span>";
   }
   function themeChips(project, themeIds) {
     var order = {};
@@ -356,7 +613,7 @@
   function showThemeEvidence(project, themeId, respondentId) {
     var TB = window.TB;
     var list = TB.evidenceForTheme(project, themeId);
-    var title = TB.themePath(project, themeId);
+    var title = TB.fullThemePath(project, themeId);
     if (respondentId) {
       list = list.filter(function (e) { return TB.respondentIdForCoding(e.coding) === respondentId; });
       var r = TB.respondentsOf(project).find(function (r) { return r.id === respondentId; });
@@ -365,11 +622,46 @@
     showEvidence(project, title, list);
   }
 
+  // ------------------------------------------------- analysis selection
+  // Which thematic analysis the analysis pages show, remembered per project
+  // across pages. null means "all analyses".
+  var VIEW_KEY = "tb_view_analysis";
+  function readViews() {
+    try { return JSON.parse(localStorage.getItem(VIEW_KEY) || "{}"); } catch (e) { return {}; }
+  }
+  function viewAnalysisId(project) {
+    var v = readViews()[project.id];
+    if (v === "all" && project.analyses.length > 1) return null;
+    return project.analyses.some(function (a) { return a.id === v; }) ? v : project.analyses[0].id;
+  }
+  function setViewAnalysisId(project, id) {
+    var views = readViews();
+    views[project.id] = id || "all";
+    try { localStorage.setItem(VIEW_KEY, JSON.stringify(views)); } catch (e) { /* storage full */ }
+  }
+  // Renders the analysis picker into `container` (hidden when the project
+  // has a single analysis). Returns the analysis in use.
+  function analysisControl(container, project, opts) {
+    var current = viewAnalysisId(project);
+    var group = container.closest(".tb-toolbar-group") || container;
+    group.classList.toggle("d-none", project.analyses.length < 2);
+    container.innerHTML = '<select class="form-select form-select-sm tb-analysis-select" aria-label="Thematic analysis">' +
+      project.analyses.map(function (a) {
+        return '<option value="' + esc(a.id) + '"' + (a.id === current ? " selected" : "") + ">" + esc(a.name) + "</option>";
+      }).join("") +
+      '<option value=""' + (current === null ? " selected" : "") + ">All analyses</option></select>";
+    container.querySelector("select").addEventListener("change", function (e) {
+      setViewAnalysisId(project, e.target.value || null);
+      opts.onChange(e.target.value || null);
+    });
+    return current;
+  }
+
   // ------------------------------------------------------ level switch
   // Renders Themes / Sub-themes / Codes radio buttons into `container`;
   // hidden when the codebook has only one level. Returns the level in use.
   function levelControl(container, project, opts) {
-    var levels = window.TB.levelOptions(project);
+    var levels = window.TB.levelOptions(project, opts.analysisId || null);
     var value = Math.min(opts.value || 0, levels.length - 1);
     container.innerHTML = '<div class="btn-group btn-group-sm tb-segmented" role="group" aria-label="Analysis level">' +
       levels.map(function (l) {
@@ -383,6 +675,18 @@
       inp.addEventListener("change", function () { opts.onChange(Number(inp.value)); });
     });
     return value;
+  }
+
+  // Theme <option>s grouped by analysis, for selects that list every theme.
+  function themeOptionsHtml(project, filter, selectedId) {
+    var TB = window.TB;
+    return project.analyses.map(function (a) {
+      var opts = TB.themesInTreeOrder(project, a.id).filter(filter || function () { return true; }).map(function (t) {
+        return '<option value="' + esc(t.id) + '"' + (t.id === selectedId ? " selected" : "") + ">" + esc(TB.themePath(project, t.id)) + "</option>";
+      }).join("");
+      if (!opts) return "";
+      return project.analyses.length > 1 ? '<optgroup label="' + esc(a.name) + '">' + opts + "</optgroup>" : opts;
+    }).join("");
   }
 
   function relativeTime(ts) {
@@ -402,8 +706,10 @@
 
   window.TB = window.TB || {};
   window.TB.ui = {
-    refreshShell: refreshShell, openAuth: openAuth, themeChip: themeChip, themeChips: themeChips,
+    refreshShell: refreshShell, openAuth: openAuth, mountAccountPage: mountAccountPage, mountSignupBanner: mountSignupBanner,
+    openProjectModal: openProjectModal, toast: toast, themeChip: themeChip, themeChips: themeChips,
     showEvidence: showEvidence, showThemeEvidence: showThemeEvidence,
-    levelControl: levelControl, relativeTime: relativeTime
+    viewAnalysisId: viewAnalysisId, setViewAnalysisId: setViewAnalysisId, analysisControl: analysisControl,
+    levelControl: levelControl, themeOptionsHtml: themeOptionsHtml, relativeTime: relativeTime
   };
 })();

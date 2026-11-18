@@ -487,15 +487,31 @@
   function redirectUrl() {
     return window.location.origin + window.location.pathname.replace(/[^/]*$/, "") + "index.html";
   }
-  function friendly(err) {
+  // Plain-language messages, keyed on Supabase's error codes where it sends
+  // them (and its message text otherwise). The code is kept on the error so
+  // the dialog can offer follow-ups such as resending a confirmation email.
+  function friendlyText(err) {
     var msg = (err && (err.message || err.msg)) || String(err);
-    if (/invalid login credentials/i.test(msg)) return "That email and password don't match an account.";
-    if (/email not confirmed/i.test(msg)) return "Please confirm your email first — check your inbox for the link.";
-    if (/already registered|already exists/i.test(msg)) return "An account with this email already exists — sign in instead.";
-    if (/password should be/i.test(msg)) return msg;
+    var code = (err && (err.code || err.error_code)) || "";
+    if (code === "email_address_not_authorized" || /not authorized/i.test(msg)) {
+      return "We couldn't send a confirmation email to this address, because the site's email service isn't fully set up yet. Please tell the TakwimuBridge administrator.";
+    }
+    if (code === "over_email_send_rate_limit" || /email rate limit/i.test(msg)) {
+      return "Too many account emails have been sent in the last hour. Please try again later, or ask the TakwimuBridge administrator.";
+    }
+    if (code === "signup_disabled" || /signups not allowed/i.test(msg)) return "New accounts can't be created right now. Please ask the TakwimuBridge administrator.";
+    if (code === "invalid_credentials" || /invalid login credentials/i.test(msg)) return "That email and password don't match an account.";
+    if (code === "email_not_confirmed" || /email not confirmed/i.test(msg)) return "Please confirm your email first — open the link we emailed you.";
+    if (code === "user_already_exists" || /already registered|already exists/i.test(msg)) return "An account with this email already exists — sign in instead.";
+    if (code === "weak_password" || /password should be/i.test(msg)) return msg;
     if (/rate limit/i.test(msg)) return "Too many attempts — please wait a few minutes and try again.";
     if (/timeout|fetch|network/i.test(msg)) return "Couldn't reach the sync service — check your internet connection.";
     return msg;
+  }
+  function friendly(err) {
+    var e = new Error(friendlyText(err));
+    e.code = (err && (err.code || err.error_code)) || (/email not confirmed/i.test((err && err.message) || "") ? "email_not_confirmed" : "");
+    return e;
   }
   function needClient() {
     if (!sb) throw new Error("Cloud sync isn't available right now — check your internet connection and reload.");
@@ -513,7 +529,7 @@
     return sb.auth.signInWithPassword({ email: email, password: password }).then(function (res) {
       if (res.error) throw res.error;
       return enterSession(res.data.session);
-    }).catch(function (err) { expectingSignIn = false; quiet = false; throw new Error(friendly(err)); });
+    }).catch(function (err) { expectingSignIn = false; quiet = false; throw friendly(err); });
   }
 
   function signUp(email, password) {
@@ -521,23 +537,36 @@
     expectingSignIn = true;
     return sb.auth.signUp({ email: email, password: password, options: { emailRedirectTo: redirectUrl() } }).then(function (res) {
       if (res.error) throw res.error;
+      // With email confirmation on, Supabase answers a sign-up for an
+      // existing address with a user that has no identities, not an error.
+      var u = res.data.user;
+      if (!res.data.session && u && Array.isArray(u.identities) && !u.identities.length) {
+        throw { code: "user_already_exists", message: "User already registered" };
+      }
       if (!res.data.session) { expectingSignIn = false; return { needsConfirmation: true }; }
       return enterSession(res.data.session).then(function () { return { needsConfirmation: false }; });
-    }).catch(function (err) { expectingSignIn = false; quiet = false; throw new Error(friendly(err)); });
+    }).catch(function (err) { expectingSignIn = false; quiet = false; throw friendly(err); });
+  }
+
+  function resendConfirmation(email) {
+    needClient();
+    return sb.auth.resend({ type: "signup", email: email, options: { emailRedirectTo: redirectUrl() } }).then(function (res) {
+      if (res.error) throw res.error;
+    }).catch(function (err) { throw friendly(err); });
   }
 
   function sendReset(email) {
     needClient();
     return sb.auth.resetPasswordForEmail(email, { redirectTo: redirectUrl() }).then(function (res) {
       if (res.error) throw res.error;
-    }).catch(function (err) { throw new Error(friendly(err)); });
+    }).catch(function (err) { throw friendly(err); });
   }
 
   function updatePassword(password) {
     needClient();
     return sb.auth.updateUser({ password: password }).then(function (res) {
       if (res.error) throw res.error;
-    }).catch(function (err) { throw new Error(friendly(err)); });
+    }).catch(function (err) { throw friendly(err); });
   }
 
   // Signing out removes this account's projects from the browser (they are
@@ -577,6 +606,7 @@
     enabled: function () { return enabled; },
     status: status, on: on,
     signIn: signIn, signUp: signUp, sendReset: sendReset, updatePassword: updatePassword, signOut: signOut,
+    resendConfirmation: resendConfirmation,
     adopt: adopt, keepLocal: keepLocal, syncState: syncState, flush: flushDirty
   };
 })();

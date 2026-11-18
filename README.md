@@ -37,6 +37,9 @@ continue on another computer; the browser copy remains the working copy.
 |---|---|
 | Coding workspace (highlight → theme → colour → weight) | ✅ Real |
 | Coding one passage to several theme groups in one reading, adding sub-themes inline | ✅ Real |
+| Several thematic analyses per project (each with its own theme tree), coded in the same reading | ✅ Real |
+| Undo / redo in the workspace; coded-references list; promote / demote / rename / move themes; edit and delete sources and projects | ✅ Real |
+| FGD composition (women / men / not disclosed / total) and multiple stakeholder types per source | ✅ Real |
 | Frequency / coverage / total weight / average weight analysis, at theme, sub-theme or code level | ✅ Real, computed live |
 | Respondent × Theme matrix, heat map, group comparison | ✅ Real |
 | Theme cloud (themes sized by coded frequency), word frequency & word cloud | ✅ Real |
@@ -112,6 +115,7 @@ workspace.qmd                 The coding tool (sources · transcript · coding p
 analysis.qmd                  Theme analysis at any level, matrix, group comparison, hierarchy, evidence drill-down
 wordfrequency.qmd             Theme cloud (default) and word cloud, with tables
 export.qmd                    Export center
+account.qmd                   My Account: create an account, sign in, change password, sign out
 about.qmd                     Scope, credits, and the SITE-1 naming-collision note
 ```
 
@@ -126,11 +130,21 @@ precedes them in the same block.
 One JSON object per project, stored under `localStorage['tb_project_<id>']`:
 
 ```
-Project { id, title, description, topic, researcher, org, date, weightingEnabled, memo }
-Source  { id, type, name, text, speakers?: [{id,label}] (FGD only), attributes: {...}, memo }
-Theme   { id, parentId (null|themeId), name, color, memo }   // self-referential → Theme→Sub-theme→Code
-Coding  { id, sourceId, speakerId?, themeIds: [...], start, end, quote, weight?: 1-10, memo }
+Project  { id, title, description, topic, researcher, org, date, weightingEnabled, memo, analyses: [...] }
+Analysis { id, name, question }                                  // a thematic analysis / research question
+Source   { id, type, name, text, speakers?: [{id,label}] (FGD only), memo,
+           attributes: { respondentId, sex, location, institution, stakeholder: [..],
+                         participants?: { women, men, undisclosed } (FGD only) } }
+Theme    { id, parentId (null|themeId), analysisId (top level only), name, color, memo }
+Coding   { id, sourceId, speakerId?, themeIds: [...], start, end, quote, weight?: 1-10, memo }
 ```
+
+Older projects and backups are upgraded on load by `TB.normalizeProject`
+(one default analysis, stakeholder strings → lists), so nothing needs
+migrating by hand. A theme belongs to its top-level theme's analysis;
+moving or promoting a theme only changes `parentId` / `analysisId`, so
+coded passages follow automatically. The workspace keeps undo/redo as
+project snapshots (sharing unchanged transcript text between snapshots).
 
 `Coding.themeIds` is an array so one passage can carry multiple codes —
 including codes from different top-level themes, which is how a single
