@@ -505,7 +505,11 @@
     if (code === "user_already_exists" || /already registered|already exists/i.test(msg)) return "An account with this email already exists — sign in instead.";
     if (code === "weak_password" || /password should be/i.test(msg)) return msg;
     if (/rate limit/i.test(msg)) return "Too many attempts — please wait a few minutes and try again.";
-    if (/timeout|fetch|network/i.test(msg)) return "Couldn't reach the sync service — check your internet connection.";
+    if (/timeout|fetch|network/i.test(msg)) {
+      return navigator.onLine === false
+        ? "You're offline — connect to the internet and try again."
+        : "The account service isn't answering. If other websites work, it may be paused — please tell the TakwimuBridge administrator. You can keep working in this browser meanwhile.";
+    }
     return msg;
   }
   function friendly(err) {
