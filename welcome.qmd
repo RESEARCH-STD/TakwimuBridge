@@ -1,0 +1,109 @@
+---
+title: "Sign in"
+description: "Sign in to TakwimuBridge or create your free account — qualitative data analysis for KIIs, FGDs, interviews and open-ended responses."
+body-classes: tb-landing
+---
+
+```{=html}
+<!-- The portal's opening page when accounts are on: assets/gate.js sends
+     visitors who haven't signed in here, and sends signed-in visitors on
+     to the app. The sidebar shell is hidden on this page (custom.scss). -->
+<div class="tb-landing-wrap">
+  <section class="tb-landing-intro">
+    <div class="tb-brand">
+      <img src="images/logo.svg" alt="" width="40" height="40">
+      <span class="tb-brand-text">
+        <span class="tb-brand-name">TakwimuBridge</span>
+        <span class="tb-brand-sub">Qualitative Data Analysis</span>
+      </span>
+    </div>
+
+    <div class="tb-landing-pitch">
+      <span class="tb-landing-kicker"><i class="bi bi-stars"></i> By Sustainable Solutions Tanzania (SST)</span>
+      <h1>Turn interviews and focus groups into clear, evidence-backed themes.</h1>
+      <p class="tb-landing-lead">Code KIIs, FGDs, in-depth interviews and open-ended responses, and watch theme frequencies, weights and comparisons update as you work.</p>
+      <ul class="tb-landing-features">
+        <li><i class="bi bi-highlighter"></i><span><strong>Code in one reading.</strong> Run several thematic analyses on the same transcripts, with undo and redo.</span></li>
+        <li><i class="bi bi-bar-chart-line"></i><span><strong>Analyse as you go.</strong> Frequencies, weights, a respondent matrix, group comparisons and theme clouds.</span></li>
+        <li><i class="bi bi-box-arrow-down"></i><span><strong>Report.</strong> Export to Excel, Word, CSV and images.</span></li>
+        <li><i class="bi bi-shield-lock"></i><span><strong>Your own account.</strong> Your projects follow you to any computer, and nobody else can see them.</span></li>
+      </ul>
+    </div>
+
+    <div class="tb-landing-foot">© 2026 Sustainable Solutions Tanzania (SST) · TakwimuBridge</div>
+  </section>
+
+  <section class="tb-landing-main">
+    <div class="card tb-landing-card">
+      <div class="card-body">
+        <h2 id="tb-land-title">Welcome</h2>
+        <div class="alert small py-2 d-none" id="tb-land-notice" role="status"></div>
+        <div id="tb-land-auth"></div>
+        <div class="tb-landing-or"><span>or</span></div>
+        <button type="button" class="btn btn-outline-secondary w-100" id="tb-land-guest">
+          Continue without an account <i class="bi bi-arrow-right ms-1"></i>
+        </button>
+        <p class="small text-muted text-center mt-2 mb-0">Try the demo project or work in this browser only. You can create an account later.</p>
+      </div>
+    </div>
+    <nav class="tb-landing-links" aria-label="Help">
+      <a href="guide.html"><i class="bi bi-journal-text me-1"></i>User Guide</a>
+      <a href="about.html"><i class="bi bi-info-circle me-1"></i>About &amp; Scope</a>
+    </nav>
+  </section>
+</div>
+
+<script>
+(function () {
+  // Read the address now: the sync library tidies email-link results out
+  // of it once it loads.
+  var linkHash = window.location.hash;
+  var linkQuery = window.location.search;
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var TB = window.TB;
+    var gate = window.TB_GATE;
+    if (!gate || !gate.enabled) { window.location.replace("index.html"); return; }
+
+    var title = document.getElementById("tb-land-title");
+    var notice = document.getElementById("tb-land-notice");
+    function showNotice(kind, text) {
+      notice.className = "alert small py-2 alert-" + kind;
+      notice.textContent = text;
+    }
+
+    var mode = new URLSearchParams(linkQuery).get("mode") === "signup" ? "signup" : "signin";
+    TB.ui.mountAuthForm(document.getElementById("tb-land-auth"), "tb-land", {
+      mode: mode,
+      onMode: function (m, t) { title.textContent = m === "signin" ? "Welcome" : t; },
+      done: function () { window.location.replace(gate.next()); }
+    });
+
+    // A confirmation or reset link that didn't work comes back here.
+    var info = new URLSearchParams(linkHash.replace(/^#/, "") + "&" + linkQuery.replace(/^\?/, ""));
+    var code = info.get("error_code"), desc = info.get("error_description");
+    if (code || desc) {
+      showNotice("warning", code === "otp_expired" || /expired|invalid/i.test(desc || "")
+        ? "That email link has expired or has already been used. Sign in below; if your account isn't confirmed yet, you'll be offered a new confirmation email."
+        : "That email link didn't work" + (desc ? " (" + desc + ")" : "") + ". Try signing in, or ask for a new link.");
+      var keep = new URLSearchParams(linkQuery).get("next");
+      history.replaceState(null, "", window.location.pathname + (keep ? "?next=" + encodeURIComponent(keep) : ""));
+    }
+
+    document.getElementById("tb-land-guest").addEventListener("click", function () {
+      gate.setGuest(true);
+      window.location.replace(gate.next());
+    });
+
+    var cloud = TB.cloud;
+    function onStatus(s) {
+      if (s.state === "unavailable" && !(code || desc)) {
+        showNotice("warning", "The account service can't be reached right now, so signing in may not work. You can continue without an account meanwhile — your work is saved in this browser.");
+      }
+    }
+    onStatus(cloud.status());
+    cloud.on("status", onStatus);
+  });
+})();
+</script>
+```

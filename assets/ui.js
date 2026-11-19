@@ -97,11 +97,15 @@
       '<button type="button" class="btn btn-link btn-sm p-0 tb-account-signout" id="tb-signout-btn">Sign out</button>';
   }
 
+  // Signing out ends any "continue without an account" choice too, so the
+  // browser goes back to the sign-in page.
   function signOutNow(btn) {
     if (btn) btn.disabled = true;
     window.TB.cloud.signOut().then(function (done) {
-      if (done) window.location.href = "index.html";
-      else if (btn) btn.disabled = false;
+      if (!done) { if (btn) btn.disabled = false; return; }
+      var gate = window.TB_GATE;
+      if (gate && gate.enabled) { gate.setGuest(false); window.location.href = "welcome.html"; }
+      else window.location.href = "index.html";
     });
   }
 
@@ -154,7 +158,9 @@
       "</form>";
   }
 
-  function wireAuthForm(root, p, onMode) {
+  // done(): what to do once signed in (default: reload the page).
+  function wireAuthForm(root, p, onMode, done) {
+    var finish = done || function () { window.location.reload(); };
     var mode = "signin";
     function q(id) { return root.querySelector("#" + p + "-" + id); }
     function field(name) { return root.querySelector('[data-field="' + name + '"]'); }
@@ -212,10 +218,14 @@
       q("resend").classList.add("d-none");
       message("secondary", m === "signin" || m === "signup" ? "Connecting and syncing your projects…" : "Working…");
       var cloud = window.TB.cloud;
-      var op = m === "signin" ? cloud.signIn(email, pw)
-        : m === "signup" ? cloud.signUp(email, pw)
-        : m === "reset" ? cloud.sendReset(email)
-        : cloud.updatePassword(pw);
+      // A promise either way, so a call that throws (e.g. the sync library
+      // hasn't loaded) shows its message instead of freezing the button.
+      var op = new Promise(function (resolve) {
+        resolve(m === "signin" ? cloud.signIn(email, pw)
+          : m === "signup" ? cloud.signUp(email, pw)
+          : m === "reset" ? cloud.sendReset(email)
+          : cloud.updatePassword(pw));
+      });
       op.then(function (res) {
         submit.disabled = false;
         if (m === "signup" && res && res.needsConfirmation) {
@@ -225,9 +235,9 @@
           message("success", "If an account exists for " + email + ", a reset link is on its way.");
         } else if (m === "recovery") {
           message("success", "Password updated — you're signed in.");
-          setTimeout(function () { window.location.reload(); }, 900);
+          setTimeout(finish, 900);
         } else {
-          window.location.reload();
+          finish();
         }
       }, function (err) {
         submit.disabled = false;
@@ -256,6 +266,15 @@
       authEl.querySelector("#tb-auth-title").textContent = title;
     });
     return authEl;
+  }
+
+  // The sign-in form on its own, e.g. on the sign-in landing page.
+  function mountAuthForm(el, p, opts) {
+    opts = opts || {};
+    el.innerHTML = authFormHtml(p);
+    var form = wireAuthForm(el, p, opts.onMode, opts.done);
+    form.setMode(opts.mode || "signin");
+    return form;
   }
 
   function openAuth(mode) {
@@ -706,7 +725,7 @@
 
   window.TB = window.TB || {};
   window.TB.ui = {
-    refreshShell: refreshShell, openAuth: openAuth, mountAccountPage: mountAccountPage, mountSignupBanner: mountSignupBanner,
+    refreshShell: refreshShell, openAuth: openAuth, mountAuthForm: mountAuthForm, mountAccountPage: mountAccountPage, mountSignupBanner: mountSignupBanner,
     openProjectModal: openProjectModal, toast: toast, themeChip: themeChip, themeChips: themeChips,
     showEvidence: showEvidence, showThemeEvidence: showThemeEvidence,
     viewAnalysisId: viewAnalysisId, setViewAnalysisId: setViewAnalysisId, analysisControl: analysisControl,

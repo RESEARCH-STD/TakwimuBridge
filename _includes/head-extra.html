@@ -1,3 +1,9 @@
+<!-- Not deferred, on purpose: when accounts are on, gate.js sends visitors
+     who haven't signed in to the sign-in page (welcome.html) before this
+     page paints. Both files are tiny. -->
+<script src="assets/config.js"></script>
+<script src="assets/gate.js"></script>
+
 <!-- Google Fonts: Inter (body) + Space Grotesk (headings), adopted from
      geoai-africa.com's type system -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,9 +23,9 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js" defer></script>
 
-<!-- TakwimuBridge app scripts (shared across every page). cloud.js loads the
-     Supabase client itself, and only when config.js turns sync on. -->
-<script src="assets/config.js" defer></script>
+<!-- TakwimuBridge app scripts (shared across every page; config.js and
+     gate.js load at the top). cloud.js loads the Supabase client itself,
+     and only when config.js turns sync on. -->
 <script src="assets/app.js" defer></script>
 <script src="assets/demo-data.js" defer></script>
 <script src="assets/cloud.js" defer></script>

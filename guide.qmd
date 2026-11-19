@@ -105,9 +105,9 @@ Bar charts show the most frequently discussed themes. Weighted bar charts show t
 
 ## Working on More Than One Computer
 
-Each researcher can open their own free account: click **Create account** near the top of the sidebar (or go to **My Account**), enter your email and a password, and open the confirmation link we email you. Your projects are then kept in your account as well as in the browser, so you can sign in on another computer and carry on. On a shared computer, sign out when you finish — that removes your projects from that browser.
+TakwimuBridge opens on a sign-in page. Each researcher can open their own free account there: choose **Create account**, enter your email and a password, and open the confirmation link we email you. Your projects are then kept in your account as well as in the browser, so you can sign in on another computer and carry on. If you were already working without an account, use **Create account** near the top of the sidebar (or **My Account**) instead. On a shared computer, sign out when you finish — that removes your projects from that browser and returns to the sign-in page.
 
-Without an account, projects stay in the browser you used. To move one, use **Export → Full Project Backup (JSON)** and restore it on the other computer.
+To try the tool first, choose **Continue without an account** on the sign-in page. Without an account, projects stay in the browser you used, and the sign-in page appears again the next time you open the browser. To move one, use **Export → Full Project Backup (JSON)** and restore it on the other computer.
 
 ## The Process in Ten Simple Steps
 

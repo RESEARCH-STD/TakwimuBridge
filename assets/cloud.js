@@ -453,7 +453,16 @@
       return withTimeout(sb.auth.getSession(), NETWORK_TIMEOUT);
     }).then(function (res) {
       var session = res && res.data && res.data.session;
-      if (!session) { setState("signed-out"); return; }
+      // An expired session that couldn't be renewed because the service
+      // didn't answer is "unreachable", not "signed out".
+      if (!session && res && res.error && (res.error.name === "AuthRetryableFetchError" || !res.error.status)) throw res.error;
+      if (!session) {
+        setState("signed-out");
+        // The stored session was refused (e.g. signed out elsewhere): the
+        // page may now need the sign-in page after all.
+        if (window.TB_GATE) window.TB_GATE.recheck();
+        return;
+      }
       return startSession(session).then(refreshState);
     }).catch(function (err) {
       handleError(err);

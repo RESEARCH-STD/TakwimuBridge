@@ -795,3 +795,110 @@ body {
   padding: .6rem 1rem;
   font-size: .88rem;
 }
+
+/* ======================================================== sign-in page */
+/* welcome.qmd — the portal's opening page when accounts are on. It has no
+   sidebar: the shell is still included (every page gets it) but hidden. */
+body.tb-landing { padding-left: 0; background: var(--tb-canvas); }
+body.tb-landing .tb-sidebar,
+body.tb-landing .tb-sidebar-backdrop,
+body.tb-landing .tb-mobilebar,
+body.tb-landing #title-block-header,
+body.tb-landing .footer { display: none !important; }
+body.tb-landing #quarto-content.page-layout-custom { max-width: none; padding: 0; min-height: 100vh; }
+body.tb-landing #quarto-content.page-layout-custom > .tb-landing-wrap { padding-top: 0; } /* Quarto pads custom-layout children */
+
+.tb-landing-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100vh;
+}
+.tb-landing-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  padding: 2.25rem clamp(2rem, 5vw, 4.5rem);
+  background:
+    radial-gradient(circle at 88% 12%, rgba(23, 184, 166, .20), transparent 42%),
+    radial-gradient(circle at 8% 95%, rgba(47, 111, 237, .22), transparent 40%),
+    linear-gradient(160deg, #0E2A5C 0%, #0A1D40 100%);
+  color: rgba(255, 255, 255, .78);
+}
+.tb-landing-intro .tb-brand { padding: 0; }
+.tb-landing-intro .tb-brand-name { font-size: 1.2rem; }
+.tb-landing-pitch { margin: auto 0; max-width: 34rem; }
+.tb-landing-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--brand-accent);
+  margin-bottom: 1rem;
+}
+.tb-landing-pitch h1 {
+  color: #fff;
+  font-size: clamp(1.75rem, 2.7vw, 2.55rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.015em;
+  margin: 0 0 1rem;
+}
+.tb-landing-lead { font-size: 1.02rem; line-height: 1.6; color: rgba(255, 255, 255, .72); margin: 0 0 1.75rem; }
+.tb-landing-features { list-style: none; padding: 0; margin: 0; display: grid; gap: .95rem; }
+.tb-landing-features li { display: flex; align-items: flex-start; gap: .85rem; font-size: .92rem; line-height: 1.5; }
+.tb-landing-features i {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: .65rem;
+  background: rgba(23, 184, 166, .14);
+  color: var(--brand-accent);
+  font-size: 1.05rem;
+}
+.tb-landing-features strong { color: #fff; font-weight: 600; }
+.tb-landing-foot { font-size: .75rem; color: rgba(255, 255, 255, .45); }
+
+.tb-landing-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 2.5rem 1.5rem;
+}
+.tb-landing-card { width: 100%; max-width: 27rem; box-shadow: 0 10px 40px rgba(27, 79, 156, .10); }
+.tb-landing-card .card-body { padding: 2rem 2rem 1.6rem; }
+.tb-landing-card h2 { font-size: 1.5rem; font-weight: 700; color: var(--tb-ink); margin: 0 0 .4rem; padding: 0; border: 0; }
+.tb-landing-card .tb-segmented .btn { font-size: .85rem; padding: .45rem .75rem; }
+.tb-landing-card .form-control { padding: .55rem .8rem; }
+.tb-landing-card button[type="submit"] { padding: .6rem 1rem; }
+.tb-landing-or {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin: 1.1rem 0 1rem;
+  font-size: .72rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--tb-muted);
+}
+.tb-landing-or::before, .tb-landing-or::after { content: ""; flex: 1; height: 1px; background: var(--tb-line-strong); }
+.tb-landing-links { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem 1.25rem; font-size: .84rem; }
+.tb-landing-links a { color: var(--tb-muted); text-decoration: none; }
+.tb-landing-links a:hover { color: $primary; }
+
+@media (max-width: 991.98px) {
+  .tb-landing-wrap { grid-template-columns: minmax(0, 1fr); min-height: 0; }
+  .tb-landing-intro { gap: 1.1rem; padding: 1.25rem 1.25rem 1.5rem; }
+  .tb-landing-pitch { margin: 0; }
+  .tb-landing-pitch h1 { font-size: 1.45rem; margin-bottom: 0; }
+  .tb-landing-kicker, .tb-landing-lead, .tb-landing-features, .tb-landing-foot { display: none; }
+  .tb-landing-main { justify-content: flex-start; padding: 1.25rem 1rem 2rem; }
+  .tb-landing-card .card-body { padding: 1.4rem 1.25rem 1.25rem; }
+}

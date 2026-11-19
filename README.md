@@ -46,6 +46,7 @@ continue on another computer; the browser copy remains the working copy.
 | CSV, Excel (.xlsx), Word-compatible report, PNG, JSON export | ✅ Real |
 | DOCX / TXT / CSV import | ✅ Real (mammoth.js / SheetJS, client-side) |
 | Accounts + cloud sync across computers (Supabase), conflict-safe | ✅ Real, once `assets/config.js` is filled in |
+| Sign-in landing page the portal opens on (with "Continue without an account") | ✅ Real, whenever accounts are on |
 | Multi-user / team projects | ❌ Not implemented — each account holds one researcher's own projects |
 | Inter-coder reliability, advanced compound queries | ❌ Not implemented — data model anticipates them |
 
@@ -92,6 +93,8 @@ How it behaves (`assets/cloud.js`):
 - Signing in on a browser that already has projects asks whether to add them to the account; signing out removes the account's projects from that browser (important on shared computers).
 - The Supabase client (`@supabase/supabase-js`, pinned, with an SRI hash) is only downloaded when sync is configured.
 
+The portal opens on the sign-in page (`welcome.qmd`) whenever accounts are on. `assets/gate.js` runs in every page's `<head>` (not deferred, straight after `config.js`) and sends a visitor to `welcome.html?next=<page>` before the page paints unless they are signed in (a Supabase session is stored in this browser), chose **Continue without an account** this browser session (the `tb_guest` session cookie), or are opening a public page (`welcome`, `account`, `guide`, `about`). Links back from Supabase emails go through: successful ones finish signing in on the dashboard, failed or expired ones are explained on the sign-in page. Signed-in visitors opening `welcome.html` go straight on to the app, and signing out returns there. Because the check is local, a dead Supabase project never causes a redirect loop: `cloud.js` asks the gate to check again only once Supabase has actually refused a stored session.
+
 ## Project Structure
 
 ```
@@ -100,6 +103,7 @@ custom.scss                 Bootstrap variable overrides + dashboard/component s
 _includes/head-extra.html   Fonts + CDN libraries (Chart.js, wordcloud2.js, SheetJS, mammoth.js) + app scripts
 _includes/app-shell.html    Dashboard sidebar navigation + mobile top bar (included before every page body)
 assets/config.js             Cloud sync settings (Supabase URL + public key); empty = browser-only
+assets/gate.js               Opening gate: sends visitors who haven't signed in (or chosen to continue without an account) to welcome.html
 assets/app.js                Core data model, localStorage persistence, all analysis computations
 assets/demo-data.js          Seeded demo project (5 KIIs + 1 FGD, Challenges/Causes/Impacts), versioned upgrades
 assets/cloud.js              Optional sign-in + sync to Supabase (pull on page load, push on save, conflict copies)
@@ -108,6 +112,7 @@ assets/ui.js                 Sidebar behaviour, evidence modal, theme chips, The
 assets/coding-ui.js          Coding Workspace: sources, transcript highlighting, coding panel, codebook, import
 assets/charts.js             Chart.js / theme cloud / word cloud / heat-colour rendering helpers
 assets/export.js             CSV / XLSX / Word-report / PNG / JSON export + JSON import
+welcome.qmd                  Sign-in landing page the portal opens on (no sidebar): sign in, create account, or continue without one
 index.qmd                    Dashboard (home): active project KPIs, theme charts, coding progress, latest quotes
 guide.qmd                    Simple User Guide (adapted from the source .docx)
 projects.qmd                 Create / open / delete / import projects, reset the demo
